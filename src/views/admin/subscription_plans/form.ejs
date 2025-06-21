@@ -1,0 +1,85 @@
+<%- contentFor('title') %>
+<%= title %> - Admin Academia AI
+
+<%- contentFor('body') %>
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item"><a href="/admin/subscription-plans">Planes de Suscripción</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><%= plan.id ? 'Editar Plan' : 'Crear Nuevo Plan' %></li>
+    </ol>
+</nav>
+
+<%- include('../../partials/messages') %>
+
+<h1 class="h2 mb-4"><%= title %></h1>
+
+<form action="<%= actionUrl %>" method="POST">
+    <% if (plan.id) { %>
+        <input type="hidden" name="_method" value="PUT"> <%# Para method-override si se usa PUT %>
+    <% } %>
+    <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    Detalles del Plan de Suscripción
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre del Plan</label>
+                        <input type="text" class="form-control" id="name" name="name" value="<%= plan.name || '' %>" required>
+                        <div class="form-text">Ej: Mensual, Trimestral (3+1), Anual VIP</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="durationMonths" class="form-label">Duración Base (Meses)</label>
+                            <input type="number" class="form-control" id="durationMonths" name="durationMonths" value="<%= plan.durationMonths || '' %>" min="1" required>
+                            <div class="form-text">Número de meses base de la suscripción.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="bonusMonths" class="form-label">Meses de Regalo (Opcional)</label>
+                            <input type="number" class="form-control" id="bonusMonths" name="bonusMonths" value="<%= plan.bonusMonths || '' %>" min="0">
+                            <div class="form-text">Meses adicionales que se regalan con este plan. Dejar en blanco o 0 si no aplica.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="price" class="form-label">Precio (Bs.)</label>
+                            <input type="number" class="form-control" id="price" name="price" value="<%= plan.price || '' %>" step="0.01" min="0" required>
+                            <div class="form-text">Costo total del plan.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="isActive" name="isActive" <%= (typeof plan.isActive === 'undefined' || plan.isActive) ? 'checked' : '' %>>
+                        <label class="form-check-label" for="isActive">Plan Activo</label>
+                        <div class="form-text">Desmarcar para ocultar este plan de las opciones de suscripción para nuevos usuarios.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    Acciones
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>
+                            <%= plan.id ? 'Actualizar Plan' : 'Crear Plan' %>
+                        </button>
+                        <a href="/admin/subscription-plans" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Planes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<%- contentFor('scripts') %>
+<%# Scripts adicionales si son necesarios %>

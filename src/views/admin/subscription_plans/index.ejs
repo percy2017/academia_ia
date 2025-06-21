@@ -1,0 +1,77 @@
+<%- contentFor('title') %>
+<%= title %> - Admin Academia AI
+
+<%- contentFor('body') %>
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Planes de Suscripción</li>
+    </ol>
+</nav>
+
+<%- include('../../partials/messages') %>
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><%= title %></h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="/admin/subscription-plans/new" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Crear Nuevo Plan
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio (Bs.)</th>
+                <th>Duración (Meses)</th>
+                <th>Bonus (Meses)</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (plans && plans.length > 0) { %>
+                <% plans.forEach(plan => { %>
+                    <tr>
+                        <td><%= plan.name %></td>
+                        <td><%= plan.price %></td>
+                        <td><%= plan.durationMonths %></td>
+                        <td><%= plan.bonusMonths || 'N/A' %></td>
+                        <td>
+                            <% if (plan.isActive) { %>
+                                <span class="badge bg-success">Activo</span>
+                            <% } else { %>
+                                <span class="badge bg-danger">Inactivo</span>
+                            <% } %>
+                        </td>
+                        <td><%= new Date(plan.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric'}) %></td>
+                        <td>
+                            <a href="/admin/subscription-plans/<%= plan.id %>/edit" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <form action="/admin/subscription-plans/<%= plan.id %>/toggle-status?_method=POST" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres cambiar el estado de este plan?');">
+                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                                <button type="submit" class="btn btn-sm <%= plan.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>" title="<%= plan.isActive ? 'Desactivar' : 'Activar' %>">
+                                    <i class="bi <%= plan.isActive ? 'bi-toggle-off' : 'bi-toggle-on' %>"></i>
+                                </button>
+                            </form>
+                            <%# Considerar si se necesita un botón de eliminar real, o si desactivar es suficiente %>
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="7" class="text-center">No hay planes de suscripción creados todavía.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+
+<%- contentFor('scripts') %>
+<%# Scripts adicionales si son necesarios para esta página, como DataTables %>

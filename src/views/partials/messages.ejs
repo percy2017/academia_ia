@@ -1,0 +1,30 @@
+<% if (locals.messages) { %>
+  <% if (messages.success_msg && messages.success_msg.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <%= messages.success_msg %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  <% if (messages.error_msg && messages.error_msg.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= messages.error_msg %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+  <% if (messages.error && messages.error.length > 0 && messages.error !== messages.error_msg) { %> 
+    <%# El messages.error !== messages.error_msg es para evitar duplicar si error_msg ya lo cubrió %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <%= messages.error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+<% } %>
+
+<%# También podemos manejar errores pasados directamente y no a través de flash, si es necesario %>
+<%# Por ejemplo, si una variable error_msg se pasa directamente al renderizar %>
+<% if (typeof error_msg !== 'undefined' && error_msg && (!locals.messages || !messages.error_msg || messages.error_msg.indexOf(error_msg) === -1)) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= error_msg %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>

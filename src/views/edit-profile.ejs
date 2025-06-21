@@ -1,0 +1,90 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <!-- intl-tel-input CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h1 class="h3 mb-0"><%= title %></h1>
+        </div>
+        <div class="card-body">
+          <% if (locals.error && locals.error.length > 0) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= locals.error %>
+            </div>
+          <% } %>
+          <% if (locals.success_msg && locals.success_msg.length > 0) { %>
+            <div class="alert alert-success" role="alert">
+              <%= locals.success_msg %>
+            </div>
+          <% } %>
+
+          <% if (user) { %>
+            <form action="/profile/update" method="POST" enctype="multipart/form-data">
+              <% if (user.avatarUrl) { %>
+                <div class="mb-3 text-center">
+                  <img src="<%= user.avatarUrl %>" alt="Avatar actual" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
+                </div>
+              <% } %>
+              <div class="mb-3">
+                <label for="avatar" class="form-label">Cambiar Avatar (opcional)</label>
+                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+              </div>
+              <div class="mb-3">
+                <label for="name" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="name" name="name" value="<%= user.name || '' %>" required>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico (no editable)</label>
+                <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly disabled>
+              </div>
+              <div class="mb-3">
+                <label for="phone" class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
+              </div>
+              
+              <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+              <a href="/profile" class="btn btn-secondary">Cancelar</a>
+            </form>
+          <% } else { %>
+            <p>No se pudo cargar la información del usuario para editar.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- intl-tel-input JS and initialization script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const phoneEditField = document.querySelector("#phone"); // ID del input de teléfono en esta vista
+    if (phoneEditField) {
+      const phoneInputEdit = window.intlTelInput(phoneEditField, {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+        initialCountry: "auto",
+        geoIpLookup: callback => {
+          fetch("https://ipapi.co/json")
+            .then(res => res.json())
+            .then(data => callback(data.country_code))
+            .catch(() => callback("us"));
+        },
+        nationalMode: false, // Guarda el número en formato internacional
+        preferredCountries: ['bo', 'pe', 'cl', 'ar', 'br', 'us', 'es'],
+        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
+          return "e.g. " + selectedCountryPlaceholder;
+        }
+        // Si el número ya tiene un prefijo guardado, la librería intentará seleccionarlo.
+      });
+
+      // Para asegurar que el valor completo se envíe al actualizar:
+      const formEdit = phoneEditField.closest("form");
+      if (formEdit) {
+        formEdit.addEventListener("submit", function() {
+          phoneEditField.value = phoneInputEdit.getNumber();
+        });
+      }
+    }
+  });
+</script>

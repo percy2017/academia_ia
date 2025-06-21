@@ -1,0 +1,121 @@
+/*
+ * Base structure
+ */
+
+/* body {
+  font-size: .875rem;
+}
+
+.feather {
+  width: 16px;
+  height: 16px;
+  vertical-align: text-bottom;
+} */
+
+/*
+ * Sidebar
+ */
+
+/* Estilos para el sidebar fijo (visible en md y superior) */
+nav#sidebarMenu.sidebar { /* Hacemos más específico el selector para el sidebar fijo */
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100; /* Behind the navbar */
+  padding: 48px 0 0; /* Height of navbar */
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+/* El offcanvas (.sidebar.offcanvas) es manejado por Bootstrap, no necesita estos estilos de posición/padding. */
+/* Ya no se necesita el media query para .sidebar top: 5rem, porque el offcanvas se maneja diferente
+   y el sidebar fijo solo aparece en pantallas grandes donde top:0 (con padding) es correcto.
+@media (max-width: 767.98px) {
+  .sidebar {
+    top: 5rem;
+  }
+}
+*/
+
+.sidebar-sticky { /* Este estilo se aplica al contenido dentro del sidebar fijo */
+  position: relative;
+  top: 0;
+  height: calc(100vh - 48px);
+  padding-top: .5rem;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+/* Estilos generales para los nav-links dentro de CUALQUIER sidebar (fijo o offcanvas) */
+.sidebar .nav-link {
+  font-weight: 500;
+  color: #333;
+}
+
+.sidebar .nav-link .feather {
+  margin-right: 4px;
+  color: #727272;
+}
+
+.sidebar .nav-link.active {
+  color: #2470dc;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+  color: inherit;
+}
+
+.sidebar-heading {
+  font-size: .75rem;
+  text-transform: uppercase;
+}
+
+/*
+ * Navbar
+ */
+
+/* Ajuste para la altura del header principal */
+/* header.navbar {
+  min-height: 42px;
+  height: auto;
+}
+
+.navbar-brand {
+  padding-top: .25rem; 
+  padding-bottom: .25rem; 
+}
+
+.navbar .navbar-toggler {
+  top: .25rem;
+  right: 1rem;
+}
+
+.navbar .form-control {
+  padding: .375rem 1rem; 
+  border-width: 0;
+  border-radius: 0;
+} */
+
+.form-control-dark {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+}
+
+/* Estilos para hacer más pequeños los botones de la barra de herramientas en home.ejs */
+.btn-toolbar .btn-sm {
+  padding: .225rem .5rem; /* Padding ligeramente aumentado */
+  font-size: .825rem;    /* Tamaño de fuente ligeramente aumentado */
+}
+
+.btn-toolbar .btn-sm svg.bi {
+  width: 14px;          /* Tamaño del icono reducido */
+  height: 14px;
+  margin-bottom: 1px;   /* Pequeño ajuste para alinear mejor el icono con el texto más pequeño */
+}

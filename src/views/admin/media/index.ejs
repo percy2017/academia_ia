@@ -1,0 +1,157 @@
+<%- contentFor('title') %>
+Biblioteca Multimedia - Administración
+<%- contentFor('scripts') %>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteForms = document.querySelectorAll('.delete-media-form');
+        deleteForms.forEach(form => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const mediaId = this.dataset.mediaId;
+                const mediaName = this.dataset.mediaName;
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: `Estás a punto de eliminar "${mediaName}". ¡Esta acción no se puede deshacer!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, ¡eliminar!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviamos el formulario si se confirma
+                        // El action del form ya apunta a la ruta DELETE correcta
+                        // Necesitamos simular un DELETE request si el form usa POST
+                        // O usar AJAX para enviar un DELETE request.
+                        
+                        // Por simplicidad, si el servidor soporta method-override, esto funcionaría.
+                        // Si no, usaremos fetch para enviar un DELETE.
+                        fetch(form.action, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                // Añadir CSRF token si es necesario
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                Swal.fire(
+                                    '¡Eliminado!',
+                                    data.message,
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload(); // Recargar para ver los cambios
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error',
+                                    data.error || 'No se pudo eliminar el archivo.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error',
+                                'Ocurrió un error al intentar eliminar el archivo.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+
+        // Preview de imagen al seleccionar archivo
+        const mediaFilesInput = document.getElementById('mediafiles'); // Corregido el ID
+        const imagePreview = document.getElementById('imagePreview');
+        if (mediaFilesInput && imagePreview) {
+            mediaFilesInput.addEventListener('change', function(event) { // Corregido el event listener
+                const file = event.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="Vista previa" class="img-thumbnail mt-2" style="max-height: 200px;">`;
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.innerHTML = ''; // Limpiar vista previa si no es imagen
+                }
+            });
+        }
+    });
+</script>
+<%- contentFor('body') %>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Biblioteca Multimedia</h1>
+    </div>
+
+    <%- include('../../partials/messages') %>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Subir Nuevo Archivo</h6>
+        </div>
+        <div class="card-body">
+            <form action="/admin/media/upload" method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="mediafiles" class="form-label">Seleccionar archivos (Max: <%= typeof maxFileSizeMB !== 'undefined' ? maxFileSizeMB : 50 %>MB por archivo)</label>
+                    <input class="form-control" type="file" id="mediafiles" name="mediafiles" multiple required>
+                    <div id="imagePreview" class="mt-2"></div> <!-- La vista previa actual solo mostrará la primera imagen seleccionada o la última, para múltiples previews se necesitaría JS más complejo -->
+                </div>
+                <button type="submit" class="btn btn-primary">Subir Archivos</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Archivos Subidos</h6>
+        </div>
+        <div class="card-body">
+            <% if (files && files.length > 0) { %>
+                <div class="row">
+                    <% files.forEach(file => { %>
+                        <div class="col-md-4 col-lg-3 mb-4">
+                            <div class="card h-100">
+                                <% if (file.mimetype.startsWith('image/')) { %>
+                                    <img src="/<%= file.path.replace(/^public[\\\/]/, '').replace(/\\/g, '/') %>" class="card-img-top" alt="<%= file.filename %>" style="height: 150px; object-fit: cover;">
+                                <% } else if (file.mimetype.startsWith('video/')) { %>
+                                    <div class="text-center p-3" style="height: 150px; background-color: #f0f0f0; display:flex; align-items:center; justify-content:center;">
+                                        <i class="fas fa-video fa-3x text-muted"></i>
+                                    </div>
+                                <% } else if (file.mimetype === 'application/pdf') { %>
+                                    <div class="text-center p-3" style="height: 150px; background-color: #f0f0f0; display:flex; align-items:center; justify-content:center;">
+                                        <i class="fas fa-file-pdf fa-3x text-muted"></i>
+                                    </div>
+                                <% } else { %>
+                                    <div class="text-center p-3" style="height: 150px; background-color: #f0f0f0; display:flex; align-items:center; justify-content:center;">
+                                        <i class="fas fa-file-alt fa-3x text-muted"></i>
+                                    </div>
+                                <% } %>
+                                <div class="card-body">
+                                    <p class="card-text small" title="<%= file.filename %>" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><%= file.filename %></p>
+                                    <p class="card-text small text-muted"><%= new Date(file.createdAt).toLocaleDateString() %></p>
+                                    <input type="text" class="form-control form-control-sm mb-2" value="<%= file.fullUrl %>" readonly onclick="this.select(); document.execCommand('copy'); Swal.fire({toast: true, position: 'top-end', icon: 'success', title: 'URL copiada', showConfirmButton: false, timer: 1500})">
+                                    
+                                    <form action="/admin/media/<%= file.id %>" method="POST" class="delete-media-form d-inline" data-media-id="<%= file.id %>" data-media-name="<%= file.filename %>">
+                                        <!-- Para method-override, si se usa: <input type="hidden" name="_method" value="DELETE"> -->
+                                        <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <p>No hay archivos en la biblioteca multimedia.</p>
+            <% } %>
+        </div>
+    </div>
+</div>

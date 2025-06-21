@@ -1,0 +1,75 @@
+<% if (courses && courses.length > 0) { %>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4"> <%# Cambiado row-cols-lg-3 a row-cols-lg-4 %>
+    <% courses.forEach(course => { %>
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <% if (course.imageUrl) { %>
+            <img src="<%= course.imageUrl %>" class="card-img-top" alt="<%= course.title %>" style="height: 200px; object-fit: cover;">
+          <% } else { %>
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+              <span class="text-light fs-4">Sin Imagen</span>
+            </div>
+          <% } %>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><%= course.title %></h5>
+            
+            <% if (course.level) { %>
+              <p class="mb-1">
+                <span class="badge 
+                  <% if (course.level === 'BEGINNER') { %> bg-success
+                  <% } else if (course.level === 'INTERMEDIATE') { %> bg-warning text-dark
+                  <% } else if (course.level === 'ADVANCED') { %> bg-danger
+                  <% } else { %> bg-secondary <% } %>">
+                  Nivel: <%= course.level.charAt(0) + course.level.slice(1).toLowerCase() %>
+                </span>
+              </p>
+            <% } %>
+
+            <p class="card-text flex-grow-1 small text-muted">
+              <%= course.shortDescription || (course.description ? course.description.substring(0, 100) + (course.description.length > 100 ? '...' : '') : 'Sin descripción breve.') %>
+            </p>
+
+            <% if (course.tags && course.tags.length > 0) { %>
+              <div class="mb-2">
+                <% course.tags.slice(0, 3).forEach(tag => { %> <%# Mostrar hasta 3 tags %>
+                  <span class="badge bg-light text-dark border me-1"><%= tag.name %></span>
+                <% }); %>
+                <% if (course.tags.length > 3) { %>
+                  <span class="badge bg-light text-dark border me-1">...</span>
+                <% } %>
+              </div>
+            <% } %>
+            
+            <div class="mt-auto pt-2"> <!-- Añadido pt-2 para un poco de espacio si los tags están presentes -->
+              <!-- Sección de precios eliminada -->
+              <a href="/courses/<%= course.slug || course.id %>" class="btn btn-primary w-100">Ver Detalles</a>
+            </div>
+          </div>
+          <% if (user && user.role === 'ADMIN') { %>
+            <div class="card-footer text-muted">
+              <a href="/admin/courses/<%= course.id %>/edit" class="btn btn-sm btn-outline-secondary me-2">Editar</a>
+              <form action="/admin/courses/<%= course.id %>?_method=DELETE" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar este curso?');">Eliminar</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } else { %>
+  <div class="alert alert-info" role="alert">
+    Actualmente no hay cursos disponibles.
+    <% if (user && user.role === 'ADMIN') { %>
+      Puedes <a href="/admin/courses/new" class="alert-link">crear un nuevo curso aquí</a>.
+    <% } %>
+  </div>
+<% } %>
+
+<script>
+  // Inicializar Feather Icons si aún no se ha hecho en este contexto de carga parcial/dinámica
+  // Esto es más relevante si el contenido se carga vía AJAX, pero es una buena práctica.
+  if (typeof feather !== 'undefined') {
+    feather.replace();
+  }
+</script>

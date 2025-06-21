@@ -1,0 +1,300 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                 @id @default(cuid())
+  name                 String?
+  email                String                 @unique
+  phone                String?
+  avatarUrl            String?
+  password             String
+  role                 Role                   @default(STUDENT)
+  isActive             Boolean                @default(true)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  
+  sessions             Session[]
+  subscriptions        UserSubscription[]     // Nueva relación
+  quizAttempts         QuizAttempt[]          // Nueva relación
+  lessonProgress       UserLessonProgress[]   // Nueva relación
+  courseProgress       UserCourseProgress[]   // Nueva relación
+  tokenLogs            UserCourseTokenLog[]   // Nueva relación
+  // authoredCourses      Course[]               @relation("AuthoredCourses") // Eliminado por ahora
+  uploadedMedia        MediaFile[]            @relation("UploadedMedia")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+model Course {
+  id                   String                 @id @default(cuid())
+  title                String                 @unique
+  slug                 String                 @unique
+  description          String?                // HTML sanitizado
+  shortDescription     String?
+  imageUrl             String?
+  level                CourseLevel            @default(BEGINNER)
+  status               CourseStatus           @default(DRAFT)
+  
+  durationMonths       Int?
+  studyDaysPerWeek     Int?
+  studyHoursPerDay     Float?
+  // accessPeriodDays  Int?                  // Eliminado, acceso por suscripción
+
+  additionalMaterialInfo String?                // Para material de apoyo
+
+  aiSystemPrompt       String?                // Configuración IA por curso
+  n8nWebhookUrl        String?                // URL para el webhook de N8N
+  requirements         String?                // Requisitos del curso, puede ser texto simple o markdown
+
+  lessons              Lesson[]
+  tags                 Tag[]                  @relation("CourseTags")
+  quizzes              Quiz[]                 // Relación a Quizzes
+  tokenLogs            UserCourseTokenLog[]   // Relación a logs de tokens del curso
+  userCourseProgress   UserCourseProgress[]   // Relación a progreso de usuarios en este curso
+  // authorId            String?               // Eliminado por ahora
+  // author              User?                 @relation("AuthoredCourses", fields: [authorId], references: [id]) // Eliminado por ahora
+
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+}
+
+model Lesson {
+  id                   String                 @id @default(cuid())
+  title                String
+  content              String                 // Puede ser HTML o Markdown
+  order                Int
+  courseId             String
+  course               Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  userLessonProgress   UserLessonProgress[]   // Relación a progreso de usuarios en esta lección
+
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  @@index([courseId, order])
+}
+
+// Modelo Enrollment eliminado
+
+model Session {
+  sid     String   @id @unique
+  sess    Json
+  expire  DateTime
+  userId  String?
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Tag {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  slug    String   @unique
+  courses Course[] @relation("CourseTags")
+}
+
+// --- Nuevos Modelos para Suscripciones, Progreso, Quizzes, Tokens ---
+
+model SubscriptionPlan {
+  id                String              @id @default(cuid())
+  name              String              @unique // Ej: "Mensual", "Trimestral + Bonus"
+  durationMonths    Int                 // Duración base en meses (1, 3, 6, 12)
+  bonusMonths       Int?                // Meses de regalo (null, null, 1, 2)
+  price             Decimal             // Precio del plan
+  isActive          Boolean             @default(true)
+  
+  userSubscriptions UserSubscription[]
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model UserSubscription {
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String
+  plan              SubscriptionPlan    @relation(fields: [planId], references: [id])
+  
+  startDate         DateTime
+  endDate           DateTime            // Calculada: startDate + durationMonths + bonusMonths
+  isActive          Boolean             @default(false) // Se activa tras pago/verificación
+
+  paymentMethod     String?             // Ej: "paypal", "qr_transfer", "admin_grant"
+  paymentId         String?             // ID de transacción de la pasarela
+  paymentReference  String?             // Referencia para QR/transferencia
+  isPaymentVerified Boolean             @default(false) // Para pagos que requieren verificación manual
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([userId, planId, startDate]) // Un usuario no debería tener el mismo plan iniciando el mismo día
+  @@index([userId])
+  @@index([planId])
+}
+
+model UserCourseTokenLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  // lessonId String? // Opcional para granularidad por lección
+  // lesson   Lesson?  @relation(fields: [lessonId], references: [id]) 
+  tokensUsed  Int      // Tokens usados en esta interacción/sesión
+  timestamp   DateTime @default(now())
+  // context  String?  // Opcional: prompt o resumen para referencia
+
+  @@index([userId, courseId, timestamp])
+}
+
+model Quiz {
+  id            String        @id @default(cuid())
+  courseId      String
+  course        Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  quizType      QuizType      @default(KNOWLEDGE_CHECK)
+  passingScore  Int?          // Puntaje mínimo para aprobar (si aplica)
+  maxAttempts   Int?          // Número máximo de intentos (null para ilimitado)
+  
+  questions     Question[]
+  attempts      QuizAttempt[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([courseId])
+}
+
+model Question {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  text        String   // Enunciado de la pregunta
+  // questionType QuestionType @default(MULTIPLE_CHOICE) // Si se añaden más tipos
+  options     Json     // Ej: [{text: "Op A", isCorrect: true}, {text: "Op B", isCorrect: false}]
+  order       Int
+  points      Int      @default(1) // Puntos que otorga esta pregunta
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([quizId, order]) // Asegurar que el orden de la pregunta sea único dentro de un quiz
+}
+
+model QuizAttempt {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId        String
+  quiz          Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  attemptNumber Int       // Número de intento para este quiz por este usuario
+  score         Int?
+  answers       Json      // Ej: [{questionId: "id", selectedOptionIndex: 0}, ...]
+  startedAt     DateTime
+  completedAt   DateTime?
+  passed        Boolean?  // True si score >= quiz.passingScore (si aplica)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, quizId])
+}
+
+model UserLessonProgress {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson        @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  courseId    String        // Denormalizado para facilitar queries por curso
+  status      LessonStatus  @default(NOT_STARTED)
+  completedAt DateTime?
+  // lastAccessedAt DateTime?
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@unique([userId, lessonId])
+  @@index([userId, courseId]) // Para buscar progreso de un usuario en un curso
+}
+
+model UserCourseProgress {
+  id                  String                  @id @default(cuid())
+  userId              String
+  user                User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId            String
+  course              Course                  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progressPercentage  Float?                  // Calculado
+  completedLessons    Int?                    // Calculado
+  totalLessons        Int?                    // Podría tomarse de Course.lessons.length o denormalizarse
+  status              CourseCompletionStatus  @default(NOT_STARTED)
+  completedAt         DateTime?
+  lastAccessedAt      DateTime?
+  
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+
+  @@unique([userId, courseId])
+}
+
+
+model MediaFile {
+  id        String   @id @default(cuid())
+  filename  String
+  path      String   @unique // Ruta relativa desde la raíz del proyecto, ej: public/uploads/media/imagen.jpg
+  mimetype  String   // ej: image/jpeg, video/mp4, application/pdf
+  size      Int      // Tamaño en bytes
+  uploadedBy User?    @relation("UploadedMedia", fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade) // onDelete: SetNull para que si se borra el usuario, el archivo no se borre pero quede sin dueño.
+  userId    String?  // Quién subió el archivo (opcional, puede ser null si es subido por el sistema)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// --- Enums ---
+
+enum CourseStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum QuizType {
+  KNOWLEDGE_CHECK // Autoevaluación, no necesariamente califica para "aprobar"
+  PARTICIPATION   // Quiz simple para marcar participación
+  GRADED_EXAM     // Examen que cuenta para aprobación del curso
+}
+
+enum LessonStatus {
+  NOT_STARTED
+  STARTED
+  COMPLETED
+}
+
+enum CourseCompletionStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED // Todas las lecciones vistas y/o quizzes requeridos aprobados
+}

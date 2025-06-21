@@ -1,0 +1,39 @@
+<main class="col-md-12 ms-sm-auto px-md-4">
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><%= title %></h1>
+  </div>
+
+  <%- include('../../partials/messages') %>
+
+  <form method="POST" action="<%= typeof tag !== 'undefined' && tag.id ? '/admin/tags/' + tag.id + '?_method=PUT' : '/admin/tags' %>">
+    <div class="mb-3">
+      <label for="name" class="form-label">Nombre del Tag</label>
+      <input type="text" class="form-control" id="name" name="name" value="<%= typeof tag !== 'undefined' ? tag.name : '' %>" required>
+      <% if (typeof errors !== 'undefined' && errors.name) { %>
+        <div class="invalid-feedback d-block">
+          <%= errors.name.msg %>
+        </div>
+      <% } %>
+    </div>
+
+    <% if (typeof tag !== 'undefined' && tag.slug) { %>
+      <div class="mb-3">
+        <label for="slug" class="form-label">Slug</label>
+        <input type="text" class="form-control" id="slug" name="slug" value="<%= tag.slug %>" readonly disabled>
+        <div class="form-text">El slug se genera automáticamente y no se puede editar directamente.</div>
+      </div>
+    <% } %>
+
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check-circle-fill me-1"></i>
+      <%= typeof tag !== 'undefined' && tag.id ? 'Actualizar Tag' : 'Crear Tag' %>
+    </button>
+    <a href="/admin/tags" class="btn btn-secondary">
+      <i class="bi bi-x-circle-fill me-1"></i>
+      Cancelar
+    </a>
+  </form>
+</main>
+
+<%- include('../../partials/theme-script-loader') %>
+
