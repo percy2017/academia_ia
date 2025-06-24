@@ -3,6 +3,8 @@
 
 <%- contentFor('body') %>
 
+<!-- El contenedor de datos del curso se elimina, los datos se inyectarán directamente en el script. -->
+
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
@@ -130,17 +132,18 @@
                           </div>
                       </div>
                       <div class="mb-3">
-                        <% if (course && course.imageUrl) { %>
-                            <div class="mt-2">
-                                <label class="">Imagen actual:</label>
-                                <img src="<%= course.imageUrl.startsWith('http') ? course.imageUrl : '/' + course.imageUrl %>" alt="Imagen actual del curso" class="img-thumbnail" style="max-width: 100%; height: auto; object-fit: cover;">
-                                <label for="courseImage" class="form-label">Imagen del Curso</label>
-                                <input type="file" class="form-control" id="courseImage" name="courseImage" accept="image/png, image/jpeg, image/gif, image/webp">
-                                <p class="form-text mt-1">Subir una nueva imagen la reemplazará.</p>
-                            </div>
-                        <% } else { %>
-                            <p class="form-text">Sube una imagen para el curso (PNG, JPG, GIF, WEBP).</p>
-                        <% } %>
+                          <label for="courseImage" class="form-label">Imagen del Curso</label>
+                          <% if (course && course.imageUrl) { %>
+                              <div class="mb-2">
+                                  <img src="<%= course.imageUrl.startsWith('http') ? course.imageUrl : '/' + course.imageUrl %>" alt="Imagen actual del curso" class="img-thumbnail" style="max-width: 100%; height: auto; object-fit: cover;">
+                              </div>
+                          <% } %>
+                          <input type="file" class="form-control" id="courseImage" name="courseImage" accept="image/png, image/jpeg, image/gif, image/webp">
+                          <% if (course && course.imageUrl) { %>
+                              <div class="form-text mt-1">Subir una nueva imagen la reemplazará.</div>
+                          <% } else { %>
+                              <div class="form-text mt-1">Sube una imagen para el curso (PNG, JPG, GIF, WEBP).</div>
+                          <% } %>
                       </div>
                       <% if (course && course.imageUrl) { %>
                           <input type="hidden" name="currentImageUrl" value="<%= course.imageUrl %>">
@@ -283,9 +286,33 @@
                         <label for="aiSystemPrompt" class="form-label">Prompt de Sistema</label>
                         <textarea class="form-control" id="aiSystemPrompt" name="aiSystemPrompt" rows="8" placeholder="Ej: Eres MentorIA, un tutor experto y amigable para el curso '{{courseTitle}}'. Conoces el progreso del alumno: {{userName}} ({{userEmail}}) ha completado {{courseProgress}}% del curso... Ayúdalo con sus dudas sobre la lección actual '{{lessonTitle}}'."><%= course.aiSystemPrompt || '' %></textarea>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="aiProvider" class="form-label">Proveedor de IA</label>
+                            <select class="form-select" id="aiProvider" name="aiProvider">
+                                <option value="">Seleccionar Proveedor</option>
+                                <option value="openai" <%= course.aiProvider === 'openai' ? 'selected' : '' %>>OpenAI</option>
+                                <option value="google" <%= course.aiProvider === 'google' ? 'selected' : '' %>>Google Gemini</option>
+                                <option value="anthropic" <%= course.aiProvider === 'anthropic' ? 'selected' : '' %>>Anthropic Claude</option>
+                                <option value="ollama" <%= course.aiProvider === 'ollama' ? 'selected' : '' %>>Ollama</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="aiModelName" class="form-label">Nombre del Modelo</label>
+                            <input type="text" class="form-control" id="aiModelName" name="aiModelName" value="<%= course.aiModelName || '' %>" placeholder="Ej: gpt-4o, gemini-1.5-pro, llama3">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="ollamaBaseUrlContainer" style="display: <%= course.aiProvider === 'ollama' ? 'block' : 'none' %>;">
+                        <label for="ollamaBaseUrl" class="form-label">URL Base de Ollama</label>
+                        <input type="url" class="form-control" id="ollamaBaseUrl" name="ollamaBaseUrl" value="<%= course.ollamaBaseUrl || '' %>" placeholder="http://tu-vps-ip:11434">
+                    </div>
+                    <div class="mb-3" id="aiApiKeyContainer" style="display: <%= course.aiProvider === 'ollama' ? 'none' : 'block' %>;">
+                        <label for="aiApiKey" class="form-label">API Key</label>
+                        <input type="password" class="form-control" id="aiApiKey" name="aiApiKey" value="<%= course.aiApiKey || '' %>">
+                    </div>
                     <div class="mb-3">
-                        <label for="n8nWebhookUrl" class="form-label">URL del Webhook N8N</label>
-                        <input type="url" class="form-control" id="n8nWebhookUrl" name="n8nWebhookUrl" value="<%= course.n8nWebhookUrl || '' %>" placeholder="https://tu-n8n.dominio.com/webhook/ruta-especifica">
+                        <label for="aiTemperature" class="form-label">Temperatura</label>
+                        <input type="number" class="form-control" id="aiTemperature" name="aiTemperature" value="<%= course.aiTemperature || '' %>" step="0.1" min="0" max="1" placeholder="Ej: 0.7">
                     </div>
                        
                     <div>
@@ -741,18 +768,9 @@
     const currentCourseId = '<%= course.id %>'; // Usado para las URLs de fetch
     let questionOptionEditorCounter = 0; // Para los names de los inputs de opciones
 
-    let mainQuizData;
-    const mainQuizDataString = `<%- (course && course.id && course.quizzes && course.quizzes.length > 0 && course.quizzes[0]) ? JSON.stringify(course.quizzes[0]).replace(/'/g, "\\'") : 'null' %>`;
-
-    try {
-        mainQuizData = JSON.parse(mainQuizDataString);
-        if (mainQuizData === null) {
-            mainQuizData = { questions: [] }; // Fallback si no hay quiz
-        }
-    } catch (e) {
-        console.error("Error parsing mainQuizData from server string:", mainQuizDataString, e);
-        mainQuizData = { questions: [] }; // Fallback en caso de error
-    }
+    // Se inyectan los datos del quiz directamente desde el servidor usando EJS.
+    // Esto es seguro porque JSON.stringify produce una cadena que es un literal de objeto JavaScript válido.
+    const mainQuizData = <%- JSON.stringify(course && course.id && course.quizzes && course.quizzes.length > 0 ? course.quizzes[0] : null) %> || { questions: [] };
     
     // Asegurarse de que questions sea un array, incluso si el quiz existe pero no tiene preguntas
     if (mainQuizData && !Array.isArray(mainQuizData.questions)) {
@@ -911,6 +929,23 @@
                 if (typeof Swal !== 'undefined') Swal.fire('Error', error.message || 'No se pudo actualizar la pregunta.', 'error');
             });
         });
+    }
+
+    // Show/hide Ollama URL field based on provider selection
+    const aiProviderSelect = document.getElementById('aiProvider');
+    const ollamaBaseUrlContainer = document.getElementById('ollamaBaseUrlContainer');
+    const aiApiKeyContainer = document.getElementById('aiApiKeyContainer');
+
+    if (aiProviderSelect) {
+      aiProviderSelect.addEventListener('change', function () {
+        if (this.value === 'ollama') {
+          ollamaBaseUrlContainer.style.display = 'block';
+          aiApiKeyContainer.style.display = 'none';
+        } else {
+          ollamaBaseUrlContainer.style.display = 'none';
+          aiApiKeyContainer.style.display = 'block';
+        }
+      });
     }
 
     // Inicializar EasyMDE para los campos de requisitos e información adicional

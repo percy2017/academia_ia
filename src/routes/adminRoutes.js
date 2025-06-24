@@ -28,6 +28,7 @@ import {
 import tagRoutes from './admin/tagRoutes.js'; // Importar rutas de tags
 import userAdminRoutes from './admin/userAdminRoutes.js'; // Importar rutas de admin de usuarios
 import subscriptionPlanAdminRoutes from './admin/subscriptionPlanAdminRoutes.js'; // Importar rutas de planes de suscripción
+import subscriptionAdminRoutes from './admin/subscriptionAdminRoutes.js'; // Importar rutas de suscripciones
 import mediaRoutes from './admin/mediaRoutes.js'; // Importar rutas de multimedia
 import { uploadCourseImage } from '../middleware/uploadMiddleware.js'; // Importar middleware de subida para cursos
 
@@ -69,6 +70,9 @@ router.use('/users', isAuthenticated, isAdmin, userAdminRoutes);
 // Montar rutas para CRUD de Planes de Suscripción
 // Todas las rutas dentro de subscriptionPlanAdminRoutes estarán bajo /admin/subscription-plans
 router.use('/subscription-plans', isAuthenticated, isAdmin, subscriptionPlanAdminRoutes);
+
+// Montar rutas para gestión de Suscripciones
+router.use('/subscriptions', isAuthenticated, isAdmin, subscriptionAdminRoutes);
 
 // Rutas para CRUD de Cuestionarios (Quizzes) anidadas bajo cursos
 router.post('/courses/:courseId/quizzes', isAuthenticated, isAdmin, createQuiz);

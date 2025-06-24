@@ -7,71 +7,45 @@
   <div class="offcanvas-body d-flex flex-column">
     <div class="flex-grow-1 pt-3">
       <ul class="nav flex-column">
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" aria-current="page" href="/">
-            <span data-feather="book-open" class="align-text-bottom"></span>
-            Catalogo
-          </a>
-        </li>
         <% if (locals.user && locals.user.role === 'ADMIN') { %>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses')) ? 'active' : '' %>" href="/admin/courses">
-            <span data-feather="archive" class="align-text-bottom"></span>
-            Admin Cursos
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/tags')) ? 'active' : '' %>" href="/admin/tags">
-            <span data-feather="tag" class="align-text-bottom"></span>
-            Admin Tags
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/users')) ? 'active' : '' %>" href="/admin/users">
-            <span data-feather="users" class="align-text-bottom"></span>
-            Admin Usuarios
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscription-plans')) ? 'active' : '' %>" href="/admin/subscription-plans">
-            <span data-feather="list" class="align-text-bottom"></span> <%# O un ícono bi como bi-card-checklist %>
-            Admin Planes
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/media')) ? 'active' : '' %>" href="/admin/media">
-            <span data-feather="image" class="align-text-bottom"></span>
-            Multimedia
-          </a>
-        </li>
+          <!-- Menú de Admin (Móvil) -->
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" href="/">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses')) ? 'active' : '' %>" href="/admin/courses">Admin Cursos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/tags')) ? 'active' : '' %>" href="/admin/tags">Admin Tags</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/users')) ? 'active' : '' %>" href="/admin/users">Admin Usuarios</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscription-plans')) ? 'active' : '' %>" href="/admin/subscription-plans">Admin Planes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscriptions')) ? 'active' : '' %>" href="/admin/subscriptions">Suscripciones</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/media')) ? 'active' : '' %>" href="/admin/media">Multimedia</a>
+          </li>
+        <% } else if (locals.user && locals.user.role === 'STUDENT') { %>
+          <!-- Menú de Estudiante (Móvil) -->
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" href="/">Catálogo de Cursos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/profile')) ? 'active' : '' %>" href="/profile">Mi Perfil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/subscription-plans')) ? 'active' : '' %>" href="/subscription-plans">Suscripción</a>
+          </li>
         <% } %>
       </ul>
     </div>
-
     <hr>
-    <div class="dropdown px-3 pb-3"> <!-- Added pb-3 for some spacing at the bottom -->
-      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-        <svg class="bi me-2" width="16" height="16"><use xlink:href="#circle-half"/></svg>
-        <strong>Tema</strong>
-      </a>
-      <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#sun-fill"></use></svg>
-          Claro
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
-          Oscuro
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#circle-half"></use></svg>
-          Automático
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-      </ul>
-    </div>
+    <!-- Theme Switcher -->
   </div>
 </div>
 
@@ -80,87 +54,64 @@
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-none d-md-block bg-light sidebar">
   <div class="position-sticky pt-3 sidebar-sticky">
     <ul class="nav flex-column">
-      <li class="nav-item">
-        <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" aria-current="page" href="/">
-          <span data-feather="book-open" class="align-text-bottom"></span>
-          Catalogo
-        </a>
-      </li>
       <% if (locals.user && locals.user.role === 'ADMIN') { %>
-      <li class="nav-item">
-        <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses')) ? 'active' : '' %>" href="/admin/courses">
-          <span data-feather="archive" class="align-text-bottom"></span>
-          Admin Cursos
-        </a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/tags')) ? 'active' : '' %>" href="/admin/tags">
-            <span data-feather="tag" class="align-text-bottom"></span>
-            Admin Tags
+        <!-- Menú de Admin (Desktop) -->
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" href="/">
+            <span data-feather="home"></span> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses')) ? 'active' : '' %>" href="/admin/courses">
+            <span data-feather="archive"></span> Admin Cursos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/tags')) ? 'active' : '' %>" href="/admin/tags">
+            <span data-feather="tag"></span> Admin Tags
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/users')) ? 'active' : '' %>" href="/admin/users">
-            <span data-feather="users" class="align-text-bottom"></span>
-            Admin Usuarios
+            <span data-feather="users"></span> Admin Usuarios
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscription-plans')) ? 'active' : '' %>" href="/admin/subscription-plans">
-            <span data-feather="list" class="align-text-bottom"></span> <%# O un ícono bi como bi-card-checklist %>
-            Admin Planes
+            <span data-feather="list"></span> Admin Planes
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscriptions')) ? 'active' : '' %>" href="/admin/subscriptions">
+            <i class="bi bi-card-checklist"></i> Suscripciones
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/media')) ? 'active' : '' %>" href="/admin/media">
-            <span data-feather="image" class="align-text-bottom"></span>
-            Multimedia
+            <span data-feather="image"></span> Multimedia
           </a>
         </li>
-        <% } %>
+      <% } else if (locals.user && locals.user.role === 'STUDENT') { %>
+        <!-- Menú de Estudiante (Desktop) -->
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" href="/">
+            <i class="bi bi-book-open"></i> Catálogo de Cursos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/profile')) ? 'active' : '' %>" href="/profile">
+            <i class="bi bi-person-circle"></i> Mi Perfil
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/subscription-plans')) ? 'active' : '' %>" href="/subscription-plans">
+            <i class="bi bi-gem"></i> Suscripción
+          </a>
+        </li>
+      <% } %>
     </ul>
-
     <hr>
-    <div class="dropdown px-3">
-      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUserDesktop" data-bs-toggle="dropdown" aria-expanded="false">
-        <svg class="bi me-2" width="16" height="16"><use xlink:href="#circle-half"/></svg>
-        <strong>Tema</strong>
-      </a>
-      <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUserDesktop">
-        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#sun-fill"></use></svg>
-          Claro
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
-          Oscuro
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-        <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
-          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#circle-half"></use></svg>
-          Automático
-          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
-        </button></li>
-      </ul>
-    </div>
+    <!-- Theme Switcher -->
   </div>
 </nav>
 <% } %>
-
-<!-- SVG symbols for theme switcher, these should be available globally -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-  <symbol id="circle-half" viewBox="0 0 16 16">
-    <path d="M8 15A7 7 0 1 0 8 1v14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
-  </symbol>
-  <symbol id="moon-stars-fill" viewBox="0 0 16 16">
-    <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
-    <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.734 1.734 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.734 1.734 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.734 1.734 0 0 0 1.097-1.097l.387-1.162zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.156 1.156 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.156 1.156 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774.258c.346-.115.617-.386.732-.732L13.863.1z"/>
-  </symbol>
-  <symbol id="sun-fill" viewBox="0 0 16 16">
-    <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
-  </symbol>
-  <symbol id="check2" viewBox="0 0 16 16">
-    <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
-  </symbol>
-</svg>

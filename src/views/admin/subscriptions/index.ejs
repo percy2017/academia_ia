@@ -1,0 +1,47 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Gestión de Suscripciones</h1>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Usuario</th>
+        <th scope="col">Plan</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Fecha de Inicio</th>
+        <th scope="col">Fecha de Vencimiento</th>
+        <th scope="col">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (subscriptions && subscriptions.length > 0) { %>
+        <% subscriptions.forEach((sub, index) => { %>
+          <tr>
+            <td><%= index + 1 %></td>
+            <td><%= sub.user.email %></td>
+            <td><%= sub.plan.name %></td>
+            <td>
+              <% if (new Date(sub.endDate) > new Date() && sub.status === 'ACTIVE') { %>
+                <span class="badge bg-success">Activa</span>
+              <% } else { %>
+                <span class="badge bg-danger">Vencida</span>
+              <% } %>
+            </td>
+            <td><%= new Date(sub.startDate).toLocaleDateString() %></td>
+            <td><%= new Date(sub.endDate).toLocaleDateString() %></td>
+            <td>
+              <a href="/admin/users/<%= sub.user.id %>" class="btn btn-sm btn-outline-secondary">Ver Usuario</a>
+              <!-- Futuras acciones como 'Cancelar' o 'Extender' irían aquí -->
+            </td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="7" class="text-center">No se encontraron suscripciones.</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>

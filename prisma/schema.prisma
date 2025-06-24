@@ -30,6 +30,7 @@ model User {
   tokenLogs            UserCourseTokenLog[]   // Nueva relación
   // authoredCourses      Course[]               @relation("AuthoredCourses") // Eliminado por ahora
   uploadedMedia        MediaFile[]            @relation("UploadedMedia")
+  chatMessages         ChatMessage[]
 }
 
 enum Role {
@@ -55,7 +56,10 @@ model Course {
   additionalMaterialInfo String?                // Para material de apoyo
 
   aiSystemPrompt       String?                // Configuración IA por curso
-  n8nWebhookUrl        String?                // URL para el webhook de N8N
+  aiProvider           String?                // Proveedor de IA (e.g., "openai", "google")
+  aiModelName          String?                // Nombre del modelo (e.g., "gpt-4o", "gemini-1.5-pro")
+  aiApiKey             String?                // API Key (debería ser encriptada)
+  aiTemperature        Float?                 // Temperatura para la generación de respuestas
   requirements         String?                // Requisitos del curso, puede ser texto simple o markdown
 
   lessons              Lesson[]
@@ -68,6 +72,7 @@ model Course {
 
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
+  chatMessages         ChatMessage[]
 }
 
 model Lesson {
@@ -82,6 +87,7 @@ model Lesson {
 
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
+  chatMessages         ChatMessage[]
 
   @@index([courseId, order])
 }
@@ -297,4 +303,23 @@ enum CourseCompletionStatus {
   NOT_STARTED
   IN_PROGRESS
   COMPLETED // Todas las lecciones vistas y/o quizzes requeridos aprobados
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  fileUrl   String?
+  fileType  String?
+  createdAt DateTime @default(now())
+  repliedToUserId String? // ID del usuario al que la IA está respondiendo
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([lessonId])
 }

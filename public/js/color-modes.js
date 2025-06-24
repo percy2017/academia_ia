@@ -19,46 +19,57 @@
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
 
+  const updateHljsTheme = theme => {
+    const lightTheme = document.querySelector('#hljs-theme-light');
+    const darkTheme = document.querySelector('#hljs-theme-dark');
+
+    if (!lightTheme || !darkTheme) {
+      return;
+    }
+
+    if (theme === 'dark') {
+      lightTheme.setAttribute('disabled', '');
+      darkTheme.removeAttribute('disabled');
+    } else {
+      darkTheme.setAttribute('disabled', '');
+      lightTheme.removeAttribute('disabled');
+    }
+  }
+
   const setTheme = theme => {
     if (theme === 'auto') {
       document.documentElement.setAttribute('data-bs-theme', (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
     } else {
       document.documentElement.setAttribute('data-bs-theme', theme)
     }
+    // Update our custom highlight.js theme
+    updateHljsTheme(document.documentElement.getAttribute('data-bs-theme'));
   }
 
   setTheme(getPreferredTheme())
 
   const showActiveTheme = (theme, focus = false) => {
-    const themeSwitcher = document.querySelector('#dropdownUser2') // Updated to match our sidebar dropdown ID
+    const themeSwitcher = document.querySelector('#bd-theme')
 
     if (!themeSwitcher) {
       return
     }
 
-    const themeSwitcherText = document.querySelector('#dropdownUser2 strong') // To update the button text
-    const activeThemeIcon = document.querySelector('.theme-icon.active use') // Should target the icon within the button if we add one
+    const themeSwitcherText = document.querySelector('#bd-theme-text')
+    const activeThemeIcon = document.querySelector('.theme-icon-active use')
     const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`)
     const svgOfActiveBtn = btnToActive.querySelector('svg use').getAttribute('href')
 
     document.querySelectorAll('[data-bs-theme-value]').forEach(element => {
       element.classList.remove('active')
-      element.querySelector('.bi.ms-auto').classList.add('d-none') // Hide all checkmarks
+      element.setAttribute('aria-pressed', 'false')
     })
 
     btnToActive.classList.add('active')
-    btnToActive.querySelector('.bi.ms-auto').classList.remove('d-none') // Show checkmark for active theme
-    
-    // Update the main dropdown button to reflect the active theme (icon and text)
-    if (themeSwitcherText) {
-        const activeThemeLabel = btnToActive.textContent.trim();
-        // themeSwitcherText.textContent = activeThemeLabel; // This might be too much if icon is also there
-    }
-    const mainIcon = themeSwitcher.querySelector('.bi.me-2 use');
-    if (mainIcon) {
-        mainIcon.setAttribute('href', svgOfActiveBtn);
-    }
-
+    btnToActive.setAttribute('aria-pressed', 'true')
+    activeThemeIcon.setAttribute('href', svgOfActiveBtn)
+    const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`
+    themeSwitcher.setAttribute('aria-label', themeSwitcherLabel)
 
     if (focus) {
       themeSwitcher.focus()

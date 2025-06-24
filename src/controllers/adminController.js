@@ -35,8 +35,7 @@ export const listAdminCourses = async (req, res) => {
         });
         res.render('admin/courses/index', { 
             courses, 
-            messages: req.flash(),
-            layout: 'layouts/main'
+            messages: req.flash()
         });
     } catch (error) {
         console.error("Error fetching courses for admin:", error);
@@ -56,8 +55,7 @@ export const renderCreateCourseForm = async (req, res) => {
             messages: req.flash(),
             allTags,
             courseLevels, // Pasando los enums/arrays definidos arriba
-            courseStatuses,
-            layout: 'layouts/main'
+            courseStatuses
         });
     } catch (error) {
         console.error("Error fetching data for create course form:", error);
@@ -74,7 +72,7 @@ export const createCourse = async (req, res) => {
         durationMonths, studyDaysPerWeek, studyHoursPerDay,
         additionalMaterialInfo, requirements,
         aiSystemPrompt, 
-        n8nWebhookUrl 
+        aiProvider, aiModelName, aiApiKey, aiTemperature, ollamaBaseUrl
     } = req.body;
 
     const slug = generateSlug(title);
@@ -118,8 +116,17 @@ export const createCourse = async (req, res) => {
         additionalMaterialInfo: additionalMaterialInfo || null,
         requirements: requirements || null, 
         aiSystemPrompt: aiSystemPrompt || null,
-        n8nWebhookUrl: n8nWebhookUrl || null, 
+        aiProvider: aiProvider || null,
+        aiModelName: aiModelName || null,
+        aiTemperature: aiTemperature ? parseFloat(aiTemperature) : null,
+        ollamaBaseUrl: ollamaBaseUrl || null,
     };
+
+    // Solo actualizar la API key si se proporciona una nueva.
+    // Esto evita borrar la clave existente si el campo se deja en blanco.
+    if (aiApiKey) {
+        data.aiApiKey = aiApiKey;
+    }
 
     // Manejar tags
     if (tags && Array.isArray(tags)) {
@@ -162,8 +169,7 @@ export const createCourse = async (req, res) => {
             error_msg: error_msg_text, // Para mostrar el error específico
             allTags,
             courseLevels,
-            courseStatuses,
-            layout: 'layouts/main'
+            courseStatuses
         });
     }
 };
@@ -213,8 +219,7 @@ export const renderEditCourseForm = async (req, res) => {
             allTags,
             courseLevels,
             courseStatuses,
-            totalTokensUsed, // <--- Pasar totalTokensUsed
-            layout: 'layouts/main'
+            totalTokensUsed // <--- Pasar totalTokensUsed
         });
     } catch (error) {
         console.error("Error fetching course for edit:", error);
@@ -232,7 +237,7 @@ export const updateCourse = async (req, res) => {
         durationMonths, studyDaysPerWeek, studyHoursPerDay,
         additionalMaterialInfo, requirements,
         aiSystemPrompt, 
-        n8nWebhookUrl, 
+        aiProvider, aiModelName, aiApiKey, aiTemperature, ollamaBaseUrl,
         currentImageUrl 
     } = req.body;
     
@@ -290,7 +295,11 @@ export const updateCourse = async (req, res) => {
         additionalMaterialInfo: additionalMaterialInfo || null,
         requirements: requirements || null, 
         aiSystemPrompt: aiSystemPrompt || null,
-        n8nWebhookUrl: n8nWebhookUrl || null, 
+        aiProvider: aiProvider || null,
+        aiModelName: aiModelName || null,
+        aiApiKey: aiApiKey || null,
+        aiTemperature: aiTemperature ? parseFloat(aiTemperature) : null,
+        ollamaBaseUrl: ollamaBaseUrl || null,
     };
 
     // Manejar tags: set sobrescribe las relaciones existentes
@@ -328,8 +337,7 @@ export const updateCourse = async (req, res) => {
             error_msg: error_msg_text,
             allTags,
             courseLevels,
-            courseStatuses,
-            layout: 'layouts/main'
+            courseStatuses
         });
     }
 };
@@ -368,8 +376,7 @@ export const listAdminLessons = async (req, res) => {
         res.render('admin/lessons/index', { 
             course, 
             lessons, 
-            messages: req.flash(), 
-            layout: 'layouts/main' 
+            messages: req.flash()
         });
     } catch (error) {
         console.error(`Error fetching lessons for course ${courseId}:`, error);
@@ -394,8 +401,7 @@ export const renderCreateLessonForm = async (req, res) => {
             actionUrl: `/admin/courses/${courseId}/lessons`, 
             formTitle: `Añadir Lección a "${course.title}"`, 
             lessonsCount: lessonsInCourse, // Para sugerir el siguiente número de orden
-            messages: req.flash(), 
-            layout: 'layouts/main' 
+            messages: req.flash()
         });
     } catch (error) {
         console.error(`Error fetching course ${courseId} for new lesson form:`, error);
@@ -526,8 +532,7 @@ export const renderEditLessonForm = async (req, res) => {
             lesson, 
             actionUrl: `/admin/courses/${courseId}/lessons/${lessonId}?_method=PUT`, 
             formTitle: `Editar Lección: "${lesson.title}"`, 
-            messages: req.flash(), 
-            layout: 'layouts/main' 
+            messages: req.flash()
         });
     } catch (error) {
         console.error(`Error fetching lesson ${lessonId} for edit:`, error);

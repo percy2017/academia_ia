@@ -43,12 +43,11 @@ const mediaController = {
 
       const maxFileSizeMB = parseInt(process.env.MAX_FILE_SIZE_MB) || 50;
 
-      // res.render('admin/media/index', { files, layout: 'layouts/admin' }); // El layout es main.ejs
-      res.render('admin/media/index', { 
-        files, 
-        layout: 'layouts/main', // Especificamos el layout principal
+      // res.render('admin/media/index', { files }); // El layout es main.ejs
+      res.render('admin/media/index', {
+        files,
+        messages: req.flash(),
         activeMenu: 'media', // Para resaltar en el sidebar si existe esa lógica
-        maxFileSizeMB // Pasar el límite a la vista
       });
     } catch (error) {
       console.error("Error al obtener la librería multimedia:", error);

@@ -7,18 +7,87 @@
     </ol>
   </nav>
 
-  <div class="row">
-    <!-- Columna principal para el contenido de la lección -->
-    <div class="col-md-8">
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-          <h1 class="h3 mb-0"><%= lesson.title %></h1>
-        </div>
-        <div class="card-body">
-          <div class="lesson-content">
-            <%- lesson.content %> <!-- Usar <%- %> para renderizar HTML -->
+  <div class="row mb-3">
+    <div class="col-md-12">
+      <div class="accordion" id="chatAccordion">
+        <div class="accordion-item">
+          <div class="accordion-header d-flex justify-content-between align-items-center p-2">
+            <h2 class="mb-0 flex-grow-1">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChat" aria-expanded="false" aria-controls="collapseChat">
+                <i class="bi bi-robot me-2"></i>Chat con el Asistente IA
+              </button>
+            </h2>
+            <button type="button" id="chat-fullscreen-btn" class="btn btn-sm btn-light ms-2">
+              <i id="chat-fullscreen-icon" class="bi bi-fullscreen"></i>
+            </button>
+          </div>
+          <div id="collapseChat" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#chatAccordion">
+            <div class="accordion-body">
+              <div id="lesson-chat-container"
+                  data-course-id="<%= lesson.course.id %>"
+                  data-lesson-id="<%= lesson.id %>"
+                  <% if (typeof user !== 'undefined' && user) { %>
+                  data-user-id="<%= user.id %>"
+                  <% } else { %>
+                  data-user-id=""
+                  <% } %>
+                  data-chat-api-base-url="/api/chat"
+                  <% if (typeof csrfToken !== 'undefined') { %>
+                  data-csrf-token="<%= csrfToken %>"
+                  <% } else { %>
+                  data-csrf-token=""
+                  <% } %>
+              >
+                <!-- Área de Mensajes -->
+                <div id="chat-messages-area" class="mb-3" style="height: 600px; overflow-y: auto;">
+                    <p class="text-muted text-center" id="chat-empty-message">El historial de chat aparecerá aquí.</p>
+                </div>
+            
+                <!-- Previsualización de Archivo (opcional) -->
+                <div id="chat-file-preview-area" class="mb-2" style="display: none;">
+                    <small>Archivo adjunto:</small>
+                    <span id="chat-file-preview-name" class="fw-bold"></span>
+                    <button type="button" id="chat-remove-file-button" class="btn btn-sm btn-outline-danger ms-2 py-0 px-1">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+      
+                <!-- Área de Composición de Mensaje -->
+                <form id="chat-form" class="d-flex gap-2 align-items-center">
+                    <textarea id="chat-input-text" class="form-control" rows="1" placeholder="Escribe tu pregunta o mensaje..."></textarea>
+                    
+                    <input type="file" id="chat-input-file" accept="image/*,audio/*" style="display: none;">
+                    
+                    <button type="button" id="chat-attach-button" class="btn btn-sm btn-light" title="Adjuntar archivo">
+                        <i class="bi bi-paperclip"></i>
+                    </button>
+                    
+                    <button type="submit" id="chat-send-button" class="btn btn-sm btn-light">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </form>
+                <!-- <small class="form-text text-muted mt-1">Puedes adjuntar imágenes o audios.</small> -->
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <!-- Columna principal para el contenido de la lección -->
+    <div class="col-md-12" id="lesson-content-col">
+      <div class="card shadow-sm mb-4">
+        <%- include('partials/_content-header', { title: lesson.title, showTTS: true, showLessonToggle: true }) %>
+        <div class="card-body">
+          <div class="lesson-content">
+            <%- marked.parse(lesson.content || '') %>
+          </div>
+
+
+         
+        </div>
+
         <div class="card-footer d-flex justify-content-between">
           <% if (previousLesson) { %>
             <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= previousLesson.id %>" class="btn btn-outline-secondary">
@@ -37,82 +106,11 @@
           <% } %>
         </div>
       </div>
-      <!-- El bloque de preparación de datos EJS y los elementos del chat se moverán fuera de esta columna -->
-
-      <!-- Nuevo Chat a Medida - Inicio -->
-      <hr class="my-4">
-      <div id="lesson-chat-container" class="mt-3 p-3 border rounded shadow-sm"
-           data-course-id="<%= lesson.course.id %>"
-           data-lesson-id="<%= lesson.id %>"
-           <% if (typeof user !== 'undefined' && user) { %>
-           data-user-id="<%= user.id %>"
-           <% } else { %>
-           data-user-id=""
-           <% } %>
-           data-chat-api-base-url="/api/chat" <%# Asegúrate que csrfToken esté disponible en el scope si lo necesitas %>
-           <% if (typeof csrfToken !== 'undefined') { %>
-           data-csrf-token="<%= csrfToken %>"
-           <% } else { %>
-           data-csrf-token=""
-           <% } %>
-      >
-          <h5 class="mb-3">Chat con el Asistente IA</h5>
-      
-          <!-- Área de Mensajes -->
-          <div id="chat-messages-area" class="mb-3" style="height: 400px; overflow-y: auto; border: 1px solid #eee; padding: 10px; background-color: #f9f9f9;">
-              <!-- Ejemplo de mensaje de usuario (comentado) -->
-              <!--
-              <div class="chat-message user-message mb-2">
-                  <div class="message-bubble">
-                      <p class="mb-0">Este es un mensaje del usuario.</p>
-                      <small class="message-timestamp text-muted">Hace 2 minutos</small>
-                  </div>
-              </div>
-              -->
-              <!-- Ejemplo de mensaje de IA (comentado) -->
-              <!--
-              <div class="chat-message ai-message mb-2">
-                  <div class="message-bubble">
-                      <p class="mb-0">Esta es una respuesta de la IA.</p>
-                      <img src="/path/to/image.jpg" alt="Imagen de la IA" class="img-fluid mt-2" style="max-height: 150px;">
-                      <small class="message-timestamp text-muted">Hace 1 minuto</small>
-                  </div>
-              </div>
-              -->
-              <p class="text-muted text-center" id="chat-empty-message">El historial de chat aparecerá aquí.</p>
-          </div>
-      
-          <!-- Previsualización de Archivo (opcional) -->
-          <div id="chat-file-preview-area" class="mb-2" style="display: none;">
-              <small>Archivo adjunto:</small>
-              <span id="chat-file-preview-name" class="fw-bold"></span>
-              <button type="button" id="chat-remove-file-button" class="btn btn-sm btn-outline-danger ms-2 py-0 px-1">
-                  <i class="bi bi-x-lg"></i>
-              </button>
-          </div>
-      
-          <!-- Área de Composición de Mensaje -->
-          <form id="chat-form" class="d-flex gap-2 align-items-start">
-              <textarea id="chat-input-text" class="form-control" rows="2" placeholder="Escribe tu pregunta o mensaje..."></textarea>
-              
-              <input type="file" id="chat-input-file" accept="image/*,audio/*" style="display: none;">
-              
-              <button type="button" id="chat-attach-button" class="btn btn-outline-secondary flex-shrink-0" title="Adjuntar archivo" style="height: calc(1.5em * 2 + .75rem + 2px);"> <!-- Ajustar altura al textarea -->
-                  <i class="bi bi-paperclip"></i>
-              </button>
-              
-              <button type="submit" id="chat-send-button" class="btn btn-primary flex-shrink-0" style="height: calc(1.5em * 2 + .75rem + 2px);"> <!-- Ajustar altura al textarea -->
-                  Enviar <i class="bi bi-send"></i>
-              </button>
-          </form>
-          <small class="form-text text-muted mt-1">Puedes adjuntar imágenes o audios.</small>
-      </div>
-      <!-- Nuevo Chat a Medida - Fin -->
 
     </div>
 
     <!-- Columna lateral para la lista de lecciones del curso -->
-    <div class="col-lg-4">
+    <div class="col-lg-4 d-none" id="lesson-list-col">
       <div class="card shadow-sm">
         <div class="card-header">
           <h5 class="mb-0">Lecciones en "<%= lesson.course.title %>"</h5>
@@ -120,7 +118,7 @@
         <% if (lesson.course.lessons && lesson.course.lessons.length > 0) { %>
           <div class="list-group list-group-flush">
             <% lesson.course.lessons.forEach(item => { %>
-              <a href="/courses/<%= lesson.course.id %>/lessons/<%= item.id %>" 
+              <a href="/courses/<%= lesson.course.id %>/lessons/<%= item.id %>"
                  class="list-group-item list-group-item-action <%= item.id === lesson.id ? 'active' : '' %>">
                 <span data-feather="<%= item.id === lesson.id ? 'check-circle' : 'file-text' %>" class="me-2"></span>
                 <%= item.title %>
@@ -133,14 +131,14 @@
           </div>
         <% } %>
       </div>
-       <% if (user && user.role === 'ADMIN') { %>
+      <% if (user && user.role === 'ADMIN') { %>
         <div class="mt-3">
             <a href="/admin/courses/<%= lesson.course.id %>/lessons/<%= lesson.id %>/edit" class="btn btn-outline-secondary w-100">Editar Lección</a>
         </div>
       <% } %>
     </div>
   </div>
-</div> <!-- Cierre de <div class="container-fluid"> -->
+</div>
 
 <!-- Bloque de preparación de datos EJS para el chat -->
 <% 
@@ -226,51 +224,15 @@
     aiSystemPromptData = attrEscape(finalSystemPrompt);
 
     courseDescriptionForAttr = attrEscape(lesson.course.description || "");
-    lessonContentForAttr = attrEscape(lesson.content || "");
+    // lessonContentForAttr = attrEscape(lesson.content || ""); // ELIMINADO: Posible causa del error de renderizado de HTML
     courseRequirementsForAttr = attrEscape(lesson.course.requirements || "");
     courseAdditionalMaterialForAttr = attrEscape(lesson.course.additionalMaterialInfo || "");
   }
 %>
 
-<!-- N8N CHAT ELEMENTS - COMENTADOS PARA MOSTRAR UI DE CHAT A MEDIDA -->
-<!--
-<% if (lesson.course.n8nWebhookUrl) { %>
-  <button id="n8n-chat-toggle-button" class="btn btn-primary rounded-circle shadow" type="button" title="Abrir Asistente AI">
-    <span data-feather="message-circle"></span>
-  </button>
-<% } %>
-
-<div id="n8n-chat-container" class="shadow-lg rounded" 
-  <% if (lesson.course.n8nWebhookUrl) { %>
-    data-webhook-url="<%= webhookUrlData %>"
-    data-course-title="<%= courseTitleData %>"
-    data-lesson-title="<%= lessonTitleData %>"
-    data-initial-message-template="<%= initialMessageTemplateData %>"
-    data-user-id="<%= userIdData %>"
-    data-user-name="<%= userNameData %>"
-    data-user-avatar-url="<%= userAvatarUrlData %>"
-    data-course-id="<%= courseIdData %>"
-    data-lesson-id="<%= lessonIdData %>"
-    data-i18n-title="<%= i18nTitleForChatData %>"
-    data-i18n-subtitle="<%= i18nSubtitleForChatData %>"
-    data-i18n-input-placeholder="<%= i18nInputPlaceholderData %>"
-    data-i18n-get-started="<%= i18nGetStartedData %>"
-    data-ai-system-prompt="<%= aiSystemPromptData %>"
-    data-course-description="<%= courseDescriptionForAttr %>"
-    data-lesson-content="<%= lessonContentForAttr %>"
-    data-course-requirements="<%= courseRequirementsForAttr %>"
-    data-course-additional-material="<%= courseAdditionalMaterialForAttr %>"
-  <% } %>>
-  <% if (!lesson.course.n8nWebhookUrl) { %>
-    
-    
-  <% } %>
-</div>
--->
-<!-- FIN N8N CHAT ELEMENTS COMENTADOS -->
 
 <style>
-  .lesson-content img {
+  /* .lesson-content img {
     max-width: 100%;
     height: auto;
     border-radius: 0.25rem;
@@ -283,328 +245,141 @@
     overflow-x: auto;
   }
   .lesson-content code {
-    color: #d63384; /* Bootstrap pink for inline code */
+    color: #d63384;
   }
   .lesson-content pre code {
-    color: inherit; /* Reset color for code blocks */
-  }
+    color: inherit; 
+  } */
 
-/* --- INICIO ESTILOS N8N COMENTADOS --- */
-/*
-  /* Estilos para personalizar el chat de n8n usando variables CSS */
-  :root {
-    --chat-window-width: 380px; /* Ancho de la ventana del chat */
-    --chat-window-height: calc(100vh - 160px); /* Alto de la ventana, ej. 100% de la altura visible menos un margen */
-    --chat-color-primary: #0d6efd; /* Azul Bootstrap como primario */
-    --chat-color-secondary: #6c757d;
-    --chat-header-background: #343a40; /* Header oscuro */
-    --chat-header-color: #fff;      /* Texto del header blanco */
-    
-    /* Ajustes para el tamaño de fuente del encabezado del chat */
-    --chat-heading-font-size: 1.1rem; 
-    --chat-header-subtitle-font-size: 0.85rem; 
-    
-    /* Intento de variable para el tamaño de fuente de los mensajes, si la biblioteca la usa */
-    /* --chat-message-font-size: 1rem; */ /* Descomentar y ajustar si se conoce la variable correcta */
-    /* Puedes añadir más variables CSS de la documentación de @n8n/chat aquí */
-  }
-
-  /* Estilo general para aumentar el tamaño de fuente dentro del chat si no hay variable CSS */
-  /* Esto es un selector genérico, podría necesitar ser más específico después de inspeccionar */
-  #n8n-chat-container .n8n-chat__message-text, /* Clase común en algunos widgets de chat para el texto del mensaje */
-  #n8n-chat-container .message-content, /* Otra clase posible */
-  #n8n-chat-container p /* Un selector más general si los mensajes son párrafos */
-  { 
-    font-size: 1rem !important; /* O 16px. Ajustar según sea necesario. !important para forzar. */
-    line-height: 1.5 !important;
-  }
-
-  #n8n-chat-toggle-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1055; /* Encima de la ventana del chat */
-    width: 56px;
-    height: 56px;
-    padding: 0;
-    display: none; /* Oculto por defecto, se muestra con JS si hay webhook */
-  }
-  #n8n-chat-toggle-button span {
-    width: 28px;
-    height: 28px;
-  }
-
-  #n8n-chat-container {
-    position: fixed;
-    bottom: 90px; /* Espacio para el botón de activación */
-    right: 20px;
-    width: var(--chat-window-width);
-    max-height: var(--chat-window-height); /* Usar max-height para que no se desborde */
-    z-index: 1050;
-    display: none; /* Oculto por defecto */
-    background-color: #fff; /* Fondo por si el widget no lo cubre todo */
-    border-radius: 0.375rem; /* Bootstrap's default border-radius */
-    overflow: hidden; /* Para que el contenido del widget no se desborde del contenedor redondeado */
-  }
-*/
-/* --- FIN N8N STYLES COMENTADOS --- */
-</style>
-
-
-<!-- N8N SCRIPTS COMENTADOS -->
-<!--
-<script>
-  // Feather icons replacement
-  if (typeof feather !== 'undefined') {
-    feather.replace();
-  }
-
-  // Lógica para el botón de chat flotante
-  document.addEventListener('DOMContentLoaded', () => {
-    const chatToggleButton = document.getElementById('n8n-chat-toggle-button');
-    const chatWindowContainer = document.getElementById('n8n-chat-container');
-
-    if (chatToggleButton && chatWindowContainer) {
-      // Solo mostrar el botón si el chat de n8n está configurado (tiene webhook en sus data-attributes)
-      if (chatWindowContainer.dataset.webhookUrl) {
-        chatToggleButton.style.display = 'flex'; // Usar flex para centrar el ícono
-        chatToggleButton.style.alignItems = 'center';
-        chatToggleButton.style.justifyContent = 'center';
-      } else {
-        chatToggleButton.style.display = 'none';
-      }
-
-      chatToggleButton.addEventListener('click', () => {
-        const isChatVisible = chatWindowContainer.style.display === 'block';
-        chatWindowContainer.style.display = isChatVisible ? 'none' : 'block';
-        // Cambiar ícono del botón (opcional)
-        chatToggleButton.innerHTML = isChatVisible ? '<span data-feather="message-circle"></span>' : '<span data-feather="x"></span>';
-        if (typeof feather !== 'undefined') {
-          feather.replace(); // Re-aplicar feather icons
-        }
-      });
-    }
-  });
-</script>
-
-<% if (lesson.course.n8nWebhookUrl) { %>
-<script type="module">
-  // import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-  // const chatContainer = document.getElementById('n8n-chat-container');
-  
-  // console.log("--- n8n Chat Data Attributes ---");
-  // const webhookUrl = String(chatContainer.dataset.webhookUrl || "");
-  // console.log("webhookUrl:", webhookUrl, typeof webhookUrl);
-  // const courseTitle = String(chatContainer.dataset.courseTitle || "este curso");
-  // console.log("courseTitle:", courseTitle, typeof courseTitle);
-  // const lessonTitle = String(chatContainer.dataset.lessonTitle || "actual"); // Usado para el mensaje inicial
-  // console.log("lessonTitle (for initial message):", lessonTitle, typeof lessonTitle);
-  // const initialMessageTemplate = String(chatContainer.dataset.initialMessageTemplate || "");
-  // console.log("initialMessageTemplate:", initialMessageTemplate, typeof initialMessageTemplate);
-  
-  // const userId = String(chatContainer.dataset.userId || "");
-  // console.log("userId:", userId, typeof userId);
-  // const userName = String(chatContainer.dataset.userName || "Usuario");
-  // console.log("userName:", userName, typeof userName);
-  // const userAvatarUrl = String(chatContainer.dataset.userAvatarUrl || "");
-  // console.log("userAvatarUrl:", userAvatarUrl, typeof userAvatarUrl);
-  
-  // const courseId = String(chatContainer.dataset.courseId || "");
-  // console.log("courseId:", courseId, typeof courseId);
-  // const lessonId = String(chatContainer.dataset.lessonId || "");
-  // console.log("lessonId:", lessonId, typeof lessonId);
-
-  // // Estos son los que ahora contienen los nombres del curso/lección para el encabezado del chat
-  // const i18nChatHeaderTitle = String(chatContainer.dataset.i18nTitle || "Asistente del Curso");
-  // console.log("i18nChatHeaderTitle:", i18nChatHeaderTitle, typeof i18nChatHeaderTitle);
-  // const i18nChatHeaderSubtitle = String(chatContainer.dataset.i18nSubtitle || "Pregúntame sobre esta lección");
-  // console.log("i18nChatHeaderSubtitle:", i18nChatHeaderSubtitle, typeof i18nChatHeaderSubtitle);
-  // const i18nInputPlaceholder = String(chatContainer.dataset.i18nInputPlaceholder || "Escribe tu pregunta...");
-  // console.log("i18nInputPlaceholder:", i18nInputPlaceholder, typeof i18nInputPlaceholder);
-  // const i18nGetStarted = String(chatContainer.dataset.i18nGetStarted || "Nueva Conversación");
-  // console.log("i18nGetStarted:", i18nGetStarted, typeof i18nGetStarted);
-  // const aiSystemPrompt = String(chatContainer.dataset.aiSystemPrompt || "");
-  // console.log("aiSystemPrompt:", aiSystemPrompt, typeof aiSystemPrompt);
-  // const courseDescription = String(chatContainer.dataset.courseDescription || "");
-  // console.log("courseDescription (length):", courseDescription.length, typeof courseDescription); 
-  // const lessonContent = String(chatContainer.dataset.lessonContent || "");
-  // console.log("lessonContent (length):", lessonContent.length, typeof lessonContent); 
-  // const courseRequirements = String(chatContainer.dataset.courseRequirements || "");
-  // console.log("courseRequirements (length):", courseRequirements.length, typeof courseRequirements);
-  // const courseAdditionalMaterial = String(chatContainer.dataset.courseAdditionalMaterial || "");
-  // console.log("courseAdditionalMaterial (length):", courseAdditionalMaterial.length, typeof courseAdditionalMaterial);
-  // console.log("-----------------------------");
-
-  // let finalInitialMessage = "¡Hola! ¿En qué puedo ayudarte hoy?"; 
-
-  // if (initialMessageTemplate) {
-  //   finalInitialMessage = initialMessageTemplate
-  //                           .replace('{courseTitle}', courseTitle)
-  //                           .replace('{lessonTitle}', lessonTitle);
-  // }
-  // console.log("finalInitialMessage:", finalInitialMessage, typeof finalInitialMessage);
-  
-  // if (webhookUrl && webhookUrl !== "null" && webhookUrl !== "undefined") {
-  //   const chatConfig = {
-  //     webhookUrl: webhookUrl,
-  //     target: chatContainer, 
-  //     mode: 'fullscreen', 
-  //     defaultLanguage: 'es',
-  //     loadPreviousSession: true, 
-  //     showWelcomeScreen: false, 
-      
-  //     allowFileUploads: true, 
-  //     allowedFilesMimeTypes: 'image/*,audio/*', 
-
-  //     chatId: undefined, 
-  //     user: undefined,   
-  //     metadata: {},      
-  //     i18n: {}           
-  //   };
-
-  //   if (userId && userId !== "undefined" && userId !== "null" && userId !== "") {
-  //     chatConfig.chatId = userId; 
-  //     chatConfig.user = { 
-  //       id: userId,
-  //       name: userName,
-  //       avatarUrl: userAvatarUrl
-  //     };
-  //   }
-    
-  //   chatConfig.metadata = {
-  //     courseId: courseId, 
-  //     lessonId: lessonId  
-  //   };
-
-  //   if (userId && userId !== "undefined" && userId !== "null" && userId !== "") {
-  //     chatConfig.metadata.userId = userId;
-  //   }
-
-  //   if (aiSystemPrompt) {
-  //     chatConfig.metadata.aiSystemPrompt = aiSystemPrompt;
-  //   }
-
-  //   if (courseDescription) {
-  //     chatConfig.metadata.courseDescription = courseDescription;
-  //   }
-
-  //   if (lessonContent) {
-  //     chatConfig.metadata.lessonContent = lessonContent;
-  //   }
-  //   if (courseRequirements) {
-  //     chatConfig.metadata.courseRequirements = courseRequirements;
-  //   }
-  //   if (courseAdditionalMaterial) {
-  //     chatConfig.metadata.courseAdditionalMaterial = courseAdditionalMaterial;
-  //   }
-
-  //   if (i18nChatHeaderTitle || i18nChatHeaderSubtitle || i18nInputPlaceholder || i18nGetStarted) {
-  //     chatConfig.i18n = {
-  //       es: { 
-  //         title: i18nChatHeaderTitle,
-  //         subtitle: i18nChatHeaderSubtitle,
-  //         inputPlaceholder: i18nInputPlaceholder,
-  //         getStarted: i18nGetStarted 
-  //       }
-  //     };
-  //   }
-    
-  //   console.log("--- n8n createChat Config Object ---");
-  //   console.log("Full chatConfig:", JSON.stringify(chatConfig, null, 2));
-  //   if(chatConfig.user) console.log("chatConfig.user:", JSON.stringify(chatConfig.user, null, 2));
-  //   if(chatConfig.metadata) console.log("chatConfig.metadata:", JSON.stringify(chatConfig.metadata, null, 2));
-  //   if(chatConfig.i18n) console.log("chatConfig.i18n:", JSON.stringify(chatConfig.i18n, null, 2));
-  //   if(chatConfig.initialMessages) console.log("chatConfig.initialMessages:", JSON.stringify(chatConfig.initialMessages, null, 2));
-  //   console.log("----------------------------------");
-
-  //   try {
-  //     // createChat(chatConfig);
-  //     const loadingMessage = chatContainer.querySelector('p.text-muted');
-  //     if (loadingMessage) {
-  //       loadingMessage.remove();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error al inicializar n8n Chat:", error);
-  //     const loadingMessage = chatContainer.querySelector('p.text-muted');
-  //     if (loadingMessage) {
-  //       loadingMessage.innerHTML = '<div class="alert alert-danger">Error al cargar el asistente AI.</div>';
-  //     } else if (!chatContainer.querySelector('div.alert')) {
-  //       chatContainer.innerHTML = '<div class="alert alert-danger">Error al cargar el asistente AI.</div>';
-  //     }
-  //   }
-    
-  // } else {
-  //   console.warn("n8n Webhook URL no está configurada o es inválida. No se cargará el chat.");
-  //   const loadingMessage = chatContainer.querySelector('p.text-muted');
-  //   if (loadingMessage) {
-  //     loadingMessage.remove();
-  //   }
-  //   if (!chatContainer.querySelector('div.alert-info') && !chatContainer.hasChildNodes()) { 
-  //       chatContainer.innerHTML = '<div class="alert alert-info">El asistente AI para este curso no está configurado actualmente.</div>';
-  //   }
-  // }
-</script>
-<% } %>
--->
-<!-- FIN N8N SCRIPTS COMENTADOS -->
-
-<!-- Estilos para el Chat a Medida -->
-<!-- Es recomendable mover estos estilos a un archivo CSS dedicado más adelante -->
-<!-- Para usar los iconos 'bi bi-paperclip', 'bi bi-send', 'bi bi-x-lg', asegúrate de tener Bootstrap Icons vinculado en tu proyecto. -->
-<!-- Ejemplo: <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
-<style>
   #chat-messages-area .chat-message {
-      padding: 8px 12px;
+      padding: 8px;
       border-radius: 15px;
-      max-width: 75%;
+      max-width:60%;
       clear: both;
-      margin-bottom: 0.5rem; 
+      /* margin-bottom: 0.5rem; */
   }
   #chat-messages-area .user-message {
-      background-color: #0d6efd; /* Azul Bootstrap */
+      background-color: #0d6efd; 
       color: white;
-      margin-left: auto; /* Alinea a la derecha */
-      border-bottom-right-radius: 5px;
+      margin-left: auto;
+      /* border-bottom-right-radius: 5px; */
   }
   #chat-messages-area .ai-message {
-      background-color: #e9ecef; /* Gris claro Bootstrap */
+      background-color: #e9ecef;
       color: #212529;
-      margin-right: auto; /* Alinea a la izquierda */
-      border-bottom-left-radius: 5px;
+      margin-right: auto; 
+      /* border-bottom-left-radius: 5px; */
   }
   #chat-messages-area .chat-message p {
-      margin-bottom: 0.25rem;
+      /* margin-bottom: 0.25rem; */
       word-wrap: break-word; 
   }
   #chat-messages-area .chat-message img,
   #chat-messages-area .chat-message audio {
       max-width: 100%;
       border-radius: 10px;
-      margin-top: 5px;
+      /* margin-top: 5px; */
   }
   #chat-messages-area .message-timestamp {
       font-size: 0.75em;
       display: block;
       text-align: right; 
+      color: #d63384;
   }
-  #chat-messages-area .user-message .message-timestamp {
-      /* color: #cce5ff; */ /* Un color más claro para el timestamp del usuario */
-  }
+
   #chat-messages-area .ai-message .message-timestamp {
-      text-align: left;
-      color: #6c757d;
+    font-size: 0.75em;
+    display: block;
+    text-align: left;
+    color: #d63384;
   }
   #chat-file-preview-name {
     font-style: italic;
+  }
+
+  .tts-highlight {
+    background-color: #ffec8a; /* Amarillo suave */
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    margin: -0.25rem -0.5rem; /* Compensar el padding para no afectar el layout */
+    transition: background-color 0.3s ease-in-out;
+  }
+
+  /* Estilos para el chat en pantalla completa */
+  .chat-fullscreen {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  .chat-fullscreen .accordion-collapse {
+    height: calc(100% - 58px) !important; /* 58px es la altura aprox del botón del acordeón */
+    max-height: calc(100% - 58px) !important;
+  }
+  .chat-fullscreen .accordion-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-fullscreen #lesson-chat-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-fullscreen #chat-messages-area {
+    flex-grow: 1;
+    height: auto !important;
   }
 </style>
 
 <!-- Placeholder para el JavaScript del Chat a Medida -->
 <script id="custom-chat-script">
   document.addEventListener('DOMContentLoaded', () => {
-    // Lógica del chat a medida irá aquí
-    console.log("Chat a medida UI lista. JS por implementar.");
+    const socket = io();
+
+    const lessonId = document.getElementById('lesson-chat-container').dataset.lessonId;
+    const userId = document.getElementById('lesson-chat-container').dataset.userId;
+    const courseId = document.getElementById('lesson-chat-container').dataset.courseId;
+
+    socket.emit('joinRoom', { lessonId });
+
+    const fetchChatHistory = async () => {
+      try {
+        const response = await fetch(`/chat/history/${lessonId}`);
+        const messages = await response.json();
+        if (chatEmptyMessage && messages.length > 0) {
+          chatEmptyMessage.style.display = 'none';
+        }
+        messages.forEach(message => {
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('chat-message', message.userId === userId ? 'user-message' : 'ai-message', 'mb-2');
+          
+          // Parse markdown content
+          const parsedContent = marked.parse(message.content || '');
+          let messageHTML = `<div class="message-bubble">${parsedContent}`;
+          
+          // TODO: Handle file display
+          messageHTML += `<small class="message-timestamp text-muted">${new Date(message.createdAt).toLocaleTimeString()}</small></div>`;
+          messageDiv.innerHTML = messageHTML;
+          
+          // Highlight code blocks within the new message
+          messageDiv.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+          });
+
+          chatMessagesArea.appendChild(messageDiv);
+        });
+        chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+      } catch (error) {
+        console.error('Error fetching chat history:', error);
+      }
+    };
+
+    fetchChatHistory();
 
     const chatForm = document.getElementById('chat-form');
     const chatInputText = document.getElementById('chat-input-text');
@@ -646,55 +421,139 @@
 
     // Ejemplo: Manejar envío de formulario (solo UI por ahora)
     if (chatForm && chatInputText && chatMessagesArea) {
-      chatForm.addEventListener('submit', (e) => {
+      // Listener para la tecla Enter en el textarea
+      chatInputText.addEventListener('keydown', (e) => {
+        // Si se presiona Enter pero no Shift, se envía el formulario.
+        // Esto permite usar Shift+Enter para crear nuevas líneas.
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault(); // Prevenir el salto de línea por defecto
+          chatForm.requestSubmit(); // Enviar el formulario
+        }
+      });
+
+      chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const messageText = chatInputText.value.trim();
         const attachedFile = chatInputFile.files[0];
 
         if (messageText || attachedFile) {
-          if (chatEmptyMessage) {
-            chatEmptyMessage.style.display = 'none'; // Ocultar mensaje de historial vacío
-          }
-          // Lógica para mostrar mensaje del usuario en la UI (temporal)
-          const userMessageDiv = document.createElement('div');
-          userMessageDiv.classList.add('chat-message', 'user-message', 'mb-2');
-          
-          let messageHTML = `<div class="message-bubble"><p class="mb-0">${messageText || 'Archivo adjunto'}</p>`;
-          if (attachedFile && attachedFile.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-              messageHTML += `<img src="${event.target.result}" alt="Vista previa" class="img-fluid mt-2" style="max-height: 150px;">`;
-              messageHTML += `<small class="message-timestamp text-muted">${new Date().toLocaleTimeString()}</small></div>`;
-              userMessageDiv.innerHTML = messageHTML;
-              chatMessagesArea.appendChild(userMessageDiv);
-              chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+          let fileUrl = null;
+          let fileType = null;
+
+          if (attachedFile) {
+            const formData = new FormData();
+            formData.append('file', attachedFile);
+
+            try {
+              const response = await fetch('/chat/upload', {
+                method: 'POST',
+                body: formData,
+              });
+
+              if (response.ok) {
+                const result = await response.json();
+                fileUrl = result.fileUrl;
+                fileType = result.fileType;
+              } else {
+                console.error('File upload failed');
+                return;
+              }
+            } catch (error) {
+              console.error('Error uploading file:', error);
+              return;
             }
-            reader.readAsDataURL(attachedFile);
-          } else if (attachedFile) {
-             messageHTML += `<small class="text-white-50 d-block mt-1"><em>Archivo: ${attachedFile.name} (${(attachedFile.size / 1024).toFixed(1)} KB)</em></small>`;
-             messageHTML += `<small class="message-timestamp text-muted">${new Date().toLocaleTimeString()}</small></div>`;
-             userMessageDiv.innerHTML = messageHTML;
-             chatMessagesArea.appendChild(userMessageDiv);
-             chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
-          } else {
-            messageHTML += `<small class="message-timestamp text-muted">${new Date().toLocaleTimeString()}</small></div>`;
-            userMessageDiv.innerHTML = messageHTML;
-            chatMessagesArea.appendChild(userMessageDiv);
-            chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
           }
-          
+
+          const messageData = {
+            content: messageText,
+            userId,
+            courseId,
+            lessonId,
+            fileUrl,
+            fileType,
+          };
+          socket.emit('sendMessage', messageData);
           chatInputText.value = '';
           chatInputFile.value = '';
           chatFilePreviewArea.style.display = 'none';
           chatFilePreviewName.textContent = '';
-          // Aquí iría la llamada a la API para enviar el mensaje al backend
-          console.log("Mensaje enviado (UI):", messageText, attachedFile ? attachedFile.name : '');
         }
       });
     }
+
+    socket.on('newMessage', (message) => {
+      if (chatEmptyMessage) {
+        chatEmptyMessage.style.display = 'none'; // Ocultar mensaje de historial vacío
+      }
+      const messageDiv = document.createElement('div');
+      const isCurrentUser = message.userId === userId;
+      messageDiv.classList.add('chat-message', isCurrentUser ? 'user-message' : 'ai-message', 'mb-2');
+      
+      // Parse markdown content
+      const parsedContent = marked.parse(message.content || '');
+      let messageHTML = `<div class="message-bubble">${parsedContent}`;
+
+      if (message.fileUrl) {
+        if (message.fileType.startsWith('image/')) {
+          messageHTML += `<img src="${message.fileUrl}" alt="Imagen adjunta" class="img-fluid mt-2" style="max-height: 150px;">`;
+        } else if (message.fileType.startsWith('audio/')) {
+          messageHTML += `<audio controls src="${message.fileUrl}" class="mt-2"></audio>`;
+        }
+      }
+      messageHTML += `<small class="message-timestamp text-muted">${new Date(message.createdAt).toLocaleTimeString()}</small></div>`;
+      messageDiv.innerHTML = messageHTML;
+
+      // Highlight code blocks within the new message
+      messageDiv.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+      });
+
+      chatMessagesArea.appendChild(messageDiv);
+      chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+    });
     // Asegurar que Feather Icons se reemplacen si se usan en los mensajes dinámicos (poco probable aquí)
     if (typeof feather !== 'undefined') {
         feather.replace();
     }
+
+    // Lógica para el chat en pantalla completa
+    const fullscreenBtn = document.getElementById('chat-fullscreen-btn');
+    const fullscreenIcon = document.getElementById('chat-fullscreen-icon');
+    const chatAccordion = document.getElementById('chatAccordion');
+    
+    if (fullscreenBtn && chatAccordion && fullscreenIcon) {
+      fullscreenBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evita que el acordeón se colapse/expanda
+        
+        document.body.style.overflow = chatAccordion.classList.contains('chat-fullscreen') ? 'auto' : 'hidden';
+        chatAccordion.classList.toggle('chat-fullscreen');
+        
+        // Cambiar el ícono
+        if (chatAccordion.classList.contains('chat-fullscreen')) {
+          fullscreenIcon.classList.remove('bi-fullscreen');
+          fullscreenIcon.classList.add('bi-fullscreen-exit');
+          fullscreenBtn.setAttribute('title', 'Salir de Pantalla Completa');
+        } else {
+          fullscreenIcon.classList.remove('bi-fullscreen-exit');
+          fullscreenIcon.classList.add('bi-fullscreen');
+          fullscreenBtn.setAttribute('title', 'Pantalla Completa');
+        }
+      });
+    }
+
+    // Lógica para Ocultar/Mostrar la lista de lecciones
+    const toggleBtn = document.getElementById('toggle-lessons-btn');
+    const lessonCol = document.getElementById('lesson-content-col');
+    const listCol = document.getElementById('lesson-list-col');
+
+    if (toggleBtn && lessonCol && listCol) {
+      toggleBtn.addEventListener('click', () => {
+        listCol.classList.toggle('d-none');
+        lessonCol.classList.toggle('col-md-8');
+        lessonCol.classList.toggle('col-md-12');
+      });
+    }
   });
 </script>
+
+<%- include('partials/_tts-script', { contentSelector: '.lesson-content' }) %>

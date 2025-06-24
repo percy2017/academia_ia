@@ -45,10 +45,10 @@ export const getAllCourses = async (req, res) => {
       }
     });
     res.render('dashboard', { 
-      title: 'Catálogo de Cursos', // Título más apropiado para la vista pública
+      title: 'Catálogo de Cursos',
       courses,
-      user: req.session.user,
-      layout: './layouts/main'
+      user: req.session.user
+      // El layout se determina automáticamente en main.ejs
     });
   } catch (error) {
     console.error('Error fetching courses:', error);
@@ -113,11 +113,28 @@ export const getCourseById = async (req, res) => {
     }
     // La descripción principal ya se guarda como HTML sanitizado desde el adminController
     
+    // --- Lógica de Suscripción ---
+    let hasActiveSubscription = false;
+    if (req.session.user) {
+      const activeSubscription = await prisma.userSubscription.findFirst({
+        where: {
+          userId: req.session.user.id,
+          isActive: true,
+          endDate: {
+            gte: new Date(), // Comprobar que la fecha de fin es hoy o en el futuro
+          },
+        },
+      });
+      hasActiveSubscription = !!activeSubscription;
+    }
+    // --- Fin Lógica de Suscripción ---
+
     res.render('courseDetail', {
       title: course.title,
       course,
       user: req.session.user,
-      layout: './layouts/main'
+      hasActiveSubscription // Pasar la nueva variable a la vista
+      // El layout se determina automáticamente en main.ejs
     });
   } catch (error) {
     console.error(`Error fetching course ${req.params.courseId}:`, error);
@@ -158,6 +175,28 @@ export const getLessonById = async (req, res) => {
     if (lesson.course.status !== 'PUBLISHED' && !(req.session.user && req.session.user.role === 'ADMIN')) {
         return res.status(404).send('Lección no disponible.');
     }
+
+    // --- Lógica de Suscripción para Acceso a Lecciones ---
+    let hasActiveSubscription = false;
+    if (req.session.user) {
+      const activeSubscription = await prisma.userSubscription.findFirst({
+        where: {
+          userId: req.session.user.id,
+          isActive: true,
+          endDate: {
+            gte: new Date(),
+          },
+        },
+      });
+      hasActiveSubscription = !!activeSubscription;
+    }
+
+    // Si el usuario no es ADMIN y no tiene suscripción activa, no puede ver la lección
+    if (req.session.user?.role !== 'ADMIN' && !hasActiveSubscription) {
+      req.flash('error_msg', 'Necesitas una suscripción activa para ver esta lección.');
+      return res.redirect('/subscription-plans');
+    }
+    // --- Fin Lógica de Suscripción ---
 
     // Encontrar lección anterior y siguiente
     let previousLesson = null;
@@ -231,8 +270,9 @@ export const getLessonById = async (req, res) => {
       previousLesson,
       nextLesson,
       user: req.session.user,
-      layout: './layouts/main',
-      hideMainSidebar: true // Nueva variable para la vista de lección
+      marked, // Pasar la función marked a la vista
+      // El layout se determina automáticamente en main.ejs
+      hideMainSidebar: true // Esta variable sigue siendo útil para ocultar el sidebar en la vista de lección
     });
   } catch (error) {
     console.error(`Error fetching lesson ${req.params.lessonId}:`, error);

@@ -1,0 +1,108 @@
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Lógica para Texto a Voz (TTS) con resaltado por bloques
+    const playBtn = document.getElementById('tts-play-btn');
+    const pauseBtn = document.getElementById('tts-pause-btn');
+    const stopBtn = document.getElementById('tts-stop-btn');
+    const contentEl = document.querySelector('<%= contentSelector %>');
+
+    if ('speechSynthesis' in window && contentEl && playBtn) {
+      let blocksQueue = [];
+      let currentUtterance = null;
+
+      const resetState = () => {
+        speechSynthesis.cancel();
+        blocksQueue = [];
+        currentUtterance = null;
+        const highlighted = contentEl.querySelector('.tts-highlight');
+        if (highlighted) {
+          highlighted.classList.remove('tts-highlight');
+        }
+        playBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+        stopBtn.style.display = 'none';
+      };
+
+      const playNextBlock = () => {
+        const highlighted = contentEl.querySelector('.tts-highlight');
+        if (highlighted) {
+          highlighted.classList.remove('tts-highlight');
+        }
+
+        if (blocksQueue.length === 0) {
+          resetState();
+          return;
+        }
+
+        const block = blocksQueue.shift();
+        const textToSpeak = block.textContent.trim();
+
+        if (textToSpeak) {
+          block.classList.add('tts-highlight');
+          block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+          currentUtterance.lang = 'es-ES';
+          currentUtterance.rate = 1;
+          currentUtterance.onend = playNextBlock;
+          
+          speechSynthesis.speak(currentUtterance);
+        } else {
+          playNextBlock();
+        }
+      };
+
+      playBtn.addEventListener('click', () => {
+        if (speechSynthesis.paused) {
+          speechSynthesis.resume();
+        } else {
+          const children = contentEl.children;
+          for (let i = 0; i < children.length; i++) {
+            const child = children[i];
+            if (child.tagName.toLowerCase() !== 'pre') {
+              if (child.tagName.toLowerCase() === 'ul' || child.tagName.toLowerCase() === 'ol') {
+                const listItems = child.querySelectorAll('li');
+                listItems.forEach(li => blocksQueue.push(li));
+              } else {
+                blocksQueue.push(child);
+              }
+            }
+          }
+          playNextBlock();
+        }
+        playBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        stopBtn.style.display = 'inline-block';
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        speechSynthesis.pause();
+        playBtn.style.display = 'inline-block';
+        pauseBtn.style.display = 'none';
+      });
+
+      stopBtn.addEventListener('click', () => {
+        resetState();
+      });
+
+      window.addEventListener('beforeunload', () => {
+        speechSynthesis.cancel();
+      });
+
+    } else {
+      const ttsControls = document.getElementById('tts-controls');
+      if(ttsControls) {
+        ttsControls.style.display = 'none';
+      }
+    }
+  });
+</script>
+<style>
+  .tts-highlight {
+    background-color: #ffec8a;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    margin: -0.25rem -0.5rem;
+    transition: background-color 0.3s ease-in-out;
+  }
+</style>

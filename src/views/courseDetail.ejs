@@ -7,28 +7,32 @@
   </nav>
 
   <div class="row">
-    <div class="col-md-8">  
-      <h1 class="mb-3"><%= course.title %></h1>
-      <% if (course.imageUrl) { %>
-        <img src="<%= course.imageUrl %>" class="img-fluid rounded mb-3" alt="<%= course.title %>" style="max-height: 400px; width: 100%; object-fit: cover;">
-      <% } %>
-      <div class="lead course-description-content mb-3"><%- course.description %></div>
-      
-      <hr class="my-4">
-
-      <h3>Lecciones del Curso</h3>
-      <% if (course.lessons && course.lessons.length > 0) { %>
-        <div class="list-group mb-4">
-          <% course.lessons.forEach(lesson => { %>
-            <a href="/courses/<%= course.slug || course.id %>/lessons/<%= lesson.id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-              <span><span data-feather="file-text" class="me-2"></span><%= lesson.title %></span>
-              <small class="text-muted">Lección <%= lesson.order %></small>
-            </a>
-          <% }); %>
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <%- include('partials/_content-header', { title: course.title, showTTS: true, showLessonToggle: false }) %>
+        <div class="card-body">
+          <% if (course.imageUrl) { %>
+            <img src="<%= course.imageUrl %>" class="img-fluid rounded mb-3" alt="<%= course.title %>" style="max-height: 400px; width: 100%; object-fit: cover;">
+          <% } %>
+          <div class="lead course-description-content mb-3"><%- course.description %></div>
+          
+          <hr class="my-4">
+    
+          <h3>Lecciones del Curso</h3>
+          <% if (course.lessons && course.lessons.length > 0) { %>
+            <div class="list-group mb-4">
+              <% course.lessons.forEach(lesson => { %>
+                <a href="/courses/<%= course.slug || course.id %>/lessons/<%= lesson.id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                  <span><span data-feather="file-text" class="me-2"></span><%= lesson.title %></span>
+                  <small class="text-muted">Lección <%= lesson.order %></small>
+                </a>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <p>Este curso aún no tiene lecciones.</p>
+          <% } %>
         </div>
-      <% } else { %>
-        <p>Este curso aún no tiene lecciones.</p>
-      <% } %>
+      </div>
     </div>
     <div class="col-md-4">
       <div class="card sticky-top" style="top: 20px;">
@@ -37,7 +41,25 @@
 
           <!-- Sección de precios eliminada -->
           
-          <button class="btn btn-success btn-lg w-100 mb-3">Inscribirse al Curso (Próximamente)</button> <!-- Este botón podría necesitar lógica de suscripción más adelante -->
+          <% if (user) { %>
+            <% if (hasActiveSubscription) { %>
+              <% if (course.lessons && course.lessons.length > 0) { %>
+                <a href="/courses/<%= course.slug || course.id %>/lessons/<%= course.lessons[0].id %>" class="btn btn-primary btn-lg w-100 mb-3">
+                  <span data-feather="play-circle" class="me-2"></span>Empezar Curso
+                </a>
+              <% } else { %>
+                <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>Lecciones no disponibles</button>
+              <% } %>
+            <% } else { %>
+              <a href="/subscription-plans" class="btn btn-success btn-lg w-100 mb-3">
+                <span data-feather="star" class="me-2"></span>Suscríbete para Acceder
+              </a>
+            <% } %>
+          <% } else { %>
+            <a href="/auth/login" class="btn btn-success btn-lg w-100 mb-3">
+              <span data-feather="log-in" class="me-2"></span>Inicia Sesión para Inscribirte
+            </a>
+          <% } %>
           
           <ul class="list-unstyled text-muted">
             <% if (course.level) { %>
@@ -109,3 +131,5 @@
     feather.replace();
   }
 </script>
+
+<%- include('partials/_tts-script', { contentSelector: '.course-description-content' }) %>

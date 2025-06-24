@@ -11,8 +11,7 @@ export const listUsers = async (req, res) => {
         res.render('admin/users/index', {
             users,
             pageTitle: 'Administración de Usuarios', // Para el título de la página
-            messages: req.flash(),
-            layout: 'layouts/main'
+            messages: req.flash()
         });
     } catch (error) {
         console.error("Error fetching users for admin:", error);
@@ -55,8 +54,7 @@ export const renderEditUserForm = async (req, res) => {
             availableRoles,
             formTitle: `Editar Usuario: ${user.name || user.email}`,
             actionUrl: `/admin/users/${user.id}?_method=PUT`,
-            messages: req.flash(),
-            layout: 'layouts/main'
+            messages: req.flash()
         });
     } catch (error) {
         console.error(`Error fetching user ${id} for edit:`, error);
@@ -187,8 +185,7 @@ export const updateUser = async (req, res) => {
             availableRoles,
             formTitle: `Editar Usuario: ${user ? (user.name || user.email) : id}`,
             actionUrl: `/admin/users/${id}?_method=PUT`,
-            messages: req.flash(), // Mostrar el error_msg que acabamos de poner
-            layout: 'layouts/main'
+            messages: req.flash() // Mostrar el error_msg que acabamos de poner
         });
     }
 };

@@ -123,6 +123,20 @@ async function main() {
   });
   console.log(`Upserted student user: student@academiaai.com`);
 
+  // Create a dedicated user for the AI agent
+  await prisma.user.upsert({
+    where: { id: 'ai-agent' },
+    update: {},
+    create: {
+      id: 'ai-agent',
+      email: 'ai-agent@academiaai.com',
+      name: 'MentorIA',
+      password: '', // No password needed for the AI agent
+      role: Role.STUDENT, // Or a new role e.g., 'AGENT'
+    },
+  });
+  console.log('Upserted AI Agent user.');
+
   // 2. Upsert Tags
   const tagWebDev = await prisma.tag.upsert({ where: { slug: 'desarrollo-web' }, update: {name: 'Desarrollo Web'}, create: { name: 'Desarrollo Web', slug: 'desarrollo-web' } });
   const tagDevOps = await prisma.tag.upsert({ where: { slug: 'devops' }, update: {}, create: { name: 'DevOps', slug: 'devops' } });
@@ -174,7 +188,9 @@ async function main() {
     requirements: "Computadora con acceso a internet. Se recomiendan conocimientos básicos de línea de comandos, pero no son estrictamente obligatorios.",
     additionalMaterialInfo: commonCourseMaterial,
     aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', dockerCourseTitle),
-    n8nWebhookUrl: 'https://n8n.percyalvarez.com/webhook/docker',
+    aiProvider: 'openai',
+    aiModelName: 'gpt-4o',
+    aiTemperature: 0.7,
     tags: { connect: [{ slug: 'docker' }, { slug: 'devops' }] },
   };
   await upsertCourseWithLessonsAndQuiz(dockerCourseTitle, dockerCoursePayload, dockerLessons);
@@ -213,7 +229,9 @@ async function main() {
     requirements: "Computadora con acceso a internet, editor de código (VS Code recomendado) y un entorno de desarrollo PHP local (XAMPP, WAMP, MAMP o Docker).",
     additionalMaterialInfo: commonCourseMaterial,
     aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', phpCourseTitle),
-    n8nWebhookUrl: 'https://n8n.percyalvarez.com/webhook/php',
+    aiProvider: 'openai',
+    aiModelName: 'gpt-4o',
+    aiTemperature: 0.7,
     tags: { connect: [{ slug: 'php' }, { slug: 'desarrollo-web' }, { slug: 'backend' }] },
   };
   await upsertCourseWithLessonsAndQuiz(phpCourseTitle, phpCoursePayload, phpLessons);
@@ -252,7 +270,9 @@ async function main() {
     requirements: "Computadora con acceso a internet, editor de código (VS Code recomendado) y Python (versión 3.7 o superior) instalado.",
     additionalMaterialInfo: commonCourseMaterial,
     aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', pythonCourseTitle),
-    n8nWebhookUrl: 'https://n8n.percyalvarez.com/webhook/python',
+    aiProvider: 'openai',
+    aiModelName: 'gpt-4o',
+    aiTemperature: 0.7,
     tags: { connect: [{ slug: 'python' }, { slug: 'desarrollo-web' }, { slug: 'ciencia-de-datos' }, {slug: 'backend'}] },
   };
   await upsertCourseWithLessonsAndQuiz(pythonCourseTitle, pythonCoursePayload, pythonLessons);
@@ -291,7 +311,9 @@ async function main() {
     requirements: "Computadora con acceso a internet y un editor de código (VS Code recomendado). Conocimientos básicos de HTML y CSS son muy recomendables.",
     additionalMaterialInfo: commonCourseMaterial,
     aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', javaScriptCourseTitle),
-    n8nWebhookUrl: 'https://n8n.percyalvarez.com/webhook/javascript',
+    aiProvider: 'openai',
+    aiModelName: 'gpt-4o',
+    aiTemperature: 0.7,
     tags: { connect: [{ slug: 'javascript' }, { slug: 'desarrollo-web' }, { slug: 'frontend' }, { slug: 'backend' }] },
   };
   await upsertCourseWithLessonsAndQuiz(javaScriptCourseTitle, javaScriptCoursePayload, javaScriptLessons);

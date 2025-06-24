@@ -119,3 +119,85 @@ nav#sidebarMenu.sidebar { /* Hacemos más específico el selector para el sideba
   height: 14px;
   margin-bottom: 1px;   /* Pequeño ajuste para alinear mejor el icono con el texto más pequeño */
 }
+
+/* Code Block Styling */
+pre {
+  background-color: #f8f9fa; /* Un color de fondo claro, puedes cambiarlo por el de tu tema oscuro si es necesario */
+  border: 1px solid #dee2e6;
+  border-radius: .375rem; /* Bootstrap's default border-radius */
+  padding: 1rem;
+  margin-bottom: 1rem;
+  overflow: auto;
+  font-size: 0.875em; /* Un poco más pequeño que el texto normal */
+}
+
+pre code.hljs {
+  padding: 0; /* El padding ya está en <pre>, no lo necesitamos en <code> */
+  background: none; /* El fondo ya está en <pre> */
+}
+
+/* For dark mode compatibility */
+[data-bs-theme="dark"] pre {
+  background-color: #212529; /* Un color oscuro para el fondo */
+  border-color: #495057;
+}
+
+/* Estilos para el chat en pantalla completa */
+#chatAccordion.chat-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1050; /* Un z-index alto para estar por encima de todo */
+  border-radius: 0;
+  border: none;
+}
+
+#chatAccordion.chat-fullscreen .accordion-item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+}
+
+#chatAccordion.chat-fullscreen .accordion-header .accordion-button {
+  border-radius: 0;
+}
+
+#chatAccordion.chat-fullscreen .accordion-collapse {
+  flex-grow: 1;
+  /* Asegurarse de que esté visible en pantalla completa */
+  display: block !important; 
+  visibility: visible !important;
+}
+
+#chatAccordion.chat-fullscreen .accordion-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+#chatAccordion.chat-fullscreen #lesson-chat-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#chatAccordion.chat-fullscreen #chat-messages-area {
+  flex-grow: 1; /* El área de mensajes ocupa todo el espacio vertical disponible */
+  height: 100% !important; /* Sobrescribir la altura fija */
+}
+
+#chatAccordion.chat-fullscreen #chat-form {
+  flex-shrink: 0; /* Evita que el formulario se encoja */
+}
+
+/* Estilo para el resaltado del texto durante la narración TTS */
+.tts-highlight {
+  background-color: #FFD700; /* Un color amarillo/dorado */
+  color: #000 !important; /* Asegurar que el texto sea legible */
+  border-radius: 3px;
+  padding: 0 2px;
+}

@@ -21,8 +21,9 @@
   <!-- EasyMDE CSS -->
   <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
 
-  <!-- n8n Chat Widget CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <!-- highlight.js CSS Themes -->
+  <link id="hljs-theme-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" disabled>
+  <link id="hljs-theme-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" disabled>
 
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
@@ -107,12 +108,11 @@
 </head>
 <body>
   <%- include('../partials/header') %>
-
-  <%- include('../partials/sidebar') %> <%# Incluye el offcanvas y el sidebar fijo para desktop %>
   
   <div class="container-fluid">
     <div class="row">
-      <main class="<%= (typeof hideMainSidebar !== 'undefined' && hideMainSidebar) ? 'col-12 px-md-4' : 'col-md-9 ms-md-auto col-lg-10 px-md-4' %>">
+      <%- include('../partials/sidebar') %>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
         <%- body %>
       </main>
     </div>
@@ -145,6 +145,20 @@
 
 
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <!-- Socket.IO Client -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- Markdown & Highlight.js -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <script>
+    // Initialize highlight.js on page load for static content
+    document.addEventListener('DOMContentLoaded', (event) => {
+      hljs.highlightAll();
+    });
+  </script>
 
   <!-- Custom scripts for specific pages will be injected here by express-ejs-layouts -->
   <%- defineContent('scripts') %>

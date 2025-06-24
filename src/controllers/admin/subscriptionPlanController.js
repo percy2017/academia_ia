@@ -7,7 +7,6 @@ export const listSubscriptionPlans = async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
         res.render('admin/subscription_plans/index', {
-            layout: 'layouts/main',
             title: 'Planes de Suscripción',
             plans,
             messages: req.flash()
@@ -22,7 +21,6 @@ export const listSubscriptionPlans = async (req, res) => {
 // Mostrar formulario para crear un nuevo plan
 export const renderCreateSubscriptionPlanForm = async (req, res) => {
     res.render('admin/subscription_plans/form', {
-        layout: 'layouts/main',
         title: 'Crear Nuevo Plan de Suscripción',
         plan: {}, // Objeto vacío para un nuevo plan
         actionUrl: '/admin/subscription-plans',
@@ -50,7 +48,6 @@ export const createSubscriptionPlan = async (req, res) => {
         console.error("Error creating subscription plan:", error);
         req.flash('error_msg', 'Error al crear el plan. Asegúrate de que el nombre no esté duplicado si es único.');
         res.render('admin/subscription_plans/form', {
-            layout: 'layouts/main',
             title: 'Crear Nuevo Plan de Suscripción',
             plan: req.body, // Devolver los datos ingresados
             actionUrl: '/admin/subscription-plans',
@@ -72,7 +69,6 @@ export const renderEditSubscriptionPlanForm = async (req, res) => {
             return res.redirect('/admin/subscription-plans');
         }
         res.render('admin/subscription_plans/form', {
-            layout: 'layouts/main',
             title: `Editar Plan: ${plan.name}`,
             plan,
             actionUrl: `/admin/subscription-plans/${id}?_method=PUT`, // Para method-override
@@ -109,7 +105,6 @@ export const updateSubscriptionPlan = async (req, res) => {
         // Re-render form con datos y error
         const plan = { ...req.body, id }; // Reconstruir el objeto plan para el formulario
         res.render('admin/subscription_plans/form', {
-            layout: 'layouts/main',
             title: `Editar Plan: ${plan.name || 'Error'}`,
             plan,
             actionUrl: `/admin/subscription-plans/${id}?_method=PUT`,

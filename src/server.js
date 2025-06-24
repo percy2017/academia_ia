@@ -1,4 +1,6 @@
 import express from 'express';
+import http from 'http'; // Import http module
+import { Server } from 'socket.io'; // Import Server from socket.io
 import dotenv from 'dotenv';
 import expressEjsLayouts from 'express-ejs-layouts';
 import path from 'path';
@@ -10,16 +12,21 @@ import authRoutes from './routes/authRoutes.js'; // Import auth routes
 import courseRoutes from './routes/courseRoutes.js'; // Import course routes
 import userRoutes from './routes/userRoutes.js'; // Import user routes
 import adminRoutes from './routes/adminRoutes.js'; // Import admin routes
+import chatRoutes from './routes/chatRoutes.js'; // Import chat routes
+import subscriptionRoutes from './routes/subscriptionRoutes.js'; // Import subscription routes
 import methodOverride from 'method-override'; // Import method-override
 import flash from 'connect-flash'; // Import connect-flash
 import { getAllCourses } from './controllers/courseController.js'; // Import getAllCourses
 import { isAuthenticated } from './middleware/authMiddleware.js'; // Import isAuthenticated
+import socketHandler from './lib/socketHandler.js'; // Import socket handler
 
 // Load environment variables
 dotenv.config();
 
-// Initialize Express app
+// Initialize Express app and HTTP server
 const app = express();
+const server = http.createServer(app); // Create HTTP server
+const io = new Server(server); // Initialize Socket.IO
 const PORT = process.env.PORT || 3000;
 
 // __dirname equivalent for ES modules
@@ -49,7 +56,7 @@ const sessionStore = new PgStore({
   tableName: 'session', // Match @@map("session") in schema.prisma
 });
 
-app.use(session({
+const sessionMiddleware = session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -59,7 +66,15 @@ app.use(session({
     httpOnly: true, // Recommended for security
     // secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
   }
-}));
+});
+
+// Use session middleware for Express
+app.use(sessionMiddleware);
+
+// Share session middleware with Socket.IO
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+});
 
 // Flash middleware - should be after session middleware
 app.use(flash());
@@ -77,13 +92,18 @@ app.use((req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/courses', courseRoutes); // Mount course routes
 app.use('/admin', adminRoutes); // Mount admin routes
+app.use('/chat', chatRoutes); // Mount chat routes
+app.use('/subscription-plans', subscriptionRoutes); // Mount subscription routes
 app.use('/', userRoutes); // Mount user routes (e.g., /profile)
 
 // Root route - Now public and shows course catalog
 // app.get('/', getAllCourses); // Uses getAllCourses, which renders 'dashboard.ejs' - Commented out old public route
 app.get('/', isAuthenticated, getAllCourses); // Protect the root route
 
+// Initialize Socket.IO handler
+socketHandler(io);
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

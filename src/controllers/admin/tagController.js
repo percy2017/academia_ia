@@ -19,8 +19,7 @@ export const listTags = async (req, res) => {
     });
     res.render('admin/tags/index', { 
       tags, 
-      title: 'Administrar Tags',
-      layout: 'layouts/main' // Asegurarse que usa el layout correcto
+      title: 'Administrar Tags'
     });
   } catch (error) {
     console.error('Error al listar tags:', error);
@@ -33,8 +32,7 @@ export const listTags = async (req, res) => {
 export const renderCreateTagForm = (req, res) => {
   res.render('admin/tags/form', { 
     title: 'Crear Nuevo Tag', 
-    tag: {}, // Objeto vacío para el formulario de creación
-    layout: 'layouts/main'
+    tag: {} // Objeto vacío para el formulario de creación
   });
 };
 
@@ -77,8 +75,7 @@ export const renderEditTagForm = async (req, res) => {
     }
     res.render('admin/tags/form', { 
       title: 'Editar Tag', 
-      tag,
-      layout: 'layouts/main'
+      tag
     });
   } catch (error) {
     console.error('Error al buscar tag para editar:', error);
