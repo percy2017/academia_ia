@@ -29,12 +29,12 @@
       border-bottom-left-radius: 0;
     }
 
-    .form-signin input[type="tel"] { /* Estilo para el nuevo campo de teléfono */
+    .form-signin .iti {
+      width: 100%;
+    }
+    .form-signin input[type="tel"] {
       margin-bottom: -1px;
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      border-bottom-left-radius: 0;
+      border-radius: var(--bs-border-radius); /* Re-aplica el radio de borde de Bootstrap */
     }
     
     .form-signin input[name="password"] { /* Para el campo de contraseña en registro */
@@ -75,9 +75,8 @@
         <input type="email" class="form-control" id="email" name="email" placeholder="nombre@ejemplo.com" required>
         <label for="email">Correo Electrónico</label>
       </div>
-      <div class="form-floating">
-        <input type="tel" class="form-control" id="phone" name="phone" placeholder="Número de Teléfono (Opcional)">
-        <label for="phone">Número de Teléfono (Opcional)</label>
+      <div class="form-group mb-2">
+        <input type="tel" class="form-control" id="phone" name="phone" required>
       </div>
       <div class="form-floating position-relative">
         <input type="password" class="form-control" id="password" name="password" placeholder="Contraseña" required>
@@ -113,39 +112,18 @@
     }
 
     // intl-tel-input initialization
-    const phoneInputFieldRegister = document.querySelector("#phone");
-    if (phoneInputFieldRegister) {
-      const phoneInputRegister = window.intlTelInput(phoneInputFieldRegister, {
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-        initialCountry: "auto",
-        geoIpLookup: callback => {
-          fetch("https://ipapi.co/json")
-            .then(res => res.json())
-            .then(data => callback(data.country_code))
-            .catch(() => callback("us")); // Fallback to US or your preferred default
-        },
-        nationalMode: false, // Guarda el número en formato internacional
-        // separateDialCode: true, // Muestra el código de país separado
-        // autoPlaceholder: "aggressive",
-        preferredCountries: ['bo', 'pe', 'cl', 'ar', 'br', 'us', 'es'], // Bolivia, Peru, Chile, Argentina, Brazil, USA, Spain
-        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-          return "e.g. " + selectedCountryPlaceholder;
-        }
-      });
+    const phoneInputField = document.querySelector("#phone");
+    const phoneInput = window.intlTelInput(phoneInputField, {
+      initialCountry: "bo", // Bolivia por defecto
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      preferredCountries: ['bo', 'pe', 'cl', 'ar', 'br', 'us', 'es'],
+    });
 
-      // Para asegurar que el valor completo (con prefijo) se envíe,
-      // podrías escuchar el evento submit del formulario y actualizar el valor del input.
-      // O, si usas un input oculto, llenarlo.
-      // Por simplicidad, asumiremos que el usuario entiende que debe incluir el prefijo
-      // o que la librería modifica el valor del input directamente si no está en nationalMode.
-      // Para un manejo más robusto, se podría hacer:
-      const formRegister = phoneInputFieldRegister.closest("form");
-      if (formRegister) {
-        formRegister.addEventListener("submit", function() {
-          phoneInputFieldRegister.value = phoneInputRegister.getNumber();
-        });
-      }
-    }
+    const form = phoneInputField.closest("form");
+    form.addEventListener("submit", function() {
+      // Antes de enviar, actualiza el valor del campo con el número completo
+      phoneInputField.value = phoneInput.getNumber();
+    });
   </script>
 </body>
 </html>

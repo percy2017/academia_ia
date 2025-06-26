@@ -1,47 +1,128 @@
+<%- contentFor('title') %>
+<%= title %> - Admin Academia AI
+
+<%- contentFor('body') %>
+
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item active" aria-current="page"><%= title %></li>
+    </ol>
+</nav>
+
+<%- include('../../partials/messages') %>
+
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 class="h2">Gestión de Suscripciones</h1>
+    <h1 class="h2"><%= title %></h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <% if (isPendingPage) { %>
+            <a href="/admin/subscriptions" class="btn btn-outline-secondary">
+                <i class="bi bi-list-ul me-1"></i> Ver Todas las Suscripciones
+            </a>
+        <% } else { %>
+            <a href="/admin/subscriptions/pending" class="btn btn-warning">
+                <i class="bi bi-clock-history me-1"></i> Ver Pagos Pendientes
+            </a>
+        <% } %>
+    </div>
 </div>
 
 <div class="table-responsive">
-  <table class="table table-striped table-sm">
-    <thead>
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Usuario</th>
-        <th scope="col">Plan</th>
-        <th scope="col">Estado</th>
-        <th scope="col">Fecha de Inicio</th>
-        <th scope="col">Fecha de Vencimiento</th>
-        <th scope="col">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% if (subscriptions && subscriptions.length > 0) { %>
-        <% subscriptions.forEach((sub, index) => { %>
-          <tr>
-            <td><%= index + 1 %></td>
-            <td><%= sub.user.email %></td>
-            <td><%= sub.plan.name %></td>
-            <td>
-              <% if (new Date(sub.endDate) > new Date() && sub.status === 'ACTIVE') { %>
-                <span class="badge bg-success">Activa</span>
-              <% } else { %>
-                <span class="badge bg-danger">Vencida</span>
-              <% } %>
-            </td>
-            <td><%= new Date(sub.startDate).toLocaleDateString() %></td>
-            <td><%= new Date(sub.endDate).toLocaleDateString() %></td>
-            <td>
-              <a href="/admin/users/<%= sub.user.id %>" class="btn btn-sm btn-outline-secondary">Ver Usuario</a>
-              <!-- Futuras acciones como 'Cancelar' o 'Extender' irían aquí -->
-            </td>
-          </tr>
-        <% }); %>
-      <% } else { %>
-        <tr>
-          <td colspan="7" class="text-center">No se encontraron suscripciones.</td>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
+    <table id="subscriptionsTable" class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Plan</th>
+                <th>Estado</th>
+                <th>Fecha de Solicitud</th>
+                <% if (isPendingPage) { %>
+                    <th>Comprobante</th>
+                <% } else { %>
+                    <th>Fecha de Vencimiento</th>
+                <% } %>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (subscriptions && subscriptions.length > 0) { %>
+                <% subscriptions.forEach(sub => { %>
+                    <tr>
+                        <td><%= sub.user.name %><br><small class="text-muted"><%= sub.user.email %></small></td>
+                        <td><%= sub.plan.name %></td>
+                        <td>
+                            <% if (sub.isPaymentVerified && sub.isActive) { %>
+                                <span class="badge bg-success">Activa</span>
+                            <% } else if (!sub.isPaymentVerified) { %>
+                                <span class="badge bg-warning">Pendiente de Verificación</span>
+                            <% } else { %>
+                                <span class="badge bg-danger">Inactiva</span>
+                            <% } %>
+                        </td>
+                        <td><%= new Date(sub.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                        
+                        <% if (isPendingPage) { %>
+                            <td>
+                                <% if (sub.transactionId) { %>
+                                    <a href="<%= sub.transactionId %>" target="_blank" class="btn btn-sm btn-info">Ver</a>
+                                <% } else { %>
+                                    N/A
+                                <% } %>
+                            </td>
+                        <% } else { %>
+                            <td><%= new Date(sub.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                        <% } %>
+
+                        <td>
+                            <% if (isPendingPage) { %>
+                                <form action="/admin/subscriptions/<%= sub.id %>/approve" method="POST" class="d-inline approve-form">
+                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                </form>
+                            <% } else { %>
+                                <a href="/admin/users/<%= sub.userId %>" class="btn btn-sm btn-outline-secondary">Ver Usuario</a>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="6" class="text-center">No se encontraron suscripciones.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </div>
+
+<%- contentFor('scripts') %>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicialización de DataTables
+    $('#subscriptionsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+        },
+        order: [] // Deshabilitar ordenamiento inicial
+    });
+
+    const approveForms = document.querySelectorAll('.approve-form');
+    approveForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Detener el envío del formulario
+            
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Vas a aprobar este pago y activar la suscripción del usuario.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, ¡aprobar!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // Si se confirma, enviar el formulario
+                }
+            });
+        });
+    });
+});
+</script>

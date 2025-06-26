@@ -1,0 +1,59 @@
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Resumen de tu Compra</h5>
+        </div>
+        <!-- <div class="card-body"> -->
+          <h5 class="card-title">Plan: <%= plan.name %></h5>
+          <p class="card-text"><%= plan.description %></p>
+          
+          <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Duración
+              <span><%= plan.durationMonths %> mes(es)</span>
+            </li>
+            <% if (plan.bonusMonths) { %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Bono
+                <span class="badge bg-success">+ <%= plan.bonusMonths %> mes(es)</span>
+              </li>
+            <% } %>
+            <li class="list-group-item d-flex justify-content-between align-items-center fw-bold">
+              Precio Total
+              <span>$<%= plan.price.toFixed(2) %></span>
+            </li>
+          </ul>
+
+          <div class="mt-4">
+            <h5>Selecciona tu método de pago</h5>
+            <p class="text-muted small">
+              Serás redirigido a la plataforma de pago para completar tu compra de forma segura.
+            </p>
+            <div class="d-grid gap-3">
+              <!-- Botón de PayPal -->
+              <form action="/payment/paypal/create-order" method="POST">
+                <input type="hidden" name="planId" value="<%= plan.id %>">
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                  <i class="bi bi-paypal"></i> Pagar con PayPal
+                </button>
+              </form>
+
+              <!-- Botón de Pago por QR -->
+              <form action="/payment/qr/generate" method="POST">
+                <input type="hidden" name="planId" value="<%= plan.id %>">
+                <button type="submit" class="btn btn-info btn-lg w-100">
+                  <i class="bi bi-qr-code"></i> Pagar con QR (Bolivianos)
+                </button>
+              </form>
+            </div>
+          </div>
+        <!-- </div>
+        <div class="card-footer text-center">
+          <a href="/subscription-plans">Cancelar y volver a los planes</a>
+        </div> -->
+      </div>
+    </div>
+  </div>
+</div>

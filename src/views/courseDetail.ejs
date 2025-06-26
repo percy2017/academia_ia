@@ -15,31 +15,39 @@
             <img src="<%= course.imageUrl %>" class="img-fluid rounded mb-3" alt="<%= course.title %>" style="max-height: 400px; width: 100%; object-fit: cover;">
           <% } %>
           <div class="lead course-description-content mb-3"><%- course.description %></div>
-          
-          <hr class="my-4">
-    
-          <h3>Lecciones del Curso</h3>
+        </div>
+      </div>
+      <div class="card shadow-sm mt-3">
+        <div class="card-header">
+          <h5 class="mb-0">Lecciones del Curso</h5>
+        </div>
           <% if (course.lessons && course.lessons.length > 0) { %>
-            <div class="list-group mb-4">
+            <div class="list-group list-group-flush">
               <% course.lessons.forEach(lesson => { %>
-                <a href="/courses/<%= course.slug || course.id %>/lessons/<%= lesson.id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                  <span><span data-feather="file-text" class="me-2"></span><%= lesson.title %></span>
-                  <small class="text-muted">Lección <%= lesson.order %></small>
-                </a>
+                <% if (hasActiveSubscription || (user && user.role === 'ADMIN')) { %>
+                  <a href="/courses/<%= course.slug || course.id %>/lessons/<%= lesson.id %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-play-circle-fill me-2 text-primary"></i><%= lesson.title %></span>
+                    <small class="text-muted">Lección <%= lesson.order %></small>
+                  </a>
+                <% } else { %>
+                  <div class="list-group-item d-flex justify-content-between align-items-center opacity-50">
+                    <span><i class="bi bi-lock-fill me-2"></i><%= lesson.title %></span>
+                    <small class="text-muted">Lección <%= lesson.order %></small>
+                  </div>
+                <% } %>
               <% }); %>
             </div>
           <% } else { %>
             <p>Este curso aún no tiene lecciones.</p>
           <% } %>
-        </div>
       </div>
     </div>
     <div class="col-md-4">
       <div class="card sticky-top" style="top: 20px;">
+        <div class="card-header">
+          <h5 class="mb-0">Detalles del Curso</h5>
+        </div>
         <div class="card-body">
-          <h5 class="card-title mb-3">Detalles del Curso</h5>
-
-          <!-- Sección de precios eliminada -->
           
           <% if (user) { %>
             <% if (hasActiveSubscription) { %>

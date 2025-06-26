@@ -176,27 +176,8 @@ export const getLessonById = async (req, res) => {
         return res.status(404).send('Lección no disponible.');
     }
 
-    // --- Lógica de Suscripción para Acceso a Lecciones ---
-    let hasActiveSubscription = false;
-    if (req.session.user) {
-      const activeSubscription = await prisma.userSubscription.findFirst({
-        where: {
-          userId: req.session.user.id,
-          isActive: true,
-          endDate: {
-            gte: new Date(),
-          },
-        },
-      });
-      hasActiveSubscription = !!activeSubscription;
-    }
-
-    // Si el usuario no es ADMIN y no tiene suscripción activa, no puede ver la lección
-    if (req.session.user?.role !== 'ADMIN' && !hasActiveSubscription) {
-      req.flash('error_msg', 'Necesitas una suscripción activa para ver esta lección.');
-      return res.redirect('/subscription-plans');
-    }
-    // --- Fin Lógica de Suscripción ---
+    // La verificación de la suscripción ahora es manejada exclusivamente por el middleware checkActiveSubscription.
+    // No se necesita lógica de suscripción aquí.
 
     // Encontrar lección anterior y siguiente
     let previousLesson = null;
@@ -272,7 +253,7 @@ export const getLessonById = async (req, res) => {
       user: req.session.user,
       marked, // Pasar la función marked a la vista
       // El layout se determina automáticamente en main.ejs
-      hideMainSidebar: true // Esta variable sigue siendo útil para ocultar el sidebar en la vista de lección
+      hideSidebar: true // Oculta el sidebar para dar más espacio a la lección
     });
   } catch (error) {
     console.error(`Error fetching lesson ${req.params.lessonId}:`, error);

@@ -10,10 +10,13 @@ export const getSubscriptionPlans = async (req, res) => {
       orderBy: { price: 'asc' },
     });
 
+    const usdToBobRate = parseFloat(process.env.USD_TO_BOB_RATE) || null;
+
     res.render('subscription-plans', {
       title: 'Elige tu Plan',
       plans,
-      user: req.session.user
+      user: req.session.user,
+      usdToBobRate
     });
   } catch (error) {
     console.error('Error fetching subscription plans:', error);
@@ -79,5 +82,31 @@ export const subscribeToPlan = async (req, res) => {
     console.error('Error creating subscription:', error);
     req.flash('error', 'Hubo un problema al procesar tu suscripción.');
     res.redirect('/subscription-plans');
+  }
+};
+
+// @desc    Display checkout page for a specific plan
+// @route   GET /checkout/:planId
+// @access  Private
+export const getCheckoutPage = async (req, res) => {
+  try {
+    const { planId } = req.params;
+    const plan = await prisma.subscriptionPlan.findUnique({
+      where: { id: planId, isActive: true },
+    });
+
+    if (!plan) {
+      req.flash('error_msg', 'El plan de suscripción no fue encontrado o no está activo.');
+      return res.redirect('/subscription-plans');
+    }
+
+    res.render('checkout', {
+      title: 'Confirmar Compra',
+      plan,
+      user: req.session.user,
+    });
+  } catch (error) {
+    console.error('Error fetching checkout page:', error);
+    res.status(500).send('Error al cargar la página de checkout.');
   }
 };

@@ -31,7 +31,7 @@ export const renderCreateSubscriptionPlanForm = async (req, res) => {
 
 // Crear un nuevo plan de suscripción
 export const createSubscriptionPlan = async (req, res) => {
-    const { name, durationMonths, bonusMonths, price, isActive } = req.body;
+    const { name, durationMonths, bonusMonths, price, currency, isActive } = req.body;
     try {
         await prisma.subscriptionPlan.create({
             data: {
@@ -39,6 +39,7 @@ export const createSubscriptionPlan = async (req, res) => {
                 durationMonths: parseInt(durationMonths, 10),
                 bonusMonths: bonusMonths ? parseInt(bonusMonths, 10) : null,
                 price: parseFloat(price),
+                currency,
                 isActive: isActive === 'on' || isActive === true, // Checkbox o valor booleano
             }
         });
@@ -85,7 +86,7 @@ export const renderEditSubscriptionPlanForm = async (req, res) => {
 // Actualizar un plan de suscripción existente
 export const updateSubscriptionPlan = async (req, res) => {
     const { id } = req.params;
-    const { name, durationMonths, bonusMonths, price, isActive } = req.body;
+    const { name, durationMonths, bonusMonths, price, currency, isActive } = req.body;
     try {
         await prisma.subscriptionPlan.update({
             where: { id },
@@ -94,6 +95,7 @@ export const updateSubscriptionPlan = async (req, res) => {
                 durationMonths: parseInt(durationMonths, 10),
                 bonusMonths: bonusMonths ? parseInt(bonusMonths, 10) : null,
                 price: parseFloat(price),
+                currency,
                 isActive: isActive === 'on' || isActive === true,
             }
         });

@@ -1,141 +1,100 @@
-# System Prompt: Master Development Plan for AI-Powered E-Learning Platform
+# Academia AI - Plataforma de E-Learning
 
-**Role:** You are an expert Full-Stack Developer specializing in the T3 Stack (Node.js, Express.js, PostgreSQL, Prisma, EJS). Your task is to act as a pair programmer, guiding me through the creation of a custom e-learning platform. I will provide you with the current phase of the project, and you will generate the necessary code, file structures, and explanations.
-
-**Project Name:** "Academia AI"
-
-**Core Technologies:**
-*   **Backend:** Node.js with ES6 Modules (`"type": "module"` in `package.json`).
-*   **Framework:** Express.js.
-*   **Database:** PostgreSQL.
-*   **ORM:** Prisma.
-*   **Templating Engine:** EJS with `express-ejs-layouts`.
-*   **Frontend Framework:** Bootstrap 5.
-*   **Real-time Communication:** Socket.IO.
-*   **Security:** `bcrypt` for password hashing, `express-session` with `connect-pg-simple` for session management.
-*   **Development Environment:** Windows, VS Code, Nodemon for auto-reloading.
-*   **Environment Variables:** `dotenv`.
-*   **Markdown Processing:** `marked` (servidor y cliente), `easymde` (cliente).
-*   **Syntax Highlighting:** `highlight.js`.
-*   **Client-Side Text-to-Speech:** Web Speech API (`SpeechSynthesis`).
+Academia AI es una plataforma de e-learning personalizada construida con Node.js, Express, PostgreSQL y Prisma. Incorpora un sistema de gestión de contenidos, autenticación de usuarios, panel de administración, y un módulo de suscripciones para el acceso a los cursos.
 
 ---
 
-## **Phase 0: Project Scaffolding and Environment Setup**
+## Core Technologies
 
-**Status: COMPLETED**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase 1: Database Modeling and Secure User Authentication**
-
-**Status: COMPLETADA (Revisada y Extendida)**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase 2: Course and Lesson Content Structure (Adaptada a Suscripciones)**
-
-**Status: COMPLETADA (Adaptada)**
-*   ... (Contenido sin cambios) ...
+- **Backend:** Node.js (`"type": "module"`)
+- **Framework:** Express.js
+- **Base de Datos:** PostgreSQL
+- **ORM:** Prisma
+- **Motor de Plantillas:** EJS con `express-ejs-layouts`
+- **Frontend:** Bootstrap 5, DataTables, SweetAlert2
+- **Comunicación Real-time:** Socket.IO
+- **Seguridad:** `bcrypt` (hashing), `express-session` con `connect-pg-simple` (sesiones)
+- **Gestión de Archivos:** `multer`
+- **Notificaciones por Correo:** `nodemailer`
+- **Variables de Entorno:** `dotenv`
+- **Procesamiento de Markdown:** `marked`, `sanitize-html`
+- **Dependencias Adicionales:** `connect-flash`, `method-override`, `@google/generative-ai`, LangChain.
 
 ---
 
-## **Phase 3: AI Agent Integration (Simulación Inicial)**
+## Estructura del Proyecto
 
-**Status: OBSOLETA (Reemplazada por Fase G y H)**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase 4: Administration Panel (Adaptado a Suscripciones y Nuevas Entidades)**
-
-**Status: EN PROGRESO (Mayormente Completado)**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase 5: Definición Detallada de Cursos y Gestión de Tags (Integrada y Adaptada)**
-
-**Status: COMPLETADA (Adaptada y Mejorada)**
-*   ... (Contenido sin cambios) ...
+```
+/
+├── prisma/             # Esquemas, migraciones y seed de la base de datos
+├── public/             # Archivos estáticos (CSS, JS, imágenes)
+├── src/
+│   ├── controllers/    # Lógica de negocio para cada ruta
+│   ├── lib/            # Módulos de ayuda (Prisma, IA, Sockets, Email)
+│   ├── middleware/     # Middlewares de Express (auth, uploads, etc.)
+│   ├── routes/         # Definición de rutas de la API
+│   └── views/          # Plantillas EJS
+├── .env.example        # Ejemplo de variables de entorno
+├── package.json
+└── server.js           # Punto de entrada de la aplicación
+```
 
 ---
 
-## **Phase F: Asistente IA Interactivo con n8n (Descartado)**
-*   ... (Contenido sin cambios) ...
+## Instalación y Ejecución
+
+1.  **Clonar el repositorio.**
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
+3.  **Configurar la Base de Datos:**
+    -   Asegúrate de tener PostgreSQL en ejecución.
+    -   Crea un archivo `.env` a partir de `.env.example` y configura las variables `DATABASE_URL` y `EMAIL_HOST`, `EMAIL_USER`, etc.
+    -   **Importante:** Si es la primera vez, elimina la carpeta `prisma/migrations` si existe.
+    -   Crea y aplica la migración inicial:
+        ```bash
+        npx prisma migrate dev --name init
+        ```
+4.  **Poblar la Base de Datos con Datos de Producción:**
+    ```bash
+    npx prisma db seed
+    ```
+    Este comando creará 9 cursos detallados, usuarios de prueba (admin y student) y planes de suscripción.
+
+5.  **Iniciar el Servidor de Desarrollo:**
+    ```bash
+    npm run dev
+    ```
+    El servidor estará disponible en `http://localhost:4000` (o el puerto definido en tu `.env`).
 
 ---
 
-## **Phase G: Real-time Chat Module & Privacy Fixes**
+## Roadmap de Desarrollo
 
-**Status: COMPLETADO Y ROBUSTO**
-*   ... (Contenido sin cambios) ...
+### Fase P: Refinamiento y Contenido de Producción (Sesión 25/06/2025)
+- **Estado:** ✅ **COMPLETADA**
+- **Resumen:** Se realizó una sesión intensiva de corrección de bugs, mejoras de UI y generación de contenido para dejar la plataforma en un estado más robusto y listo para producción.
+- **Logros y Funcionalidades:**
+    -   **Seed de Producción Detallado:** Se reemplazó el `seed.js` básico por uno de calidad de producción, generando 9 cursos completos con descripciones creativas, temarios extensos (20 a 60 lecciones), y un banco de preguntas inicial para cada uno.
+    -   **Corrección de Flujo de Autenticación:** Se ajustó la lógica de login para que la verificación de email sea obligatoria **solo para usuarios con rol `STUDENT`**, permitiendo a los administradores iniciar sesión sin este paso.
+    -   **Corrección de Flujo de Pago QR:** Se eliminó un bug crítico que permitía a los usuarios crear múltiples suscripciones pendientes para el mismo plan, asegurando que solo exista una intención de compra a la vez.
+    -   **Mejora de UI en Admin (DataTables):** Se implementó la librería **DataTables** en la tabla de gestión de suscripciones del panel de administración, añadiendo funcionalidades de búsqueda, paginación y ordenamiento para una mejor experiencia de gestión.
+    -   **Mejora de UI en Admin (SweetAlert2):** Se reemplazó la alerta nativa `confirm()` del navegador por una notificación moderna y estilizada con **SweetAlert2** al momento de aprobar una suscripción.
+    -   **Rediseño de Perfil de Usuario:** La página de "Editar Perfil" fue completamente rediseñada con una UI más limpia y profesional, utilizando una estructura de dos columnas, previsualización de avatar en tiempo real y añadiendo una sección para el cambio de contraseña.
 
----
+### Fase N: Implementación de Pasarelas de Pago
+- **Estado:** 🟡 **EN PROGRESO**
+- **Resumen:** El flujo de pago manual por QR está funcional y robustecido. La integración con PayPal queda como la principal tarea pendiente.
+- **Tareas Pendientes:**
+    1.  **Integración con PayPal:**
+        -   Implementar la lógica para comunicarse con la API de PayPal (crear orden, capturar pago).
+        -   Utilizar el SDK de PayPal en el frontend.
+        -   Activar la suscripción automáticamente tras la confirmación del pago.
 
-## **Phase H: UI/UX Refinements for Lessons & Chat**
-
-**Status: COMPLETADA Y MEJORADA**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase I: Capacidades Avanzadas del Agente IA (Planificación)**
-
-**Status: PENDIENTE**
-*   ... (Contenido sin cambios) ...
-
----
-
-## **Phase J: Estandarización de UI y Refactorización de Vistas**
-
-**Status: COMPLETADA**
-
-**Objective:** Refactorizar las vistas principales para eliminar código duplicado, estandarizar la apariencia y mejorar la mantenibilidad del frontend.
-
-**Development & Fixes:**
-
-*   **Creación de Partials Reutilizables:**
-    *   ✅ **`_content-header.ejs`:** Se creó un nuevo partial para las cabeceras de las tarjetas de contenido. Este componente recibe variables como `title` y `showTTS`, garantizando que todas las cabeceras de página (cursos, lecciones, etc.) tengan un aspecto idéntico y se gestionen desde un único archivo.
-    *   ✅ **`_tts-script.ejs`:** Se extrajo toda la lógica del narrador de Texto a Voz (TTS) a su propio partial. Este script ahora acepta un selector de contenido como parámetro (`contentSelector`), lo que permite reutilizarlo en cualquier página que necesite narrar un bloque de texto específico.
-
-*   **Refactorización de Vistas Principales:**
-    *   ✅ **`lessonDetail.ejs`:** Se refactorizó para eliminar su código de cabecera y de script de TTS, y en su lugar ahora incluye los nuevos partials `_content-header` y `_tts-script`, pasándoles las variables correspondientes.
-    *   ✅ **`courseDetail.ejs`:** Se aplicó la misma refactorización. Se añadió la funcionalidad de narrador a la página de detalles del curso y se estandarizó su cabecera para que sea idéntica a la de las lecciones, usando los mismos partials.
-
-*   **Separación de Layouts:**
-    *   ✅ **`admin.ejs`:** Se creó un nuevo layout principal (`src/views/layouts/admin.ejs`) dedicado exclusivamente para el panel de administración.
-    *   ✅ **`main.ejs`:** Se simplificó el layout principal para que sirva únicamente a las vistas públicas de la plataforma.
-    *   ✅ **Actualización de Controladores:** Todos los controladores del panel de administración fueron actualizados para que rendericen sus vistas usando el nuevo `layout: 'layouts/admin'`, resolviendo conflictos de estilo y estructura.
-
----
-
-## **Phase K: Gestión de Suscripciones y Control de Acceso**
-
-**Status: COMPLETADA**
-
-**Objective:** Implementar una interfaz para que los administradores puedan ver las suscripciones de los usuarios y crear un sistema de control de acceso al contenido basado en el estado de dichas suscripciones.
-
-**Development & Fixes:**
-
-*   **UI de Gestión de Suscripciones:**
-    *   ✅ **Vista de Tabla:** Se creó una nueva vista en `src/views/admin/subscriptions/index.ejs` que muestra una tabla con todas las suscripciones, incluyendo información del usuario, el plan, el estado (Activa/Vencida) y las fechas de inicio/fin.
-    *   ✅ **Controlador y Rutas:** Se implementó el `subscriptionAdminController.js` y las rutas correspondientes en `subscriptionAdminRoutes.js` para obtener los datos de la base de datos y renderizar la vista.
-    *   ✅ **Integración en Menú:** Se añadió el enlace "Suscripciones" a los menús del panel de administración (móvil y escritorio) en `sidebar.ejs` para un acceso fácil.
-
-*   **Middleware de Control de Acceso:**
-    *   ✅ **`checkActiveSubscription.js`:** Se creó un nuevo middleware para verificar si un usuario tiene una suscripción activa.
-    *   ✅ **Lógica de Verificación:** El middleware comprueba si la suscripción del usuario está activa y si la fecha de vencimiento no ha pasado. Los administradores tienen acceso libre.
-    *   ✅ **Protección de Rutas:** El middleware se aplicó a las rutas críticas de contenido (`/courses/:id` y `/courses/:courseId/lessons/:lessonId`) para restringir el acceso a usuarios sin una suscripción válida.
-
-*   **Corrección de Errores:**
-    *   ✅ Se solucionó un error de `Cannot GET /login` al corregir las redirecciones para que apuntaran a la ruta correcta con prefijo: `/auth/login`.
-    *   ✅ Se corrigió un error de `PrismaClientInitializationError` que resultó ser un nombre de modelo incorrecto en una consulta (`prisma.subscription` en lugar de `prisma.userSubscription`).
-    *   ✅ Se solucionó un error de `Failed to lookup view` al separar los layouts de administración y públicos y actualizar los controladores para que usaran el layout correcto.
-
----
-
-## **Flujo del Alumno (Diagrama)**
-*   ... (Contenido sin cambios) ...
+### Problemas Conocidos y Tareas Pendientes
+-   **Error de Email "Relay Not Permitted":** El servidor de correo configurado actualmente solo permite enviar correos desde su propio dominio (ej: `percyalvarez.com`). Falla al intentar enviar notificaciones a usuarios con otros dominios (ej: `student@academiaai.com`).
+    -   **Solución Temporal:** El `seed.js` fue actualizado para usar un correo del dominio autorizado (`student@percyalvarez.com`) para permitir las pruebas.
+    -   **Solución Definitiva:** Se debe configurar el proveedor de correo para autorizar el envío desde otros dominios (mediante registros SPF/DKIM).
+-   **Bug de Renderizado en Perfil de Usuario:** Persiste un problema visual donde el menú lateral (sidebar) no se muestra en la página `/profile/edit`, a pesar de que el código del controlador, la vista y el layout parecen ser correctos.
+    -   **Próximo Paso:** Requiere una depuración manual en el entorno de desarrollo, posiblemente inspeccionando el DOM y los estilos aplicados en tiempo de ejecución para identificar la causa raíz.

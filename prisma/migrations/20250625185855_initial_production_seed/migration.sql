@@ -26,6 +26,8 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT 'STUDENT',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "emailVerified" TIMESTAMP(3),
+    "emailVerificationToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -47,7 +49,10 @@ CREATE TABLE "Course" (
     "studyHoursPerDay" DOUBLE PRECISION,
     "additionalMaterialInfo" TEXT,
     "aiSystemPrompt" TEXT,
-    "n8nWebhookUrl" TEXT,
+    "aiProvider" TEXT,
+    "aiModelName" TEXT,
+    "aiApiKey" TEXT,
+    "aiTemperature" DOUBLE PRECISION,
     "requirements" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -94,6 +99,7 @@ CREATE TABLE "SubscriptionPlan" (
     "durationMonths" INTEGER NOT NULL,
     "bonusMonths" INTEGER,
     "price" DECIMAL(65,30) NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'USD',
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -109,9 +115,8 @@ CREATE TABLE "UserSubscription" (
     "startDate" TIMESTAMP(3) NOT NULL,
     "endDate" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT false,
-    "paymentMethod" TEXT,
-    "paymentId" TEXT,
-    "paymentReference" TEXT,
+    "paymentGateway" TEXT,
+    "transactionId" TEXT,
     "isPaymentVerified" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -222,6 +227,21 @@ CREATE TABLE "MediaFile" (
 );
 
 -- CreateTable
+CREATE TABLE "ChatMessage" (
+    "id" TEXT NOT NULL,
+    "content" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "lessonId" TEXT NOT NULL,
+    "fileUrl" TEXT,
+    "fileType" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "repliedToUserId" TEXT,
+
+    CONSTRAINT "ChatMessage_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "_CourseTags" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL
@@ -229,6 +249,9 @@ CREATE TABLE "_CourseTags" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_emailVerificationToken_key" ON "User"("emailVerificationToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Course_title_key" ON "Course"("title");
@@ -253,6 +276,9 @@ CREATE UNIQUE INDEX "Tag_slug_key" ON "Tag"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SubscriptionPlan_name_key" ON "SubscriptionPlan"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserSubscription_transactionId_key" ON "UserSubscription"("transactionId");
 
 -- CreateIndex
 CREATE INDEX "UserSubscription_userId_idx" ON "UserSubscription"("userId");
@@ -289,6 +315,15 @@ CREATE UNIQUE INDEX "MediaFile_path_key" ON "MediaFile"("path");
 
 -- CreateIndex
 CREATE INDEX "MediaFile_userId_idx" ON "MediaFile"("userId");
+
+-- CreateIndex
+CREATE INDEX "ChatMessage_userId_idx" ON "ChatMessage"("userId");
+
+-- CreateIndex
+CREATE INDEX "ChatMessage_courseId_idx" ON "ChatMessage"("courseId");
+
+-- CreateIndex
+CREATE INDEX "ChatMessage_lessonId_idx" ON "ChatMessage"("lessonId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_CourseTags_AB_unique" ON "_CourseTags"("A", "B");
@@ -340,6 +375,15 @@ ALTER TABLE "UserCourseProgress" ADD CONSTRAINT "UserCourseProgress_courseId_fke
 
 -- AddForeignKey
 ALTER TABLE "MediaFile" ADD CONSTRAINT "MediaFile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ChatMessage" ADD CONSTRAINT "ChatMessage_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES "Lesson"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CourseTags" ADD CONSTRAINT "_CourseTags_A_fkey" FOREIGN KEY ("A") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;

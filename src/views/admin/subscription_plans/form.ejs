@@ -46,9 +46,17 @@
                             <div class="form-text">Meses adicionales que se regalan con este plan. Dejar en blanco o 0 si no aplica.</div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label for="price" class="form-label">Precio (Bs.)</label>
+                            <label for="price" class="form-label">Precio</label>
                             <input type="number" class="form-control" id="price" name="price" value="<%= plan.price || '' %>" step="0.01" min="0" required>
                             <div class="form-text">Costo total del plan.</div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="currency" class="form-label">Moneda</label>
+                            <select class="form-select" id="currency" name="currency">
+                                <option value="USD" <%= (plan.currency === 'USD') ? 'selected' : '' %>>USD ($)</option>
+                                <option value="BOB" <%= (plan.currency === 'BOB') ? 'selected' : '' %>>BOB (Bs.)</option>
+                            </select>
+                            <div class="form-text">Moneda del precio.</div>
                         </div>
                     </div>
                     

@@ -1,38 +1,43 @@
 import prisma from '../lib/prisma.js';
 
 export const checkActiveSubscription = async (req, res, next) => {
-  // Permitir acceso a los administradores sin verificar suscripción
-  if (req.user && req.user.role === 'ADMIN') {
-    return next();
+  // El middleware isAuthenticated ya se ejecutó, por lo que req.session.user debe existir.
+  const user = req.session.user;
+
+  // Si por alguna razón no hay usuario en la sesión, isAuthenticated debería haberlo manejado.
+  // Pero como medida de seguridad, si no existe, no hacemos nada y dejamos que falle más adelante si es necesario.
+  if (!user) {
+    // Esto no debería ocurrir si isAuthenticated está antes en la cadena.
+    return res.redirect('/auth/login');
   }
 
-  // Para usuarios no administradores, verificar si están autenticados
-  if (!req.user) {
-    req.flash('error', 'Debes iniciar sesión para acceder a esta página.');
-    return res.redirect('/auth/login');
+  // Los administradores siempre tienen acceso.
+  if (user.role === 'ADMIN') {
+    return next();
   }
 
   try {
     const subscription = await prisma.userSubscription.findFirst({
       where: {
-        userId: req.user.id,
+        userId: user.id,
         isActive: true,
         endDate: {
-          gte: new Date(), // gte = greater than or equal to
+          gte: new Date(),
         },
       },
     });
 
+    // Si no se encuentra una suscripción activa, redirigir a la página de planes.
     if (!subscription) {
-      req.flash('error', 'Tu suscripción ha vencido o no está activa. Por favor, suscríbete para acceder al contenido.');
+      req.flash('error_msg', 'Necesitas una suscripción activa para acceder a este contenido.');
       return res.redirect('/subscription-plans');
     }
 
-    // Si todo está en orden, continuar con la siguiente función en la ruta
+    // Si hay una suscripción activa, permitir el acceso.
     next();
   } catch (error) {
-    console.error('Error checking subscription status:', error);
-    req.flash('error', 'Hubo un problema al verificar tu suscripción. Por favor, intenta de nuevo.');
-    res.redirect('/dashboard'); // O a una página de error genérica
+    console.error('Error al verificar la suscripción:', error);
+    req.flash('error_msg', 'Hubo un problema al verificar tu suscripción.');
+    res.redirect('/dashboard');
   }
 };

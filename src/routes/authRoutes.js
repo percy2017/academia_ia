@@ -4,7 +4,8 @@ import {
   registerUser, 
   renderLoginForm, 
   loginUser, 
-  logoutUser 
+  logoutUser,
+  verifyEmail
 } from '../controllers/authController.js';
 // import { isAuthenticated, isGuest } from '../middleware/authMiddleware.js'; // Will be added later
 
@@ -14,6 +15,8 @@ const router = express.Router();
 // For now, middleware like isGuest and isAuthenticated will be added in a later step
 router.get('/register', renderRegisterForm);
 router.post('/register', registerUser);
+
+router.get('/verify-email', verifyEmail);
 
 router.get('/login', renderLoginForm);
 router.post('/login', loginUser);

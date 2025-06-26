@@ -14,6 +14,7 @@ import userRoutes from './routes/userRoutes.js'; // Import user routes
 import adminRoutes from './routes/adminRoutes.js'; // Import admin routes
 import chatRoutes from './routes/chatRoutes.js'; // Import chat routes
 import subscriptionRoutes from './routes/subscriptionRoutes.js'; // Import subscription routes
+import paymentRoutes from './routes/paymentRoutes.js'; // Import payment routes
 import methodOverride from 'method-override'; // Import method-override
 import flash from 'connect-flash'; // Import connect-flash
 import { getAllCourses } from './controllers/courseController.js'; // Import getAllCourses
@@ -94,6 +95,7 @@ app.use('/courses', courseRoutes); // Mount course routes
 app.use('/admin', adminRoutes); // Mount admin routes
 app.use('/chat', chatRoutes); // Mount chat routes
 app.use('/subscription-plans', subscriptionRoutes); // Mount subscription routes
+app.use('/payment', paymentRoutes); // Mount payment routes
 app.use('/', userRoutes); // Mount user routes (e.g., /profile)
 
 // Root route - Now public and shows course catalog

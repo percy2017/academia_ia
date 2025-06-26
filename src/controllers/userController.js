@@ -30,22 +30,29 @@ export const renderProfilePage = async (req, res) => {
         avatarUrl: user.avatarUrl 
     };
 
-    // Obtener cursos en los que el usuario está inscrito
-    const userEnrollments = await prisma.enrollment.findMany({
-      where: { userId: userId },
+    // Obtener las suscripciones activas del usuario
+    const userSubscriptions = await prisma.userSubscription.findMany({
+      where: { 
+        userId: userId,
+        isActive: true // Solo mostrar suscripciones activas
+      },
       include: {
-        course: true, // Incluir los detalles completos del curso
+        plan: true, // Incluir los detalles del plan de suscripción
       },
       orderBy: {
-        enrolledAt: 'desc',
+        startDate: 'desc',
       },
     });
-    const enrolledCourses = userEnrollments.map(enrollment => enrollment.course);
 
+    // NOTA: Con el modelo de suscripción, el usuario tiene acceso a TODOS los cursos.
+    // La lógica de "cursos inscritos" cambia. Por ahora, pasaremos las suscripciones.
+    // Si quisieras mostrar cursos, tendríamos que obtener todos los cursos publicados.
+    // Vamos a pasar las suscripciones a la vista por ahora.
+    
     res.render('profile', {
       title: 'Mi Perfil - Academia AI',
       user: user,
-      enrolledCourses: enrolledCourses, // Pasar cursos inscritos a la vista
+      subscriptions: userSubscriptions, // Pasar suscripciones a la vista
       currentPath: '/profile',
       success_msg: req.query.success_msg, // Para mostrar mensajes de éxito (ej. después de actualizar)
       messages: req.flash() // Asegurar que los mensajes flash estén disponibles
@@ -78,7 +85,8 @@ export const renderEditProfilePage = async (req, res) => {
       user: user,
       currentPath: '/profile/edit',
       error: req.query.error,
-      success_msg: req.query.success_msg
+      success_msg: req.query.success_msg,
+      layout: 'layouts/main' // Forzar el uso del layout principal
     });
   } catch (error) {
     console.error("Error al renderizar la página de edición de perfil:", error);

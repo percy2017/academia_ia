@@ -12,12 +12,12 @@ router.get('/dashboard', isAuthenticated, getAllCourses);
 
 // @route   GET /courses/:courseId
 // @desc    Get a single course by ID with its lessons
-// @access  Private (assuming only logged-in users can see course details)
-router.get('/:courseId', isAuthenticated, checkActiveSubscription, getCourseById);
+// @access  Private
+router.get('/:courseId', isAuthenticated, getCourseById);
 
 // @route   GET /courses/:courseId/lessons/:lessonId
 // @desc    Get a single lesson by ID
-// @access  Private (assuming only logged-in users can see lesson details)
+// @access  Private (Subscription required)
 router.get('/:courseId/lessons/:lessonId', isAuthenticated, checkActiveSubscription, getLessonById);
 
 export default router;

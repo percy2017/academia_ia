@@ -26,7 +26,8 @@
         <thead>
             <tr>
                 <th>Nombre</th>
-                <th>Precio (Bs.)</th>
+                <th>Precio</th>
+                <th>Moneda</th>
                 <th>Duración (Meses)</th>
                 <th>Bonus (Meses)</th>
                 <th>Estado</th>
@@ -40,6 +41,7 @@
                     <tr>
                         <td><%= plan.name %></td>
                         <td><%= plan.price %></td>
+                        <td><span class="badge bg-secondary"><%= plan.currency %></span></td>
                         <td><%= plan.durationMonths %></td>
                         <td><%= plan.bonusMonths || 'N/A' %></td>
                         <td>
@@ -66,7 +68,7 @@
                 <% }); %>
             <% } else { %>
                 <tr>
-                    <td colspan="7" class="text-center">No hay planes de suscripción creados todavía.</td>
+                    <td colspan="8" class="text-center">No hay planes de suscripción creados todavía.</td>
                 </tr>
             <% } %>
         </tbody>

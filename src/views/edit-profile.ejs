@@ -1,90 +1,190 @@
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-md-8 offset-md-2">
-      <!-- intl-tel-input CSS -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
-      <div class="card">
-        <div class="card-header bg-primary text-white">
-          <h1 class="h3 mb-0"><%= title %></h1>
-        </div>
-        <div class="card-body">
-          <% if (locals.error && locals.error.length > 0) { %>
-            <div class="alert alert-danger" role="alert">
-              <%= locals.error %>
-            </div>
-          <% } %>
-          <% if (locals.success_msg && locals.success_msg.length > 0) { %>
-            <div class="alert alert-success" role="alert">
-              <%= locals.success_msg %>
-            </div>
-          <% } %>
+<%- contentFor('title') %>
+<%= title %> - Academia AI
 
-          <% if (user) { %>
-            <form action="/profile/update" method="POST" enctype="multipart/form-data">
-              <% if (user.avatarUrl) { %>
-                <div class="mb-3 text-center">
-                  <img src="<%= user.avatarUrl %>" alt="Avatar actual" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover; border-radius: 50%;">
-                </div>
-              <% } %>
-              <div class="mb-3">
-                <label for="avatar" class="form-label">Cambiar Avatar (opcional)</label>
-                <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
-              </div>
-              <div class="mb-3">
-                <label for="name" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="name" name="name" value="<%= user.name || '' %>" required>
-              </div>
-              <div class="mb-3">
-                <label for="email" class="form-label">Correo Electrónico (no editable)</label>
-                <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly disabled>
-              </div>
-              <div class="mb-3">
-                <label for="phone" class="form-label">Teléfono</label>
-                <input type="tel" class="form-control" id="phone" name="phone" value="<%= user.phone || '' %>">
-              </div>
-              
-              <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-              <a href="/profile" class="btn btn-secondary">Cancelar</a>
-            </form>
-          <% } else { %>
-            <p>No se pudo cargar la información del usuario para editar.</p>
-          <% } %>
-        </div>
-      </div>
+<%- contentFor('body') %>
+
+<!-- intl-tel-input CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<style>
+    .avatar-upload {
+        position: relative;
+        max-width: 205px;
+        margin: 20px auto;
+    }
+    .avatar-upload .avatar-edit {
+        position: absolute;
+        right: 12px;
+        z-index: 1;
+        top: 10px;
+    }
+    .avatar-upload .avatar-edit input {
+        display: none;
+    }
+    .avatar-upload .avatar-edit input + label {
+        display: inline-block;
+        width: 34px;
+        height: 34px;
+        margin-bottom: 0;
+        border-radius: 100%;
+        background: #FFFFFF;
+        border: 1px solid transparent;
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+        cursor: pointer;
+        font-weight: normal;
+        transition: all .2s ease-in-out;
+        text-align: center;
+    }
+    .avatar-upload .avatar-edit input + label:hover {
+        background: #f1f1f1;
+        border-color: #d6d6d6;
+    }
+    .avatar-upload .avatar-edit input + label:after {
+        content: "\f435";
+        font-family: 'bootstrap-icons';
+        color: #757575;
+        position: absolute;
+        top: 5px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        margin: auto;
+    }
+    .avatar-upload .avatar-preview {
+        width: 192px;
+        height: 192px;
+        position: relative;
+        border-radius: 100%;
+        border: 6px solid #F8F8F8;
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+    }
+    .avatar-upload .avatar-preview > div {
+        width: 100%;
+        height: 100%;
+        border-radius: 100%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+</style>
+
+<div class="container-fluid profile-page">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Editar Perfil</h1>
     </div>
-  </div>
+
+    <%- include('./partials/messages') %>
+
+    <form action="/profile/update" method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <!-- Columna del Avatar -->
+            <div class="col-xl-4">
+                <div class="card mb-4 mb-xl-0">
+                    <div class="card-header">Avatar</div>
+                    <div class="card-body text-center">
+                        <div class="avatar-upload">
+                            <div class="avatar-edit">
+                                <input type='file' id="imageUpload" name="avatar" accept=".png, .jpg, .jpeg" />
+                                <label for="imageUpload"></label>
+                            </div>
+                            <div class="avatar-preview">
+                                <div id="imagePreview" style="background-image: url(<%= user.avatarUrl || '/uploads/media/default-avatar.png' %>);">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="small font-italic text-muted mb-4">JPG o PNG no mayor de 5 MB</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna de Detalles de la Cuenta -->
+            <div class="col-xl-8">
+                <div class="card mb-4">
+                    <div class="card-header">Detalles de la Cuenta</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="small mb-1" for="name">Nombre de usuario</label>
+                            <input class="form-control" id="name" name="name" type="text" placeholder="Ingresa tu nombre" value="<%= user.name || '' %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small mb-1" for="email">Correo Electrónico (no editable)</label>
+                            <input class="form-control" id="email" type="email" value="<%= user.email %>" readonly disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small mb-1" for="phone">Teléfono</label>
+                            <input class="form-control" id="phone" name="phone" type="tel" placeholder="Ingresa tu número de teléfono" value="<%= user.phone || '' %>">
+                        </div>
+                        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                        <a href="/profile" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </div>
+
+                <!-- Card para Cambiar Contraseña -->
+                <div class="card mb-4">
+                    <div class="card-header">Cambiar Contraseña</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="small mb-1" for="currentPassword">Contraseña Actual</label>
+                            <input class="form-control" id="currentPassword" name="currentPassword" type="password" placeholder="Ingresa tu contraseña actual">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small mb-1" for="newPassword">Nueva Contraseña</label>
+                            <input class="form-control" id="newPassword" name="newPassword" type="password" placeholder="Ingresa la nueva contraseña">
+                        </div>
+                        <div class="mb-3">
+                            <label class="small mb-1" for="confirmPassword">Confirmar Nueva Contraseña</label>
+                            <input class="form-control" id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirma la nueva contraseña">
+                        </div>
+                        <button class="btn btn-primary" type="submit">Guardar Contraseña</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
+<%- contentFor('scripts') %>
 <!-- intl-tel-input JS and initialization script -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const phoneEditField = document.querySelector("#phone"); // ID del input de teléfono en esta vista
-    if (phoneEditField) {
-      const phoneInputEdit = window.intlTelInput(phoneEditField, {
-        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-        initialCountry: "auto",
-        geoIpLookup: callback => {
-          fetch("https://ipapi.co/json")
-            .then(res => res.json())
-            .then(data => callback(data.country_code))
-            .catch(() => callback("us"));
-        },
-        nationalMode: false, // Guarda el número en formato internacional
-        preferredCountries: ['bo', 'pe', 'cl', 'ar', 'br', 'us', 'es'],
-        customPlaceholder: function(selectedCountryPlaceholder, selectedCountryData) {
-          return "e.g. " + selectedCountryPlaceholder;
+document.addEventListener('DOMContentLoaded', function () {
+    // Avatar Preview
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#imagePreview').css('background-image', 'url('+e.target.result +')');
+                $('#imagePreview').hide();
+                $('#imagePreview').fadeIn(650);
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-        // Si el número ya tiene un prefijo guardado, la librería intentará seleccionarlo.
-      });
-
-      // Para asegurar que el valor completo se envíe al actualizar:
-      const formEdit = phoneEditField.closest("form");
-      if (formEdit) {
-        formEdit.addEventListener("submit", function() {
-          phoneEditField.value = phoneInputEdit.getNumber();
-        });
-      }
     }
-  });
+    $("#imageUpload").change(function() {
+        readURL(this);
+    });
+
+    // Intl Tel Input
+    const phoneEditField = document.querySelector("#phone");
+    if (phoneEditField) {
+        const phoneInputEdit = window.intlTelInput(phoneEditField, {
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+            initialCountry: "auto",
+            geoIpLookup: callback => {
+                fetch("https://ipapi.co/json")
+                    .then(res => res.json())
+                    .then(data => callback(data.country_code))
+                    .catch(() => callback("us"));
+            },
+            nationalMode: false,
+            preferredCountries: ['bo', 'pe', 'cl', 'ar', 'br', 'us', 'es'],
+        });
+
+        const form = phoneEditField.closest("form");
+        if (form) {
+            form.addEventListener("submit", function() {
+                phoneEditField.value = phoneInputEdit.getNumber();
+            });
+        }
+    }
+});
 </script>

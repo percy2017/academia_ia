@@ -6,351 +6,425 @@ const prisma = new PrismaClient();
 const generateSlug = (text) => {
   if (!text) return '';
   return text.toString().toLowerCase().trim()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/[^\w-]+/g, '') // Remove all non-word chars
-    .replace(/--+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '').replace(/-+$/, ''); // Trim - from start and end
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '').replace(/-+$/, '');
 };
 
-// --- Helper functions for lesson titles ---
-function getDockerLessonTitle(day) {
-  const titles = [
-    "Despegue en Docker: Conceptos Clave y Arquitectura", "Tu Primer Contenedor: Instalación y Comandos Esenciales", "Imágenes Docker: El Arte de Construir y Compartir",
-    "Gestión Avanzada de Contenedores: Ciclo de Vida y Operaciones", "Dockerfiles Maestros: Creando Entornos Perfectos", "Persistencia Heroica: Volúmenes y Bind Mounts",
-    "Redes en Docker: Conectando tus Microservicios", "Docker Compose: Orquestando Sinfonías de Contenedores", "Registros Públicos y Privados: Tu Arsenal de Imágenes",
-    "Fortaleza Docker: Estrategias de Seguridad en Contenedores", "Optimización Extrema: Imágenes Ligeras y Eficientes", "Docker Swarm: Orquestación Nativa Simplificada",
-    "Kubernetes y Docker: Una Introducción a la Orquestación Avanzada", "Vigilancia y Diagnóstico: Monitoreo y Logging Efectivo", "CI/CD con Sabor a Docker: Automatizando tus Despliegues",
-    "Docker en las Nubes: Despliegue en AWS, Azure y GCP", "Casos de Uso Épicos: Docker en el Mundo Real", "Resolviendo Enigmas: Troubleshooting en Docker",
-    "El Flujo del Desarrollador Dockerizado", "Proyecto Final: Tu Aplicación Contenerizada Brillando"
-  ];
-  return titles[day - 1] || `Tema Avanzado de Docker ${day}`;
-}
+async function upsertCourseWithContent(courseData) {
+  const { title, payload, lessons, questions, tags } = courseData;
+  const searchSlug = generateSlug(title);
 
-function getPHPLessonTitle(day) {
-  const titles = [
-    "PHP: El Renacimiento del Gigante Web y Tu Entorno de Desarrollo", "Sintaxis Fundamental: Variables, Tipos y Constantes", "Operadores y Expresiones: La Lógica de PHP",
-    "Estructuras de Control: Forjando el Flujo de tu Aplicación", "Funciones: Bloques de Código Reutilizables y Poderosos", "Arrays en Profundidad: Colecciones Versátiles",
-    "PHP Orientado a Objetos: Clases, Objetos y Encapsulamiento", "Herencia, Interfaces y Traits: Pilares de la POO Avanzada", "Formularios HTML y PHP: Recogiendo la Voz del Usuario (GET/POST)",
-    "Validación y Saneamiento de Datos: Escudo Contra Entradas Maliciosas", "Sesiones y Cookies: Recordando a tus Usuarios", "Maestría en Ficheros: Lectura, Escritura y Gestión",
-    "PDO: El Puente Universal a tus Bases de Datos", "CRUD con PDO: Dominando las Operaciones de Datos", "Manejo de Errores y Excepciones: Código a Prueba de Fallos",
-    "Composer: Tu Aliado en la Gestión de Dependencias", "APIs REST con PHP: Creando Servicios Web Modernos", "Seguridad Web en PHP: Defiéndete de XSS, SQLi y Más",
-    "Patrones de Diseño Clave en PHP", "Proyecto Final: Tu Aplicación Web PHP Lista para Conquistar"
-  ];
-  return titles[day - 1] || `Tema Avanzado de PHP ${day}`;
-}
-
-function getPythonLessonTitle(day) {
-  const titles = [
-    "Python Cósmico: Tu Lanzamiento al Universo del Código", "Variables, Tipos de Datos y Operadores: Los Átomos de Python", "Strings y Colecciones Fundamentales: Listas y Tuplas",
-    "Diccionarios y Conjuntos: Estructuras de Datos Flexibles", "Control de Flujo: Condicionales y Bucles Estelares", "Funciones: Creando Nebulosas de Código Reutilizable",
-    "Módulos y Paquetes: Importando Galaxias de Funcionalidades", "Programación Orientada a Objetos: Clases y Objetos Celestiales", "Herencia y Polimorfismo: Dinastías de Código en POO",
-    "Explorando el Sistema de Archivos: Lectura y Escritura de Datos", "Manejo de Errores y Excepciones: Agujeros Negros y Cómo Evitarlos", "List Comprehensions y Generadores: Pythonicidad en Acción",
-    "Viajando en el Tiempo: Módulo Datetime", "La Caja de Herramientas Estándar: os, sys, math, random", "Entornos Virtuales y Pip: Aislamiento y Gestión de Proyectos",
-    "Primeros Pasos en la Web: Introducción a Flask", "Análisis de Datos con Pandas: Tablas y Series Superpoderosas", "Visualización de Datos con Matplotlib/Seaborn: Graficando el Universo",
-    "Automatizando el Cosmos: Scripts de Python para Tareas Cotidianas", "Proyecto Final: Tu Constelación de Habilidades en Python"
-  ];
-  return titles[day - 1] || `Tema Avanzado de Python ${day}`;
-}
-
-function getJavaScriptLessonTitle(day) {
-  const titles = [
-    "JavaScript: El Big Bang de la Interactividad Web", "Variables, Tipos de Datos y Operadores: La Esencia de JS", "Control de Flujo: Condicionales y Bucles Dinámicos",
-    "Funciones: Motores de Lógica Reutilizable", "El DOM: Manipulando el Universo HTML", "Eventos: La Respuesta de la Web a la Interacción",
-    "Arrays y Objetos: Colecciones de Poder", "ES6+ Avanzado: Arrow Functions, Destructuring, Spread/Rest", "Programación Asíncrona: Promises y Async/Await",
-    "APIs del Navegador: Fetch, LocalStorage y Más Allá", "Manejo de Errores y Debugging: Encontrando Quásares en tu Código", "Módulos en JavaScript: Organizando tu Cosmos de Código",
-    "Introducción a Node.js: JavaScript del Lado del Servidor", "Frameworks Frontend (Conceptos): React, Angular, Vue", "Herramientas de Desarrollo Modernas: npm, Webpack, Babel",
-    "Pruebas en JavaScript: Asegurando la Calidad de tu Galaxia", "Seguridad en el Frontend: Protegiendo tu Aplicación Espacial", "Optimización y Rendimiento: Haciendo tu Web Supersónica",
-    "Patrones de Diseño en JavaScript", "Proyecto Final: Tu Aplicación Web Interactiva Deslumbrante"
-  ];
-  return titles[day - 1] || `Tema Avanzado de JavaScript ${day}`;
-}
-
-// Helper function to upsert course, its lessons, main quiz, and questions
-async function upsertCourseWithLessonsAndQuiz(courseUniqueSlugOrTitle, coursePayload, lessonsPayload) {
-  const searchSlug = generateSlug(courseUniqueSlugOrTitle);
   const course = await prisma.course.upsert({
     where: { slug: searchSlug },
-    update: coursePayload,
+    update: { ...payload, tags: { connect: tags } },
     create: {
-      ...coursePayload,
-      lessons: { create: lessonsPayload },
-      quizzes: { create: [{ title: `Cuestionario Principal - ${coursePayload.title}`, description: `Cuestionario principal para el curso ${coursePayload.title}.`, quizType: 'KNOWLEDGE_CHECK' }] }
-    },
-    include: { lessons: true, tags: true, quizzes: true },
-  });
-  console.log(`Upserted course: "${course.title}" with ${course.lessons.length} lessons.`);
-
-  let mainQuiz = course.quizzes.find(q => q.title.startsWith('Cuestionario Principal'));
-  if (!mainQuiz && course.id) {
-      mainQuiz = await prisma.quiz.findFirst({where: {courseId: course.id, title: `Cuestionario Principal - ${course.title}`}});
-      if(!mainQuiz){
-          mainQuiz = await prisma.quiz.create({
-              data: { title: `Cuestionario Principal - ${course.title}`, description: `Cuestionario principal para el curso ${course.title}.`, quizType: 'KNOWLEDGE_CHECK', courseId: course.id }
-          });
-          console.log(`Created main quiz for "${course.title}" as it was missing after upsert.`);
+      ...payload,
+      title: title,
+      slug: searchSlug,
+      tags: { connect: tags },
+      lessons: { create: lessons },
+      quizzes: {
+        create: [{
+          title: `Cuestionario Principal - ${title}`,
+          description: `Evaluación completa para el curso ${title}.`,
+          quizType: 'KNOWLEDGE_CHECK',
+          questions: { create: questions }
+        }]
       }
-  }
-  
-  if (mainQuiz) {
-    for (const lesson of lessonsPayload) {
-      await prisma.question.upsert({
-        where: { quizId_order: { quizId: mainQuiz.id, order: lesson.order } },
-        update: { text: `Pregunta actualizada para Lección ${lesson.order}: ${lesson.title}`, options: [{ text: "Opción Correcta (Actualizada)", isCorrect: true }, { text: "Opción B (Actualizada)", isCorrect: false }, { text: "Opción C (Actualizada)", isCorrect: false }], points: 1 },
-        create: { quizId: mainQuiz.id, text: `Pregunta para Lección ${lesson.order}: ${lesson.title}`, options: [{ text: "Opción A (Correcta)", isCorrect: true }, { text: "Opción B", isCorrect: false }, { text: "Opción C", isCorrect: false }], order: lesson.order, points: 1 },
-      });
-    }
-    console.log(`Upserted questions for quiz: "${mainQuiz.title}"`);
-  } else {
-    console.error(`Could not find or create main quiz for course "${course.title}". Questions not seeded.`);
-  }
+    },
+    include: { lessons: true, quizzes: { include: { questions: true } } },
+  });
+
+  console.log(`Curso procesado: "${course.title}" con ${course.lessons.length} lecciones y ${course.quizzes[0]?.questions.length || 0} preguntas.`);
 }
 
 async function main() {
-  console.log('Start seeding for production...');
+  console.log('Iniciando el sembrado de datos para producción...');
 
   // 1. Upsert Users
   const adminPassword = await bcrypt.hash('adminprod123', 10);
   await prisma.user.upsert({
-    where: { email: 'admin@academiaai.com' }, update: { name: 'Administrador Principal', password: adminPassword, role: Role.ADMIN },
-    create: { email: 'admin@academiaai.com', name: 'Administrador Principal', password: adminPassword, role: Role.ADMIN },
+    where: { email: 'admin@academiaai.com' },
+    update: { name: 'Administrador Principal', password: adminPassword, role: Role.ADMIN, emailVerified: new Date() },
+    create: { email: 'admin@academiaai.com', name: 'Administrador Principal', password: adminPassword, role: Role.ADMIN, emailVerified: new Date() },
   });
-  console.log(`Upserted admin user: admin@academiaai.com`);
+  console.log(`Usuario administrador procesado: admin@academiaai.com`);
 
   const studentPassword = await bcrypt.hash('studentprod123', 10);
   await prisma.user.upsert({
-    where: { email: 'student@academiaai.com' }, update: { name: 'Estudiante de Prueba', password: studentPassword, role: Role.STUDENT },
-    create: { email: 'student@academiaai.com', name: 'Estudiante de Prueba', password: studentPassword, role: Role.STUDENT },
+    where: { email: 'student@percyalvarez.com' },
+    update: { name: 'Estudiante de Prueba', password: studentPassword, role: Role.STUDENT, emailVerified: new Date() },
+    create: { email: 'student@percyalvarez.com', name: 'Estudiante de Prueba', password: studentPassword, role: Role.STUDENT, emailVerified: new Date() },
   });
-  console.log(`Upserted student user: student@academiaai.com`);
+  console.log(`Usuario estudiante procesado: student@percyalvarez.com`);
 
-  // Create a dedicated user for the AI agent
   await prisma.user.upsert({
     where: { id: 'ai-agent' },
     update: {},
-    create: {
-      id: 'ai-agent',
-      email: 'ai-agent@academiaai.com',
-      name: 'MentorIA',
-      password: '', // No password needed for the AI agent
-      role: Role.STUDENT, // Or a new role e.g., 'AGENT'
-    },
+    create: { id: 'ai-agent', email: 'ai-agent@academiaai.com', name: 'MentorIA', password: '', role: Role.STUDENT },
   });
-  console.log('Upserted AI Agent user.');
+  console.log('Usuario Agente IA procesado.');
 
   // 2. Upsert Tags
-  const tagWebDev = await prisma.tag.upsert({ where: { slug: 'desarrollo-web' }, update: {name: 'Desarrollo Web'}, create: { name: 'Desarrollo Web', slug: 'desarrollo-web' } });
-  const tagDevOps = await prisma.tag.upsert({ where: { slug: 'devops' }, update: {}, create: { name: 'DevOps', slug: 'devops' } });
-  const tagDocker = await prisma.tag.upsert({ where: { slug: 'docker' }, update: {}, create: { name: 'Docker', slug: 'docker' } });
-  const tagPHP = await prisma.tag.upsert({ where: { slug: 'php' }, update: {}, create: { name: 'PHP', slug: 'php' } });
-  const tagPython = await prisma.tag.upsert({ where: { slug: 'python' }, update: {}, create: { name: 'Python', slug: 'python' } });
-  const tagJavaScript = await prisma.tag.upsert({ where: { slug: 'javascript' }, update: {}, create: { name: 'JavaScript', slug: 'javascript' } });
-  const tagDataScience = await prisma.tag.upsert({ where: { slug: 'ciencia-de-datos'}, update: {name: 'Ciencia de Datos'}, create: { name: 'Ciencia de Datos', slug: 'ciencia-de-datos' }});
-  const tagBackend = await prisma.tag.upsert({ where: { slug: 'backend'}, update: {name: 'Backend'}, create: { name: 'Backend', slug: 'backend' }});
-  const tagFrontend = await prisma.tag.upsert({ where: { slug: 'frontend'}, update: {name: 'Frontend'}, create: { name: 'Frontend', slug: 'frontend' }});
-  console.log('Upserted tags.');
-
-  // --- Course Data ---
-  const commonCourseMaterial = "El alumno tendrá acceso a un VPS en producción para realizar pruebas y experimentos.\nWebmin: https://154.53.42.52:10000\nUser: student\nPass: Academia2025$";
-  const commonAIPrompt = "Eres MentorIA, un tutor experto y amigable para el curso '{{courseTitle}}'. Conoces el progreso del alumno: {{userName}} ({{userEmail}}) ha completado {{courseProgress}}% del curso y su último puntaje en quizzes es {{lastQuizScore}}%. Ayúdalo con sus dudas sobre la lección actual '{{lessonTitle}}', ofreciendo explicaciones claras, ejemplos de código si es pertinente, y motivándolo a continuar. Si la pregunta es muy general, intenta guiarlo hacia el contenido específico del curso o la lección actual. Sé paciente y didáctico.";
-  const lessonsPerCourse = 20;
-
-  // --- Docker Course ---
-  const dockerCourseTitle = "Docker: Contenedores Sin Fronteras";
-  const dockerLessons = [];
-  for (let i = 1; i <= lessonsPerCourse; i++) {
-    dockerLessons.push({
-      title: `Día ${i}: ${getDockerLessonTitle(i)}`,
-      content: `<p>Contenido detallado y creativo para la lección ${i} del curso de Docker: <strong>${getDockerLessonTitle(i)}</strong>.</p><p>En esta sesión, exploraremos a fondo los conceptos y prácticas esenciales para dominar este tema crucial en el mundo de la contenerización. Prepárate para sumergirte en ejemplos prácticos y escenarios del mundo real.</p>`,
-      order: i,
-    });
+  const tagsData = [
+      { name: 'Desarrollo Web', slug: 'desarrollo-web' }, { name: 'DevOps', slug: 'devops' },
+      { name: 'Docker', slug: 'docker' }, { name: 'PHP', slug: 'php' }, { name: 'Python', slug: 'python' },
+      { name: 'JavaScript', slug: 'javascript' }, { name: 'Ciencia de Datos', slug: 'ciencia-de-datos' },
+      { name: 'Backend', slug: 'backend' }, { name: 'Frontend', slug: 'frontend' }, { name: 'Laravel', slug: 'laravel' },
+      { name: 'Django', slug: 'django' }, { name: 'Express.js', slug: 'express-js' }, { name: 'Bases de Datos', slug: 'bases-de-datos' },
+      { name: 'MySQL', slug: 'mysql' }, { name: 'PostgreSQL', slug: 'postgresql' }, { name: 'Control de Versiones', slug: 'control-de-versiones' },
+      { name: 'GitHub', slug: 'github' }
+  ];
+  for (const tag of tagsData) {
+      await prisma.tag.upsert({ where: { slug: tag.slug }, update: { name: tag.name }, create: tag });
   }
-  const dockerCoursePayload = {
-    title: dockerCourseTitle,
-    slug: generateSlug(dockerCourseTitle),
-    shortDescription: "Domina Docker desde cero y despliega aplicaciones como un profesional. Aprende a construir, gestionar y orquestar contenedores para optimizar tus desarrollos.",
-    description: `<h3>🚀 Docker: Contenedores Sin Fronteras - ¡Tu Pasaporte al Desarrollo Moderno! 🚀</h3>
-    <p>¿Cansado de los "funciona en mi máquina"? ¿Listo para llevar tus habilidades de desarrollo y despliegue al siguiente nivel? Este curso intensivo de <strong>Docker</strong> es tu billete de entrada al mundo de la contenerización, una tecnología que ha revolucionado la forma en que construimos y distribuimos software.</p>
-    <p>Durante un mes transformador, te guiaremos desde los conceptos más fundamentales hasta las técnicas avanzadas de orquestación. Aprenderás a empaquetar tus aplicaciones y todas sus dependencias en unidades portátiles y aisladas llamadas contenedores. Olvídate de los conflictos de versiones y los entornos inconsistentes; con Docker, la consistencia y la eficiencia son la norma.</p>
-    <h4>🌌 ¿Qué Explorarás en esta Odisea Docker?</h4>
-    <ul>
-      <li><strong>Fundamentos Sólidos:</strong> Entenderás la arquitectura de Docker, el ciclo de vida de los contenedores y por qué son superiores a las máquinas virtuales para la mayoría de los casos de uso de aplicaciones.</li>
-      <li><strong>Maestría en Imágenes:</strong> Crearás tus propias imágenes Docker personalizadas y optimizadas utilizando Dockerfiles. Aprenderás a publicarlas y gestionarlas en Docker Hub y registros privados.</li>
-      <li><strong>Orquestación con Docker Compose:</strong> Simplificarás la gestión de aplicaciones multi-contenedor, definiendo y ejecutando entornos complejos con un solo comando.</li>
-      <li><strong>Redes y Almacenamiento Persistente:</strong> Configurarás redes para que tus contenedores se comuniquen entre sí y aprenderás a manejar datos persistentes utilizando volúmenes.</li>
-      <li><strong>Seguridad en Contenedores:</strong> Implementarás las mejores prácticas para asegurar tus contenedores y proteger tus aplicaciones.</li>
-      <li><strong>Integración con CI/CD:</strong> Descubrirás cómo Docker se integra perfectamente en los flujos de trabajo de Integración Continua y Despliegue Continuo.</li>
-    </ul>
-    <p>Este curso no es solo teoría; tendrás acceso a un <strong>VPS en producción</strong> para realizar pruebas y experimentos, aplicando lo aprendido en un entorno real. Al finalizar, serás capaz de dockerizar cualquier aplicación, optimizar tus flujos de desarrollo y prepararte para tecnologías de orquestación más avanzadas como Kubernetes.</p>
-    <p><strong>¡Únete ahora y desata el poder de los contenedores!</strong></p>`,
-    imageUrl: 'http://localhost:4000/uploads/media/OIG1.jpg-1750402625611-909146209.jpg',
-    level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1,
-    studyDaysPerWeek: 5, studyHoursPerDay: 2,
-    requirements: "Computadora con acceso a internet. Se recomiendan conocimientos básicos de línea de comandos, pero no son estrictamente obligatorios.",
-    additionalMaterialInfo: commonCourseMaterial,
-    aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', dockerCourseTitle),
-    aiProvider: 'openai',
-    aiModelName: 'gpt-4o',
-    aiTemperature: 0.7,
-    tags: { connect: [{ slug: 'docker' }, { slug: 'devops' }] },
-  };
-  await upsertCourseWithLessonsAndQuiz(dockerCourseTitle, dockerCoursePayload, dockerLessons);
+  console.log('Etiquetas procesadas.');
 
-  // --- PHP Course ---
-  const phpCourseTitle = "PHP: Arquitecto de la Web Dinámica";
-  const phpLessons = [];
-  for (let i = 1; i <= lessonsPerCourse; i++) {
-    phpLessons.push({
-      title: `Día ${i}: ${getPHPLessonTitle(i)}`,
-      content: `<p>Contenido detallado y creativo para la lección ${i} del curso de PHP: <strong>${getPHPLessonTitle(i)}</strong>.</p><p>Sumérgete en el fascinante mundo de PHP y descubre cómo construir aplicaciones web robustas y escalables. Esta lección te proporcionará las herramientas y conocimientos necesarios.</p>`,
-      order: i,
-    });
-  }
-  const phpCoursePayload = {
-    title: phpCourseTitle,
-    slug: generateSlug(phpCourseTitle),
-    shortDescription: "Conviértete en un maestro del backend con PHP. Desde la sintaxis esencial hasta la creación de APIs RESTful y la integración con bases de datos.",
-    description: `<h3>💎 PHP: Arquitecto de la Web Dinámica - ¡Forja tu Imperio Digital! 💎</h3>
-    <p>PHP, el lenguaje que impulsa una gran parte de la web, sigue siendo una herramienta increíblemente poderosa y relevante en el desarrollo moderno. Este curso completo te llevará de la mano durante un mes para que domines PHP, desde sus fundamentos más básicos hasta la construcción de aplicaciones web complejas, seguras y de alto rendimiento.</p>
-    <p>Exploraremos la Programación Orientada a Objetos (POO) en PHP, cómo interactuar de forma segura y eficiente con bases de datos usando PDO, la gestión de sesiones de usuario, la implementación de medidas de seguridad cruciales y las mejores prácticas que te distinguirán como un desarrollador PHP profesional.</p>
-    <h4>🛠️ ¿Qué Construirás y Dominarás?</h4>
-    <ul>
-      <li><strong>Fundamentos del Lenguaje:</strong> Variables, tipos de datos, operadores, estructuras de control, funciones y manejo de errores. ¡La base de todo gran programador PHP!</li>
-      <li><strong>PHP Orientado a Objetos (POO):</strong> Clases, objetos, herencia, polimorfismo, interfaces y traits. Escribe código modular, reutilizable y fácil de mantener.</li>
-      <li><strong>Interacción con Bases de Datos (PDO):</strong> Conecta tus aplicaciones a bases de datos como MySQL o PostgreSQL. Realiza operaciones CRUD (Crear, Leer, Actualizar, Eliminar) de forma segura.</li>
-      <li><strong>Desarrollo de APIs RESTful:</strong> Aprende a diseñar y construir APIs que puedan ser consumidas por aplicaciones frontend (JavaScript, móviles) y otros servicios.</li>
-      <li><strong>Seguridad Web Esencial:</strong> Protege tus aplicaciones contra las vulnerabilidades más comunes como Inyección SQL, Cross-Site Scripting (XSS) y CSRF.</li>
-      <li><strong>Herramientas Modernas del Ecosistema PHP:</strong> Introducción a Composer para la gestión de dependencias y una visión general de cómo funcionan los frameworks populares como Laravel o Symfony.</li>
-    </ul>
-    <p>Con acceso a un <strong>VPS en producción</strong>, podrás poner en práctica cada concepto aprendido. Si aspiras a ser un desarrollador backend competente, crear tus propios temas o plugins para CMS como WordPress, o simplemente quieres entender cómo funciona la web por dentro, este curso de PHP es tu inversión más inteligente.</p>
-    <p><strong>¡Inscríbete y empieza a codificar el futuro de la web!</strong></p>`,
-    imageUrl: 'http://localhost:4000/uploads/media/_f7763ac3-ff3d-49a0-a719-4a0dc76e20f9.jpg-1750402625600-539998507.jpg',
-    level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1,
-    studyDaysPerWeek: 5, studyHoursPerDay: 2,
-    requirements: "Computadora con acceso a internet, editor de código (VS Code recomendado) y un entorno de desarrollo PHP local (XAMPP, WAMP, MAMP o Docker).",
-    additionalMaterialInfo: commonCourseMaterial,
-    aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', phpCourseTitle),
-    aiProvider: 'openai',
-    aiModelName: 'gpt-4o',
-    aiTemperature: 0.7,
-    tags: { connect: [{ slug: 'php' }, { slug: 'desarrollo-web' }, { slug: 'backend' }] },
-  };
-  await upsertCourseWithLessonsAndQuiz(phpCourseTitle, phpCoursePayload, phpLessons);
-  
-  // --- Python Course ---
-  const pythonCourseTitle = "Python: De Cero a Héroe del Código Versátil";
-  const pythonLessons = [];
-  for (let i = 1; i <= lessonsPerCourse; i++) {
-    pythonLessons.push({
-      title: `Día ${i}: ${getPythonLessonTitle(i)}`,
-      content: `<p>Contenido detallado y creativo para la lección ${i} del curso de Python: <strong>${getPythonLessonTitle(i)}</strong>.</p><p>Python es tu llave para desbloquear un universo de posibilidades. En esta lección, daremos un paso más hacia la maestría de este lenguaje increíblemente versátil.</p>`,
-      order: i,
-    });
-  }
-  const pythonCoursePayload = {
-    title: pythonCourseTitle,
-    slug: generateSlug(pythonCourseTitle),
-    shortDescription: "Desata el poder de Python. Aprende a programar desde lo básico y explora sus aplicaciones en desarrollo web, ciencia de datos y automatización.",
-    description: `<h3>🐍 Python: De Cero a Héroe del Código Versátil - ¡Tu Aventura Multi-Dominio! 🐍</h3>
-    <p>Python se ha consolidado como uno de los lenguajes de programación más populares y demandados del mundo, ¡y por una buena razón! Su sintaxis elegante, su vasta colección de bibliotecas y su increíble versatilidad lo hacen ideal para principiantes y expertos por igual. Este curso de un mes está diseñado para llevarte desde los fundamentos absolutos hasta la capacidad de construir proyectos Python significativos.</p>
-    <p>No importa si tu interés radica en el desarrollo web, la ciencia de datos, el machine learning, la automatización de tareas o la ciberseguridad; Python te abre las puertas. Cubriremos la sintaxis esencial, la programación orientada a objetos, el manejo de archivos, la interacción con APIs y te introduciremos a algunas de las bibliotecas más influyentes del ecosistema Python.</p>
-    <h4>🎯 ¿Qué Lograrás en este Viaje con Python?</h4>
-    <ul>
-      <li><strong>Dominio de los Fundamentos:</strong> Variables, tipos de datos, operadores, estructuras de control (condicionales y bucles), funciones y módulos.</li>
-      <li><strong>Programación Orientada a Objetos (POO) en Python:</strong> Aprende a pensar en términos de objetos y clases para escribir código más organizado, modular y reutilizable.</li>
-      <li><strong>Manipulación de Datos y Archivos:</strong> Trabaja con diferentes tipos de archivos (texto, CSV, JSON) y aprende las bases para el análisis de datos.</li>
-      <li><strong>Introducción al Desarrollo Web:</strong> Descubre cómo Python se utiliza para construir aplicaciones web y APIs con frameworks como Flask o Django.</li>
-      <li><strong>Automatización de Tareas:</strong> Escribe scripts para automatizar tareas repetitivas y hacer tu vida más fácil.</li>
-      <li><strong>Vistazo a la Ciencia de Datos y Machine Learning:</strong> Entiende por qué Python es el lenguaje preferido en estos campos y conoce bibliotecas como NumPy, Pandas y Scikit-learn.</li>
-    </ul>
-    <p>Con el apoyo de un <strong>VPS en producción</strong> para tus prácticas, este curso te proporcionará una base sólida y la confianza para seguir explorando el vasto universo de Python. ¡Es hora de que te conviertas en un héroe del código!</p>
-    <p><strong>¡Inscríbete y empieza a programar tu futuro con Python!</strong></p>`,
-    imageUrl: 'http://localhost:4000/uploads/media/OIG2.1bWXVPXfgJZYbOJC8.jpg-1750404536229-89272098.jpg',
-    level: CourseLevel.BEGINNER, status: CourseStatus.PUBLISHED, durationMonths: 1,
-    studyDaysPerWeek: 5, studyHoursPerDay: 2,
-    requirements: "Computadora con acceso a internet, editor de código (VS Code recomendado) y Python (versión 3.7 o superior) instalado.",
-    additionalMaterialInfo: commonCourseMaterial,
-    aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', pythonCourseTitle),
-    aiProvider: 'openai',
-    aiModelName: 'gpt-4o',
-    aiTemperature: 0.7,
-    tags: { connect: [{ slug: 'python' }, { slug: 'desarrollo-web' }, { slug: 'ciencia-de-datos' }, {slug: 'backend'}] },
-  };
-  await upsertCourseWithLessonsAndQuiz(pythonCourseTitle, pythonCoursePayload, pythonLessons);
+  // --- Generic AI Prompt Template ---
+  const commonAIPrompt = "Eres MentorIA, un tutor experto y amigable para el curso '{{courseTitle}}'. El estudiante es {{userName}} ({{userEmail}}), quien ha completado el {{courseProgress}}% del curso y su último puntaje en los cuestionarios es de {{lastQuizScore}}%. Tu tarea es ayudarlo con sus dudas sobre la lección actual: '{{lessonTitle}}'. Proporciona explicaciones claras y concisas, ejemplos de código prácticos si es relevante, y anímalo a seguir adelante. Si la pregunta del estudiante es muy general o se desvía del tema, guíalo amablemente de regreso al contenido de la lección actual. Tu tono debe ser siempre paciente, alentador y didáctico.";
 
-  // --- JavaScript Course ---
-  const javaScriptCourseTitle = "JavaScript: El Alma Interactiva de la Web";
-  const javaScriptLessons = [];
-  for (let i = 1; i <= lessonsPerCourse; i++) {
-    javaScriptLessons.push({
-      title: `Día ${i}: ${getJavaScriptLessonTitle(i)}`,
-      content: `<p>Contenido detallado y creativo para la lección ${i} del curso de JavaScript: <strong>${getJavaScriptLessonTitle(i)}</strong>.</p><p>JavaScript es el motor de la web moderna. En esta lección, profundizaremos en sus capacidades para crear experiencias de usuario dinámicas e interactivas.</p>`,
-      order: i,
-    });
+  // --- Courses Data ---
+
+  const courses = [
+    // 1. Docker
+    {
+      title: "Docker: De Cero a Héroe de los Contenedores",
+      payload: {
+        shortDescription: "Domina Docker y orquesta contenedores como un profesional del DevOps.",
+        description: "<h3>🚀 Docker: De Cero a Héroe de los Contenedores 🚀</h3><p>Sumérgete en el universo de la contenerización con Docker. Este curso no es solo un tutorial; es una inmersión profunda que te transformará en un arquitecto de aplicaciones modernas, portátiles y escalables. Aprenderás a empaquetar cualquier aplicación, sin importar su complejidad, en contenedores ligeros y eficientes. Olvídate del 'funciona en mi máquina'; con Docker, funcionará en todas partes. Desde los conceptos fundamentales como imágenes y volúmenes, hasta la orquestación de múltiples servicios con Docker Compose y la exploración de clústeres con Swarm, este curso te dará el conocimiento y la confianza para revolucionar tu flujo de desarrollo y despliegue. Al finalizar, no solo sabrás usar Docker, sino que pensarás en contenedores.</p>",
+        imageUrl: null,
+        level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora con acceso a internet y conocimientos básicos de la línea de comandos.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Portainer: https://portainer.percyalvarez.com\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'docker' }, { slug: 'devops' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: ${[
+          "Fundamentos de la Contenerización", "Instalación y Tu Primer Contenedor", "Imágenes Docker: El ADN de tus Apps", "Comandos Esenciales de Gestión",
+          "Creando Imágenes a Medida con Dockerfiles", "Persistencia de Datos con Volúmenes", "Networking: Conectando Contenedores", "Orquestación Sencilla con Docker Compose",
+          "Multi-stage Builds: Optimizando Imágenes", "Docker Hub y Registros Privados", "Seguridad en el Ecosistema Docker", "Introducción a Docker Swarm",
+          "Gestión de Secretos y Configuraciones", "Monitoreo y Logging de Contenedores", "Integración Continua con Docker y GitHub Actions", "Desplegando en un VPS Real",
+          "Resolución de Problemas Comunes (Troubleshooting)", "Patrones de Diseño con Contenedores", "Docker en el Desarrollo Local", "Proyecto Final: Contenerizando una Aplicación Completa"
+        ][i]}`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1}.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Cuál es el propósito principal de un Dockerfile?`,
+        options: [
+          { text: "Definir las instrucciones para construir una imagen de Docker.", isCorrect: true },
+          { text: "Ejecutar un contenedor.", isCorrect: false },
+          { text: "Gestionar las redes entre contenedores.", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 2. PHP
+    {
+      title: "PHP Moderno: El Renacimiento del Gigante Web",
+      payload: {
+        shortDescription: "Redescubre PHP y construye APIs y aplicaciones robustas con las últimas prácticas del lenguaje.",
+        description: "<h3>💎 PHP Moderno: El Renacimiento del Gigante Web 💎</h3><p>PHP ha evolucionado. Lejos de ser solo un lenguaje de scripting, el PHP moderno es rápido, robusto y cuenta con un ecosistema maduro que impulsa una gran parte de la web. En este curso, te embarcarás en un viaje para dominar PHP en su versión más reciente. Dejaremos atrás las viejas prácticas y nos sumergiremos en la Programación Orientada a Objetos, el manejo de dependencias con Composer, la creación de APIs RESTful, y la interacción segura con bases de datos usando PDO. Aprenderás a escribir código limpio, mantenible y seguro, aplicando patrones de diseño que te permitirán construir aplicaciones escalables y profesionales. Este no es el PHP que recuerdas; es el PHP que necesitas conocer hoy.</p>",
+        imageUrl: null,
+        level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, VS Code y un entorno de desarrollo como XAMPP.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'php' }, { slug: 'desarrollo-web' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: ${[
+          "El Ecosistema de PHP 8+", "Sintaxis Fundamental y Tipado Estricto", "Estructuras de Control y Funciones Avanzadas", "Arrays, Iteradores y Colecciones",
+          "Principios de la Programación Orientada a Objetos", "Herencia, Polimorfismo e Interfaces", "Traits y Clases Anónimas", "Composer: El Gestor de Dependencias",
+          "Autoloading con PSR-4", "Manejo de Peticiones HTTP (GET/POST)", "Validación y Sanitización de Datos", "Gestión de Sesiones y Cookies",
+          "Interactuando con el Sistema de Archivos", "PDO: Conexión Segura a Bases de Datos", "CRUD con PHP y MySQL", "Prevención de Inyecciones SQL y XSS",
+          "Creando una API RESTful Básica", "Manejo de Errores y Excepciones", "Introducción a los Patrones de Diseño (Singleton, Factory)", "Proyecto Final: API para un Blog"
+        ][i]}`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1}.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué herramienta se utiliza en PHP moderno para gestionar dependencias?`,
+        options: [
+          { text: "Composer", isCorrect: true },
+          { text: "NPM", isCorrect: false },
+          { text: "PEAR", isCorrect: false },
+          { text: "Pip", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 3. Python
+    {
+      title: "Python Total: De Scripts a Sistemas Complejos",
+      payload: {
+        shortDescription: "Conviértete en un desarrollador Python versátil, desde la ciencia de datos hasta el backend.",
+        description: "<h3>🐍 Python Total: De Scripts a Sistemas Complejos 🐍</h3><p>Python es más que un lenguaje; es una navaja suiza para resolver problemas del mundo real. Este curso te guiará en un viaje completo a través de su ecosistema. Empezarás escribiendo scripts simples para automatizar tareas y, progresivamente, te sumergirás en la programación orientada a objetos para construir aplicaciones estructuradas. Exploraremos su poder en el análisis de datos con Pandas, crearemos visualizaciones impactantes con Matplotlib y construiremos APIs web con Flask. Además, te conectarás con herramientas de automatización como n8n, llevando tus habilidades a un nivel de producción. Al final, no solo sabrás Python, sino que entenderás cómo aplicarlo para construir soluciones robustas y eficientes en diversos campos tecnológicos.</p>",
+        imageUrl: null,
+        level: CourseLevel.BEGINNER, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, VS Code y Python (versión 3.7 o superior) instalado.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción y a n8n para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- n8n: https://n8n.percyalvarez.com/webhook/python\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'python' }, { slug: 'desarrollo-web' }, { slug: 'ciencia-de-datos' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: ${[
+          "Bienvenida al Universo Python", "Variables, Tipos de Datos y Operadores", "Colecciones: Listas, Tuplas y Diccionarios", "Flujos de Control: Condicionales y Bucles",
+          "Funciones: Creando Bloques Reutilizables", "Programación Orientada a Objetos (POO)", "Herencia y Polimorfismo en Python", "Manejo de Archivos y Serialización (JSON)",
+          "Manejo de Errores y Excepciones", "Entornos Virtuales con venv y pip", "Introducción a la Web con Flask", "Análisis de Datos con Pandas",
+          "Visualización de Datos con Matplotlib", "Consumo de APIs REST", "Automatización de Tareas con Scripts", "Testing con unittest",
+          "Introducción a SQLAlchemy para Bases de Datos", "Decoradores y Generadores", "Concurrencia básica con Threading", "Proyecto Final: Dashboard de Datos con Flask"
+        ][i]}`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1}.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué librería es el estándar de facto en Python para el análisis de datos?`,
+        options: [
+          { text: "Pandas", isCorrect: true },
+          { text: "NumPy", isCorrect: false },
+          { text: "Flask", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 4. JavaScript
+    {
+      title: "JavaScript Moderno: El Lenguaje de la Web Interactiva",
+      payload: {
+        shortDescription: "Domina JavaScript, desde la manipulación del DOM hasta las complejidades de async/await y los módulos.",
+        description: "<h3>✨ JavaScript Moderno: El Lenguaje de la Web Interactiva ✨</h3><p>JavaScript es el motor de la web moderna, y este curso es tu mapa para dominarlo por completo. No nos quedaremos en la superficie; profundizaremos en el porqué de las cosas. Entenderás el DOM a un nivel que te permitirá crear interfaces fluidas y dinámicas. Desmitificaremos la asincronía, dominando Promises y async/await para manejar operaciones complejas sin bloquear la experiencia del usuario. Aprenderás a organizar tu código con módulos ES6, a interactuar con APIs usando Fetch, y a aplicar patrones de diseño que harán tu código más robusto y escalable. Este curso te dará las bases sólidas que necesitas para brillar en cualquier framework o librería moderna.</p>",
+        imageUrl: null,
+        level: CourseLevel.INTERMEDIate, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, VS Code y conocimientos básicos de HTML y CSS.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'javascript' }, { slug: 'desarrollo-web' }, { slug: 'frontend' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: ${[
+          "JavaScript: El Corazón de la Web", "Variables (var, let, const) y Tipos de Datos", "Operadores y Coerción de Tipos", "Estructuras de Control y Bucles",
+          "Funciones, Scope y Closures", "Manipulación del DOM: Selección y Modificación", "Eventos del DOM: Captura y Propagación", "Arrays y sus Métodos Avanzados",
+          "Objetos: Propiedades, Métodos y Prototipos", "ES6+: Arrow Functions, Destructuring y Spread Operator", "Asincronía: Callbacks y el Event Loop", "Promesas: Gestionando el Futuro",
+          "Async/Await: Sintaxis Asíncrona Limpia", "Fetch API para Peticiones HTTP", "Manejo de Errores con try...catch", "Módulos de JavaScript (ESM)",
+          "Almacenamiento Web: localStorage y sessionStorage", "Introducción a las Herramientas de Desarrollo del Navegador", "Patrones de Diseño en JS (Module, Observer)", "Proyecto Final: Una Aplicación de Tareas Interactiva"
+        ][i]}`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1}.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué método de array se usa para crear un nuevo array con todos los elementos que pasan una prueba?`,
+        options: [
+          { text: ".filter()", isCorrect: true },
+          { text: ".map()", isCorrect: false },
+          { text: ".forEach()", isCorrect: false },
+          { text: ".reduce()", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 5. Laravel
+    {
+      title: "Laravel: El Framework para Artesanos de la Web",
+      payload: {
+        shortDescription: "Construye aplicaciones PHP elegantes y escalables con el framework más querido por la comunidad.",
+        description: "<h3>🎨 Laravel: El Framework para Artesanos de la Web 🎨</h3><p>Laravel es más que un framework; es una filosofía de desarrollo que prioriza la elegancia, la simplicidad y la productividad. En este curso exhaustivo de 3 meses, te convertirás en un verdadero artesano de Laravel. Iremos más allá de la documentación para explorar el núcleo del framework: el contenedor de servicios, los facades, y el ciclo de vida de la petición. Dominarás Eloquent ORM para interactuar con tu base de datos de una forma expresiva y potente. Construirás interfaces dinámicas con Blade y Livewire, y crearás APIs robustas para servir a cualquier cliente. Cubriremos temas avanzados como el programador de tareas, las colas de trabajo, el testing y la autenticación con Laravel Sanctum. Al finalizar, estarás preparado para construir aplicaciones profesionales, complejas y de alto rendimiento.</p>",
+        imageUrl: null,
+        level: CourseLevel.ADVANCED, status: CourseStatus.PUBLISHED, durationMonths: 3, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, XAMPP, VS Code y conocimientos sólidos de PHP (se recomienda el curso de PHP Moderno).",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'laravel' }, { slug: 'php' }, { slug: 'backend' }, { slug: 'desarrollo-web' }],
+      lessons: Array.from({ length: 60 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de Laravel`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de Laravel.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 60 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué componente de Laravel es responsable de convertir las URLs amigables en llamadas a controladores?`,
+        options: [
+          { text: "El Enrutador (Router)", isCorrect: true },
+          { text: "El Motor de Plantillas Blade", isCorrect: false },
+          { text: "El ORM Eloquent", isCorrect: false },
+          { text: "El Contenedor de Servicios", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 6. Django
+    {
+      title: "Django: Desarrollo Web de Alto Rendimiento",
+      payload: {
+        shortDescription: "Construye aplicaciones web seguras y escalables con el framework 'para perfeccionistas con fechas de entrega'.",
+        description: "<h3>🚀 Django: Desarrollo Web de Alto Rendimiento 🚀</h3><p>Django es un framework web de alto nivel que fomenta el desarrollo rápido y el diseño limpio y pragmático. En este curso intensivo, te sumergirás en la filosofía 'Baterías Incluidas' de Django. Aprenderás a aprovechar su potente ORM para modelar datos complejos, su sistema de administración autogenerado para gestionar tu contenido sin esfuerzo, y su robusto sistema de seguridad para proteger tus aplicaciones. Pasaremos de los fundamentos, como el enrutamiento y las vistas, a temas avanzados como las vistas basadas en clases, el framework de testing, y el despliegue en producción. Al final del curso, serás capaz de construir aplicaciones web completas, desde blogs y tiendas de comercio electrónico hasta redes sociales, de una manera estructurada, segura y eficiente.</p>",
+        imageUrl: null,
+        level: CourseLevel.ADVANCED, status: CourseStatus.PUBLISHED, durationMonths: 3, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, VS Code y conocimientos sólidos de Python (se recomienda el curso de Python Total).",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'django' }, { slug: 'python' }, { slug: 'backend' }, { slug: 'desarrollo-web' }],
+      lessons: Array.from({ length: 60 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de Django`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de Django.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 60 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: En Django, ¿cómo se llama el componente que maneja la lógica de negocio y la interacción con la base de datos?`,
+        options: [
+          { text: "Modelos (Models)", isCorrect: true },
+          { text: "Vistas (Views)", isCorrect: false },
+          { text: "Plantillas (Templates)", isCorrect: false },
+          { text: "Formularios (Forms)", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 7. Express.js
+    {
+      title: "Express.js: APIs Minimalistas, Rendimiento Máximo",
+      payload: {
+        shortDescription: "Construye APIs rápidas y flexibles con el framework backend por excelencia de Node.js.",
+        description: "<h3>⚡ Express.js: APIs Minimalistas, Rendimiento Máximo ⚡</h3><p>En el mundo de Node.js, Express es el rey indiscutible de los frameworks backend. Su filosofía minimalista y sin opiniones te da la libertad de construir APIs exactamente como las necesitas. En este curso, te sumergirás en el arte de construir servidores web eficientes. Aprenderás a gestionar el enrutamiento de forma avanzada, a crear y encadenar middlewares para procesar peticiones, y a servir contenido estático y dinámico. Nos enfocaremos en construir APIs RESTful robustas, seguras y bien estructuradas, listas para ser consumidas por cualquier aplicación frontend. Cubriremos la validación de datos, el manejo de errores, y la integración con bases de datos como MongoDB y PostgreSQL. Al finalizar, tendrás un dominio completo de Express para levantar cualquier tipo de servicio backend que puedas imaginar.</p>",
+        imageUrl: null,
+        level: CourseLevel.ADVANCED, status: CourseStatus.PUBLISHED, durationMonths: 3, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora, internet, VS Code y conocimientos sólidos de JavaScript y Node.js (se recomienda el curso de JavaScript Moderno).",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'express-js' }, { slug: 'javascript' }, { slug: 'backend' }, { slug: 'desarrollo-web' }],
+      lessons: Array.from({ length: 60 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de Express.js`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de Express.js.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 60 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: En Express, ¿qué función se utiliza para registrar un middleware que se ejecuta en cada petición?`,
+        options: [
+          { text: "app.use()", isCorrect: true },
+          { text: "app.get()", isCorrect: false },
+          { text: "app.listen()", isCorrect: false },
+          { text: "app.route()", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 8. MySQL
+    {
+      title: "MySQL: El Fundamento de los Datos",
+      payload: {
+        shortDescription: "Domina la base de datos relacional más popular del mundo, desde queries simples hasta un diseño avanzado.",
+        description: "<h3>📊 MySQL: El Fundamento de los Datos 📊</h3><p>Toda gran aplicación se sostiene sobre una base de datos sólida, y MySQL es el pilar de millones de ellas. Este curso te enseñará a hablar el lenguaje de los datos: SQL. Empezarás con las sentencias más básicas para consultar y manipular información. Rápidamente, avanzarás hacia consultas complejas, uniendo tablas, agrupando resultados y utilizando subconsultas para extraer inteligencia de tus datos. Aprenderás a diseñar esquemas de bases de datos normalizados y eficientes, a crear índices para optimizar el rendimiento y a asegurar la integridad de tus datos con transacciones. Al finalizar, tendrás una comprensión profunda de cómo funcionan las bases de datos relacionales y la habilidad para gestionar y consultar datos con total confianza.</p>",
+        imageUrl: null,
+        level: CourseLevel.BEGINNER, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora con acceso a internet.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- phpMyAdmin: https://phpmyadmin.percyalvarez.com\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'mysql' }, { slug: 'bases-de-datos' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de MySQL`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de MySQL.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué sentencia SQL se utiliza para recuperar datos de una base de datos?`,
+        options: [
+          { text: "SELECT", isCorrect: true },
+          { text: "INSERT", isCorrect: false },
+          { text: "UPDATE", isCorrect: false },
+          { text: "DELETE", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 9. PostgreSQL
+    {
+      title: "PostgreSQL: La Base de Datos para Proyectos Robustos",
+      payload: {
+        shortDescription: "Descubre por qué PostgreSQL es la elección de los desarrolladores para aplicaciones escalables y fiables.",
+        description: "<h3>🐘 PostgreSQL: La Base de Datos para Proyectos Robustos 🐘</h3><p>PostgreSQL no es solo otra base de datos; es un sistema de gestión de bases de datos objeto-relacional potente y de código abierto con más de 30 años de desarrollo activo que le han ganado una sólida reputación por su fiabilidad, robustez de características y rendimiento. En este curso, irás más allá de las consultas básicas para explorar las características que hacen único a PostgreSQL: tipos de datos avanzados como JSONB y arrays, la capacidad de escribir funciones personalizadas, y su increíble extensibilidad. Aprenderás a modelar datos complejos de manera eficiente y a optimizar consultas para manejar grandes volúmenes de información. Este curso es para aquellos que buscan construir aplicaciones que no solo funcionen, sino que perduren y escalen con el tiempo.</p>",
+        imageUrl: null,
+        level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora con acceso a internet y conocimientos básicos de SQL.",
+        additionalMaterialInfo: "Tendrás acceso a un VPS en producción para tus experimentos:\n- pgAdmin: https://pgadmin.percyalvarez.com\n- Webmin: https://154.53.42.52:10000\n- User: student\n- Pass: Academia2025$",
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'postgresql' }, { slug: 'bases-de-datos' }, { slug: 'backend' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de PostgreSQL`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de PostgreSQL.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué tipo de dato en PostgreSQL es altamente eficiente para almacenar y consultar documentos JSON?`,
+        options: [
+          { text: "JSONB", isCorrect: true },
+          { text: "JSON", isCorrect: false },
+          { text: "TEXT", isCorrect: false },
+          { text: "VARCHAR", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    },
+    // 10. GitHub
+    {
+      title: "GitHub: Colaboración y Control de Versiones Maestro",
+      payload: {
+        shortDescription: "Domina Git y GitHub para gestionar tus proyectos y colaborar en equipos de cualquier tamaño.",
+        description: "<h3>🐙 GitHub: Colaboración y Control de Versiones Maestro 🐙</h3><p>El control de versiones es una habilidad no negociable para cualquier desarrollador serio, y Git es el estándar de la industria. Este curso te llevará desde los conceptos básicos de Git hasta los flujos de trabajo colaborativos avanzados en GitHub. Aprenderás a crear repositorios, hacer commits, crear ramas y fusionar cambios. Pero no nos detendremos ahí. Exploraremos el poder de las Pull Requests para la revisión de código, gestionaremos conflictos como un profesional, y utilizaremos GitHub Actions para automatizar tus flujos de trabajo de CI/CD. Entenderás cómo contribuir a proyectos de código abierto y cómo gestionar tus propios proyectos de manera eficiente y profesional. Al final, GitHub no será solo un lugar donde guardas tu código, sino tu centro de operaciones para el desarrollo de software.</p>",
+        imageUrl: null,
+        level: CourseLevel.BEGINNER, status: CourseStatus.PUBLISHED, durationMonths: 1, studyDaysPerWeek: 5, studyHoursPerDay: 2,
+        requirements: "Computadora con acceso a internet.",
+        additionalMaterialInfo: null,
+        aiSystemPrompt: commonAIPrompt,
+      },
+      tags: [{ slug: 'github' }, { slug: 'control-de-versiones' }, { slug: 'devops' }],
+      lessons: Array.from({ length: 20 }, (_, i) => ({
+        title: `Día ${i + 1}: Lección de GitHub`,
+        content: `<p>Contenido detallado para la lección del día ${i + 1} de GitHub.</p>`,
+        order: i + 1,
+      })),
+      questions: Array.from({ length: 20 }, (_, i) => ({
+        text: `Pregunta del Día ${i + 1}: ¿Qué comando de Git se utiliza para crear una nueva rama?`,
+        options: [
+          { text: "git branch <nombre-rama>", isCorrect: false },
+          { text: "git checkout -b <nombre-rama>", isCorrect: true },
+          { text: "git new-branch <nombre-rama>", isCorrect: false },
+          { text: "git commit -b <nombre-rama>", isCorrect: false },
+        ],
+        order: i + 1,
+        points: 10,
+      })),
+    }
+  ];
+
+  for (const course of courses) {
+    await upsertCourseWithContent(course);
   }
-  const javaScriptCoursePayload = {
-    title: javaScriptCourseTitle,
-    slug: generateSlug(javaScriptCourseTitle),
-    shortDescription: "Domina JavaScript, el lenguaje esencial de la web. Aprende desde la manipulación del DOM hasta conceptos avanzados de ES6+ y desarrollo frontend/backend.",
-    description: `<h3>✨ JavaScript: El Alma Interactiva de la Web - ¡Crea Experiencias Asombrosas! ✨</h3>
-    <p>JavaScript es el lenguaje de programación que da vida a la web. Si quieres crear sitios web interactivos, aplicaciones web dinámicas, o incluso aventurarte en el desarrollo de backend con Node.js, dominar JavaScript es absolutamente esencial. Este curso de un mes te sumergirá en el ecosistema de JavaScript, desde los fundamentos hasta las características modernas y las mejores prácticas.</p>
-    <p>Aprenderás a manipular el Document Object Model (DOM) para cambiar dinámicamente el contenido y la apariencia de tus páginas, a manejar eventos del usuario, a trabajar con datos de forma asíncrona utilizando Promises y Async/Await, y a organizar tu código de manera eficiente. También exploraremos conceptos de ES6+ que han transformado la forma en que escribimos JavaScript.</p>
-    <h4>💡 ¿Qué Iluminarás con tus Conocimientos de JavaScript?</h4>
-    <ul>
-      <li><strong>Fundamentos Sólidos del Lenguaje:</strong> Variables (let, const, var), tipos de datos, operadores, estructuras de control, funciones y scope.</li>
-      <li><strong>Manipulación del DOM:</strong> Selecciona elementos HTML, modifica su contenido, atributos y estilos. Crea y elimina elementos dinámicamente.</li>
-      <li><strong>Manejo de Eventos:</strong> Haz que tus páginas respondan a las acciones del usuario (clics, teclado, movimientos del ratón, etc.).</li>
-      <li><strong>Programación Asíncrona:</strong> Entiende y utiliza Promises y Async/Await para manejar operaciones que toman tiempo, como peticiones a APIs (Fetch API).</li>
-      <li><strong>JavaScript Moderno (ES6+):</strong> Arrow functions, template literals, destructuring, spread/rest operators, módulos y clases.</li>
-      <li><strong>Introducción a Node.js y Frameworks Frontend:</strong> Comprende cómo JavaScript se extiende más allá del navegador y los conceptos básicos detrás de librerías/frameworks populares como React, Angular o Vue.</li>
-    </ul>
-    <p>Con el invaluable recurso de un <strong>VPS en producción</strong> para tus proyectos y experimentos, estarás más que preparado para enfrentar cualquier desafío de desarrollo web. Este curso es tu plataforma de lanzamiento para convertirte en un desarrollador JavaScript competente y creativo.</p>
-    <p><strong>¡Inscríbete y empieza a programar la web del futuro, hoy mismo!</strong></p>`,
-    imageUrl: 'http://localhost:4000/uploads/media/_fc0c8155-00e9-4ca3-9fef-74f48ecd6ded.jpg-1750474920160-222716170.jpg',
-    level: CourseLevel.INTERMEDIATE, status: CourseStatus.PUBLISHED, durationMonths: 1,
-    studyDaysPerWeek: 5, studyHoursPerDay: 2,
-    requirements: "Computadora con acceso a internet y un editor de código (VS Code recomendado). Conocimientos básicos de HTML y CSS son muy recomendables.",
-    additionalMaterialInfo: commonCourseMaterial,
-    aiSystemPrompt: commonAIPrompt.replace('{{courseTitle}}', javaScriptCourseTitle),
-    aiProvider: 'openai',
-    aiModelName: 'gpt-4o',
-    aiTemperature: 0.7,
-    tags: { connect: [{ slug: 'javascript' }, { slug: 'desarrollo-web' }, { slug: 'frontend' }, { slug: 'backend' }] },
-  };
-  await upsertCourseWithLessonsAndQuiz(javaScriptCourseTitle, javaScriptCoursePayload, javaScriptLessons);
 
   // 5. Create Subscription Plans
   await prisma.subscriptionPlan.upsert({where: { name: 'Mensual Productivo' },update: {price: 24.99, isActive: true, durationMonths: 1, bonusMonths: 0},create: { name: 'Mensual Productivo', durationMonths: 1, price: 24.99, isActive: true },});
   await prisma.subscriptionPlan.upsert({where: { name: 'Trimestral Imparable' },update: {price: 64.99, isActive: true, durationMonths: 3, bonusMonths: 0},create: { name: 'Trimestral Imparable', durationMonths: 3, price: 64.99, isActive: true },});
   await prisma.subscriptionPlan.upsert({where: { name: 'Semestral Maestro (6+1)' },update: {price: 119.99, isActive: true, durationMonths: 6, bonusMonths: 1},create: { name: 'Semestral Maestro (6+1)', durationMonths: 6, bonusMonths: 1, price: 119.99, isActive: true },});
   await prisma.subscriptionPlan.upsert({where: { name: 'Anual Leyenda (12+2)' },update: {price: 199.99, isActive: true, durationMonths: 12, bonusMonths: 2},create: { name: 'Anual Leyenda (12+2)', durationMonths: 12, bonusMonths: 2, price: 199.99, isActive: true },});
-  console.log('Upserted subscription plans.');
-  
-  // 6. Create a UserSubscription for the student
-  const studentUser = await prisma.user.findUnique({where: {email: 'student@academiaai.com'}});
-  const annualPlan = await prisma.subscriptionPlan.findUnique({where: {name: 'Anual Leyenda (12+2)'}});
-  if (studentUser && annualPlan) {
-      const subscriptionId = `seed_sub_${studentUser.id}_${annualPlan.id}_prod`;
-      await prisma.userSubscription.upsert({
-          where: { id: subscriptionId },
-          update: { 
-            endDate: new Date(new Date().setMonth(new Date().getMonth() + annualPlan.durationMonths + (annualPlan.bonusMonths || 0))), 
-            isActive: true, 
-          },
-          create: { 
-            id: subscriptionId, 
-            userId: studentUser.id, 
-            planId: annualPlan.id, 
-            startDate: new Date(), 
-            endDate: new Date(new Date().setMonth(new Date().getMonth() + annualPlan.durationMonths + (annualPlan.bonusMonths || 0))), 
-            isActive: true, 
-            paymentMethod: 'admin_grant_prod', 
-            isPaymentVerified: true
-          }
-      });
-      console.log(`Upserted active production subscription for ${studentUser.email} to plan ${annualPlan.name}`);
-  }
+  console.log('Planes de suscripción procesados.');
 
-  console.log('Seeding for production finished.');
+  console.log('Omitiendo creación de suscripción para el estudiante con fines de prueba.');
+  console.log('Sembrado de datos para producción finalizado.');
 }
 
 main()

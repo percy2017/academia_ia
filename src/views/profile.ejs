@@ -2,12 +2,12 @@
 Mi Cuenta - Academia AI
 <%- contentFor('body') %>
 
-<div class="container-fluid mt-4 profile-page">
-    <div class="row">
+<div class="container-fluid profile-page">
+    <!-- <div class="row">
         <div class="col-12">
             <h1 class="h2 mb-4">Mi Cuenta</h1>
         </div>
-    </div>
+    </div> -->
 
     <% if (messages && messages.success_msg && messages.success_msg.length > 0) { %>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -54,41 +54,35 @@ Mi Cuenta - Academia AI
             </div>
         </div>
 
-        <!-- Sección de Mis Cursos -->
+        <!-- Sección de Mis Suscripciones -->
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Mis Cursos Inscritos</h5>
+                <h5 class="mb-0">Mis Suscripciones</h5>
             </div>
             <div class="card-body">
-                <% if (enrolledCourses && enrolledCourses.length > 0) { %>
+                <% if (subscriptions && subscriptions.length > 0) { %>
                     <div class="table-responsive">
-                        <table class="table table-hover" id="myCoursesTable">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th style="width: 10%;">Imagen</th>
-                                    <th>Título del Curso</th>
-                                    <th>Descripción</th>
-                                    <th style="width: 15%;">Acción</th>
+                                    <th>Plan</th>
+                                    <th>Fecha de Inicio</th>
+                                    <th>Fecha de Vencimiento</th>
+                                    <th>Estado</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% enrolledCourses.forEach(course => { %>
+                                <% subscriptions.forEach(sub => { %>
                                     <tr>
+                                        <td><%= sub.plan.name %></td>
+                                        <td><%= new Date(sub.startDate).toLocaleDateString('es-ES') %></td>
+                                        <td><%= new Date(sub.endDate).toLocaleDateString('es-ES') %></td>
                                         <td>
-                                            <% if (course.imageUrl) { %>
-                                                <img src="<%= course.imageUrl %>" alt="<%= course.title %>" class="img-fluid" style="max-height: 50px; object-fit: cover; border-radius: .25rem;">
+                                            <% if (sub.isActive) { %>
+                                                <span class="badge bg-success">Activa</span>
                                             <% } else { %>
-                                                <div style="width: 100%; height: 50px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center; border-radius: .25rem;">
-                                                    <small class="text-muted">Sin img</small>
-                                                </div>
+                                                <span class="badge bg-warning">Inactiva</span>
                                             <% } %>
-                                        </td>
-                                        <td><%= course.title %></td>
-                                        <td><%= course.description ? course.description.substring(0, 100) + (course.description.length > 100 ? '...' : '') : 'N/A' %></td>
-                                        <td>
-                                            <a href="/courses/<%= course.id %>" class="btn btn-sm btn-primary">
-                                                <i class="bi bi-eye-fill me-1"></i>Ir al Curso
-                                            </a>
                                         </td>
                                     </tr>
                                 <% }); %>
@@ -97,7 +91,7 @@ Mi Cuenta - Academia AI
                     </div>
                 <% } else { %>
                     <div class="alert alert-info mb-0" role="alert">
-                        Aún no te has inscrito en ningún curso. ¡<a href="/" class="alert-link">Explora nuestro catálogo de cursos</a> y comienza a aprender!
+                        No tienes ninguna suscripción activa. ¡<a href="/subscription-plans" class="alert-link">Ver planes de suscripción</a> para acceder a todos nuestros cursos!
                     </div>
                 <% } %>
             </div>
@@ -111,26 +105,6 @@ Mi Cuenta - Academia AI
 
 <%- contentFor('scripts') %>
 <script>
-    $(document).ready(function() {
-        if ($('#myCoursesTable').length && $.fn.DataTable) { // Verificar que la tabla y DataTables existan
-            try {
-                $('#myCoursesTable').DataTable({
-                    "language": {
-                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-                    },
-                    "order": [], 
-                    "pageLength": 5,
-                    "lengthMenu": [ [5, 10, 25, -1], [5, 10, 25, "Todos"] ],
-                    "autoWidth": false, // Puede ayudar con el layout
-                    "responsive": true // Para mejor adaptación en móviles
-                });
-                console.log("DataTables para 'Mis Cursos' inicializado.");
-            } catch (e) {
-                console.error("Error inicializando DataTables para 'Mis Cursos':", e);
-            }
-        } else {
-            if (!$('#myCoursesTable').length) console.log("Tabla #myCoursesTable no encontrada.");
-            if (!$.fn.DataTable) console.log("DataTables plugin no está cargado en jQuery.");
-        }
-    });
+    // El script de DataTables para la tabla de cursos ya no es necesario aquí.
+    // Se puede añadir uno nuevo si se desea paginación/búsqueda para las suscripciones.
 </script>
