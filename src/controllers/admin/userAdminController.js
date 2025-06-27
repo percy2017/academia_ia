@@ -1,4 +1,6 @@
 import prisma from '../../lib/prisma.js';
+import { sendEmail } from '../../lib/emailService.js';
+import crypto from 'crypto';
 
 const availableRoles = ['STUDENT', 'ADMIN']; // Roles disponibles para la edición
 
@@ -187,5 +189,82 @@ export const updateUser = async (req, res) => {
             actionUrl: `/admin/users/${id}?_method=PUT`,
             messages: req.flash() // Mostrar el error_msg que acabamos de poner
         });
+    }
+};
+
+// Reenviar correo de verificación desde el panel de admin
+export const resendUserVerificationEmail = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await prisma.user.findUnique({ where: { id } });
+
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/admin/users');
+        }
+
+        if (user.emailVerified) {
+            req.flash('info_msg', `El correo de ${user.email} ya ha sido verificado.`);
+            return res.redirect('/admin/users');
+        }
+
+        // Generar un nuevo token y actualizar el usuario
+        const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { emailVerificationToken },
+        });
+
+        // Reenviar el correo de verificación
+        const verificationUrl = `${req.protocol}://${req.get('host')}/auth/verify-email?token=${emailVerificationToken}`;
+        const subject = 'Verificación de correo electrónico de Academia AI (enviado por un administrador)';
+        const html = `
+            <h1>Hola ${user.name},</h1>
+            <p>Un administrador ha solicitado un nuevo enlace de verificación para tu cuenta en Academia AI. Por favor, haz clic en el siguiente enlace para verificar tu dirección de correo electrónico:</p>
+            <a href="${verificationUrl}">${verificationUrl}</a>
+            <br>
+            <p>Si no esperabas esto, puedes ignorar este correo.</p>
+            <p>El equipo de Academia AI</p>
+        `;
+        
+        await sendEmail(user.email, subject, html);
+
+        req.flash('success_msg', `Se ha enviado un nuevo correo de verificación a ${user.email}.`);
+        res.redirect('/admin/users');
+
+    } catch (error) {
+        console.error(`Error al reenviar correo de verificación para el usuario ${id}:`, error);
+        req.flash('error_msg', 'Error al intentar reenviar el correo.');
+        res.redirect('/admin/users');
+    }
+};
+
+// Eliminar un usuario
+export const deleteUser = async (req, res) => {
+    const { id } = req.params;
+
+    // Medida de seguridad: no permitir que un admin se elimine a sí mismo.
+    if (id === req.session.user.id) {
+        req.flash('error_msg', 'No puedes eliminar tu propia cuenta de administrador.');
+        return res.redirect('/admin/users');
+    }
+
+    try {
+        const userToDelete = await prisma.user.findUnique({ where: { id } });
+        if (!userToDelete) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/admin/users');
+        }
+
+        await prisma.user.delete({
+            where: { id },
+        });
+
+        req.flash('success_msg', `El usuario ${userToDelete.email} ha sido eliminado exitosamente.`);
+        res.redirect('/admin/users');
+    } catch (error) {
+        console.error(`Error deleting user ${id}:`, error);
+        req.flash('error_msg', 'Error al eliminar el usuario.');
+        res.redirect('/admin/users');
     }
 };

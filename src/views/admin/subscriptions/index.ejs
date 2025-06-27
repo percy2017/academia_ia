@@ -44,50 +44,44 @@
             </tr>
         </thead>
         <tbody>
-            <% if (subscriptions && subscriptions.length > 0) { %>
-                <% subscriptions.forEach(sub => { %>
-                    <tr>
-                        <td><%= sub.user.name %><br><small class="text-muted"><%= sub.user.email %></small></td>
-                        <td><%= sub.plan.name %></td>
-                        <td>
-                            <% if (sub.isPaymentVerified && sub.isActive) { %>
-                                <span class="badge bg-success">Activa</span>
-                            <% } else if (!sub.isPaymentVerified) { %>
-                                <span class="badge bg-warning">Pendiente de Verificación</span>
-                            <% } else { %>
-                                <span class="badge bg-danger">Inactiva</span>
-                            <% } %>
-                        </td>
-                        <td><%= new Date(sub.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
-                        
-                        <% if (isPendingPage) { %>
-                            <td>
-                                <% if (sub.transactionId) { %>
-                                    <a href="<%= sub.transactionId %>" target="_blank" class="btn btn-sm btn-info">Ver</a>
-                                <% } else { %>
-                                    N/A
-                                <% } %>
-                            </td>
-                        <% } else { %>
-                            <td><%= new Date(sub.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
-                        <% } %>
-
-                        <td>
-                            <% if (isPendingPage) { %>
-                                <form action="/admin/subscriptions/<%= sub.id %>/approve" method="POST" class="d-inline approve-form">
-                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                </form>
-                            <% } else { %>
-                                <a href="/admin/users/<%= sub.userId %>" class="btn btn-sm btn-outline-secondary">Ver Usuario</a>
-                            <% } %>
-                        </td>
-                    </tr>
-                <% }); %>
-            <% } else { %>
+            <% subscriptions.forEach(sub => { %>
                 <tr>
-                    <td colspan="6" class="text-center">No se encontraron suscripciones.</td>
+                    <td><%= sub.user.name %><br><small class="text-muted"><%= sub.user.email %></small></td>
+                    <td><%= sub.plan.name %></td>
+                    <td>
+                        <% if (sub.isPaymentVerified && sub.isActive) { %>
+                            <span class="badge bg-success">Activa</span>
+                        <% } else if (!sub.isPaymentVerified) { %>
+                            <span class="badge bg-warning">Pendiente de Verificación</span>
+                        <% } else { %>
+                            <span class="badge bg-danger">Inactiva</span>
+                        <% } %>
+                    </td>
+                    <td><%= new Date(sub.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                    
+                    <% if (isPendingPage) { %>
+                        <td>
+                            <% if (sub.transactionId) { %>
+                                <a href="<%= sub.transactionId %>" target="_blank" class="btn btn-sm btn-info">Ver</a>
+                            <% } else { %>
+                                N/A
+                            <% } %>
+                        </td>
+                    <% } else { %>
+                        <td><%= new Date(sub.endDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) %></td>
+                    <% } %>
+
+                    <td>
+                        <% if (isPendingPage) { %>
+                            <form action="/admin/subscriptions/<%= sub.id %>/approve" method="POST" class="d-inline approve-form">
+                                <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                            </form>
+                        <% } else { %>
+                            <a href="/admin/users/<%= sub.userId %>" class="btn btn-sm btn-outline-secondary">Ver Usuario</a>
+                        <% } %>
+                    </td>
                 </tr>
-            <% } %>
+            <% }); %>
         </tbody>
     </table>
 </div>

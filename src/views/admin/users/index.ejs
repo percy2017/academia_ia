@@ -42,16 +42,31 @@
                         </span>
                     </td>
                     <td>
-                        <span class="badge bg-<%= user.isActive ? 'success' : 'warning text-dark' %>">
-                            <%= user.isActive ? 'Activo' : 'Inactivo' %>
-                        </span>
+                        <% if (user.emailVerified) { %>
+                            <span class="badge bg-success">Verificado</span>
+                        <% } else { %>
+                            <span class="badge bg-warning text-dark">No Verificado</span>
+                        <% } %>
                     </td>
                     <td><%= new Date(user.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
                     <td>
-                        <a href="/admin/users/<%= user.id %>/edit" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil-square me-1"></i> Editar
+                        <a href="/admin/users/<%= user.id %>/edit" class="btn btn-sm btn-outline-primary" title="Editar usuario">
+                            <i class="bi bi-pencil-square me-1"></i>
                         </a>
-                        <%# Botón de eliminar podría añadirse aquí en el futuro %>
+                        <% if (!user.emailVerified) { %>
+                            <form action="/admin/users/<%= user.id %>/resend-verification" method="POST" class="d-inline ms-1">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Reenviar correo de verificación">
+                                    <i class="bi bi-envelope-at"></i>
+                                </button>
+                            </form>
+                        <% } %>
+                        <% if (locals.user.id !== user.id) { %>
+                        <form action="/admin/users/<%= user.id %>?_method=DELETE" method="POST" class="d-inline ms-1" onsubmit="return confirm('¿Estás seguro de que quieres eliminar a este usuario? Esta acción no se puede deshacer.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar usuario">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        <% } %>
                     </td>
                 </tr>
             <% }); %>

@@ -302,10 +302,6 @@
                             <input type="text" class="form-control" id="aiModelName" name="aiModelName" value="<%= course.aiModelName || '' %>" placeholder="Ej: gpt-4o, gemini-1.5-pro, llama3">
                         </div>
                     </div>
-                    <div class="mb-3" id="ollamaBaseUrlContainer" style="display: <%= course.aiProvider === 'ollama' ? 'block' : 'none' %>;">
-                        <label for="ollamaBaseUrl" class="form-label">URL Base de Ollama</label>
-                        <input type="url" class="form-control" id="ollamaBaseUrl" name="ollamaBaseUrl" value="<%= course.ollamaBaseUrl || '' %>" placeholder="http://tu-vps-ip:11434">
-                    </div>
                     <div class="mb-3" id="aiApiKeyContainer" style="display: <%= course.aiProvider === 'ollama' ? 'none' : 'block' %>;">
                         <label for="aiApiKey" class="form-label">API Key</label>
                         <input type="password" class="form-control" id="aiApiKey" name="aiApiKey" value="<%= course.aiApiKey || '' %>">
@@ -933,19 +929,22 @@
 
     // Show/hide Ollama URL field based on provider selection
     const aiProviderSelect = document.getElementById('aiProvider');
-    const ollamaBaseUrlContainer = document.getElementById('ollamaBaseUrlContainer');
     const aiApiKeyContainer = document.getElementById('aiApiKeyContainer');
 
-    if (aiProviderSelect) {
-      aiProviderSelect.addEventListener('change', function () {
-        if (this.value === 'ollama') {
-          ollamaBaseUrlContainer.style.display = 'block';
-          aiApiKeyContainer.style.display = 'none';
+    function toggleAiProviderFields() {
+        if (!aiProviderSelect || !aiApiKeyContainer) return;
+        
+        if (aiProviderSelect.value === 'ollama') {
+            aiApiKeyContainer.style.display = 'none';
         } else {
-          ollamaBaseUrlContainer.style.display = 'none';
-          aiApiKeyContainer.style.display = 'block';
+            aiApiKeyContainer.style.display = 'block';
         }
-      });
+    }
+
+    if (aiProviderSelect) {
+      aiProviderSelect.addEventListener('change', toggleAiProviderFields);
+      // Run on page load to set initial state
+      toggleAiProviderFields();
     }
 
     // Inicializar EasyMDE para los campos de requisitos e información adicional

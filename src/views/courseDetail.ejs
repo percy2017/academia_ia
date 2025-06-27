@@ -12,7 +12,7 @@
         <%- include('partials/_content-header', { title: course.title, showTTS: true, showLessonToggle: false }) %>
         <div class="card-body">
           <% if (course.imageUrl) { %>
-            <img src="<%= course.imageUrl %>" class="img-fluid rounded mb-3" alt="<%= course.title %>" style="max-height: 400px; width: 100%; object-fit: cover;">
+            <img src="/<%= course.imageUrl %>" class="img-fluid rounded mb-3" alt="<%= course.title %>" style="max-height: 400px; width: 100%; object-fit: cover;">
           <% } %>
           <div class="lead course-description-content mb-3"><%- course.description %></div>
         </div>

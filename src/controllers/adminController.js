@@ -72,7 +72,7 @@ export const createCourse = async (req, res) => {
         durationMonths, studyDaysPerWeek, studyHoursPerDay,
         additionalMaterialInfo, requirements,
         aiSystemPrompt, 
-        aiProvider, aiModelName, aiApiKey, aiTemperature, ollamaBaseUrl
+        aiProvider, aiModelName, aiApiKey, aiTemperature
     } = req.body;
 
     const slug = generateSlug(title);
@@ -119,7 +119,6 @@ export const createCourse = async (req, res) => {
         aiProvider: aiProvider || null,
         aiModelName: aiModelName || null,
         aiTemperature: aiTemperature ? parseFloat(aiTemperature) : null,
-        ollamaBaseUrl: ollamaBaseUrl || null,
     };
 
     // Solo actualizar la API key si se proporciona una nueva.
@@ -237,7 +236,7 @@ export const updateCourse = async (req, res) => {
         durationMonths, studyDaysPerWeek, studyHoursPerDay,
         additionalMaterialInfo, requirements,
         aiSystemPrompt, 
-        aiProvider, aiModelName, aiApiKey, aiTemperature, ollamaBaseUrl,
+        aiProvider, aiModelName, aiApiKey, aiTemperature,
         currentImageUrl 
     } = req.body;
     
@@ -266,7 +265,7 @@ export const updateCourse = async (req, res) => {
     }
     
     // El slug no se actualiza automáticamente para evitar romper URLs.
-    const data = {
+    const dataToUpdate = {
         title,
         shortDescription: shortDescription || null,
         description: description ? sanitizeHtml(description, {
@@ -286,7 +285,7 @@ export const updateCourse = async (req, res) => {
             lowerCaseTags: true
           }
         }) : null,
-        imageUrl: finalImageUrl, // Usar la nueva URL o la actual si no se subió nueva
+        imageUrl: finalImageUrl,
         level: level || 'BEGINNER',
         status: status || 'DRAFT',
         durationMonths: durationMonths ? parseInt(durationMonths, 10) : null,
@@ -297,24 +296,27 @@ export const updateCourse = async (req, res) => {
         aiSystemPrompt: aiSystemPrompt || null,
         aiProvider: aiProvider || null,
         aiModelName: aiModelName || null,
-        aiApiKey: aiApiKey || null,
         aiTemperature: aiTemperature ? parseFloat(aiTemperature) : null,
-        ollamaBaseUrl: ollamaBaseUrl || null,
     };
+
+    // Solo actualizar la API key si se proporciona una nueva (no está vacía)
+    if (aiApiKey) {
+        dataToUpdate.aiApiKey = aiApiKey;
+    }
 
     // Manejar tags: set sobrescribe las relaciones existentes
     if (tags && Array.isArray(tags)) {
-        data.tags = { set: tags.map(tagId => ({ id: tagId })) };
+        dataToUpdate.tags = { set: tags.map(tagId => ({ id: tagId })) };
     } else if (tags) { // Si solo viene un tag
-        data.tags = { set: [{ id: tags }] };
+        dataToUpdate.tags = { set: [{ id: tags }] };
     } else { // Si no se envía ningún tag, se desasocian todos
-        data.tags = { set: [] };
+        dataToUpdate.tags = { set: [] };
     }
 
     try {
         await prisma.course.update({
             where: { id },
-            data
+            data: dataToUpdate
         });
         req.flash('success_msg', 'Curso actualizado exitosamente.');
         res.redirect('/admin/courses');
@@ -327,7 +329,7 @@ export const updateCourse = async (req, res) => {
 
         const allTags = await prisma.tag.findMany({ orderBy: { name: 'asc' } });
         // Reconstruir el objeto course con los datos que se intentaron guardar
-        const courseDataForForm = { ...req.body, id, tags: data.tags.set.map(t => ({id: t.id})) }; // Simplificado, idealmente cargar los objetos Tag completos
+        const courseDataForForm = { ...req.body, id, tags: dataToUpdate.tags.set.map(t => ({id: t.id})) }; // Simplificado, idealmente cargar los objetos Tag completos
 
         res.render('admin/courses/form', {
             course: courseDataForForm,

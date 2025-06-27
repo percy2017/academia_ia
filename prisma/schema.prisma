@@ -32,7 +32,7 @@ model User {
   tokenLogs            UserCourseTokenLog[]   // Nueva relación
   // authoredCourses      Course[]               @relation("AuthoredCourses") // Eliminado por ahora
   uploadedMedia        MediaFile[]            @relation("UploadedMedia")
-  chatMessages         ChatMessage[]
+  sentMessages         ChatMessage[]
 }
 
 enum Role {
@@ -310,8 +310,9 @@ enum CourseCompletionStatus {
 model ChatMessage {
   id        String   @id @default(cuid())
   content   String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  senderId  String?  // Ahora es opcional
+  sender    User?    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  source    String   @default("USER") // "USER" o "AI"
   courseId  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessonId  String
@@ -321,7 +322,7 @@ model ChatMessage {
   createdAt DateTime @default(now())
   repliedToUserId String? // ID del usuario al que la IA está respondiendo
 
-  @@index([userId])
+  @@index([senderId])
   @@index([courseId])
   @@index([lessonId])
 }

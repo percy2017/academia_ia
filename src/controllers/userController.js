@@ -72,7 +72,7 @@ export const renderEditProfilePage = async (req, res) => {
     const userId = req.session.user.id;
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, email: true, phone: true, avatarUrl: true } // Incluir avatarUrl
+      select: { name: true, email: true, phone: true, avatarUrl: true, role: true } // Incluir role
     });
 
     if (!user) {
@@ -85,8 +85,7 @@ export const renderEditProfilePage = async (req, res) => {
       user: user,
       currentPath: '/profile/edit',
       error: req.query.error,
-      success_msg: req.query.success_msg,
-      layout: 'layouts/main' // Forzar el uso del layout principal
+      success_msg: req.query.success_msg
     });
   } catch (error) {
     console.error("Error al renderizar la página de edición de perfil:", error);

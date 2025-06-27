@@ -16,7 +16,7 @@ Academia AI es una plataforma de e-learning personalizada construida con Node.js
 - **Seguridad:** `bcrypt` (hashing), `express-session` con `connect-pg-simple` (sesiones)
 - **Gestión de Archivos:** `multer`
 - **Notificaciones por Correo:** `nodemailer`
-- **Variables de Entorno:** `dotenv`
+- **Variables de Entorno:** `dotenv`, `cross-env`
 - **Procesamiento de Markdown:** `marked`, `sanitize-html`
 - **Dependencias Adicionales:** `connect-flash`, `method-override`, `@google/generative-ai`, LangChain.
 
@@ -51,17 +51,15 @@ Academia AI es una plataforma de e-learning personalizada construida con Node.js
 3.  **Configurar la Base de Datos:**
     -   Asegúrate de tener PostgreSQL en ejecución.
     -   Crea un archivo `.env` a partir de `.env.example` y configura las variables `DATABASE_URL` y `EMAIL_HOST`, `EMAIL_USER`, etc.
-    -   **Importante:** Si es la primera vez, elimina la carpeta `prisma/migrations` si existe.
-    -   Crea y aplica la migración inicial:
+    -   **Importante:** Si es la primera vez o quieres una base de datos limpia, ejecuta:
         ```bash
-        npx prisma migrate dev --name init
+        npx prisma migrate reset
         ```
-4.  **Poblar la Base de Datos con Datos de Producción:**
+        Este comando borrará la base de datos, aplicará todas las migraciones y ejecutará el `seed`.
+4.  **Poblar la Base de Datos (si no se usó `migrate reset`):**
     ```bash
     npx prisma db seed
     ```
-    Este comando creará 9 cursos detallados, usuarios de prueba (admin y student) y planes de suscripción.
-
 5.  **Iniciar el Servidor de Desarrollo:**
     ```bash
     npm run dev
@@ -72,29 +70,45 @@ Academia AI es una plataforma de e-learning personalizada construida con Node.js
 
 ## Roadmap de Desarrollo
 
+### Fase R: Refactorización y Mejoras de Admin (Sesión 26/06/2025)
+- **Estado:** ✅ **COMPLETADA**
+- **Resumen:** Sesión enfocada en la refactorización de la arquitectura del Agente de IA, la solución de bugs de UI y la adición de funcionalidades clave en el panel de administración para mejorar la gestión de usuarios.
+- **Logros y Funcionalidades:**
+    -   **Refactorización del Agente de IA:** Se tomó la decisión arquitectónica de **eliminar al Agente de IA como un registro en la tabla `User`**. Esto implicó:
+        -   Modificar el `schema.prisma` para que los `ChatMessage` ya no requieran un `senderId` (haciéndolo opcional) y añadiendo un campo `source` para identificar si el mensaje proviene de un "USER" o de la "AI".
+        -   Aplicar una nueva migración a la base de datos (`agent-refactor`).
+        -   Actualizar el `seed.js` para eliminar la creación del usuario `ai-agent`.
+        -   Refactorizar el `socketHandler.js` para manejar la nueva lógica de guardado de mensajes y la consulta del historial de chat.
+        -   Ajustar el frontend en `lessonDetail.ejs` para renderizar los mensajes basándose en la nueva `source`.
+    -   **Solución de Bug de Renderizado en Perfil:** Se corrigió un bug crítico que impedía que el menú lateral (sidebar) se renderizara en la página de "Editar Perfil". El problema se debía a que la consulta del controlador no incluía el `role` del usuario, impidiendo que la vista condicional del sidebar mostrara las opciones.
+    -   **Mejoras de Gestión de Usuarios (Admin):**
+        -   **Reenvío de Correo de Verificación:** Se implementó la funcionalidad para que el administrador pueda reenviar el correo de verificación a los usuarios no verificados directamente desde la tabla de gestión de usuarios.
+        -   **Eliminación de Usuarios:** Se añadió un botón y la lógica de backend correspondiente para permitir al administrador eliminar usuarios, con una confirmación de seguridad y una regla que impide la auto-eliminación.
+    -   **Solución de Envío de Correos en Desarrollo:** Para resolver el problema de "Relay Not Permitted" y facilitar las pruebas, se implementó **Ethereal.email**. Ahora, en modo desarrollo (`npm run dev`), los correos se capturan y se muestra un enlace de previsualización en la consola en lugar de intentar un envío real. El envío real solo se activa en producción (`npm start`).
+    -   **Mejoras de UI/UX:**
+        -   Se simplificó el menú desplegable del usuario en la barra de navegación superior para eliminar enlaces redundantes con el sidebar.
+        -   Se ajustó el estilo del campo de teléfono en la página de edición de perfil para que ocupe el 100% del ancho, mejorando la consistencia visual del formulario.
+
 ### Fase P: Refinamiento y Contenido de Producción (Sesión 25/06/2025)
 - **Estado:** ✅ **COMPLETADA**
 - **Resumen:** Se realizó una sesión intensiva de corrección de bugs, mejoras de UI y generación de contenido para dejar la plataforma en un estado más robusto y listo para producción.
 - **Logros y Funcionalidades:**
-    -   **Seed de Producción Detallado:** Se reemplazó el `seed.js` básico por uno de calidad de producción, generando 9 cursos completos con descripciones creativas, temarios extensos (20 a 60 lecciones), y un banco de preguntas inicial para cada uno.
-    -   **Corrección de Flujo de Autenticación:** Se ajustó la lógica de login para que la verificación de email sea obligatoria **solo para usuarios con rol `STUDENT`**, permitiendo a los administradores iniciar sesión sin este paso.
-    -   **Corrección de Flujo de Pago QR:** Se eliminó un bug crítico que permitía a los usuarios crear múltiples suscripciones pendientes para el mismo plan, asegurando que solo exista una intención de compra a la vez.
-    -   **Mejora de UI en Admin (DataTables):** Se implementó la librería **DataTables** en la tabla de gestión de suscripciones del panel de administración, añadiendo funcionalidades de búsqueda, paginación y ordenamiento para una mejor experiencia de gestión.
-    -   **Mejora de UI en Admin (SweetAlert2):** Se reemplazó la alerta nativa `confirm()` del navegador por una notificación moderna y estilizada con **SweetAlert2** al momento de aprobar una suscripción.
-    -   **Rediseño de Perfil de Usuario:** La página de "Editar Perfil" fue completamente rediseñada con una UI más limpia y profesional, utilizando una estructura de dos columnas, previsualización de avatar en tiempo real y añadiendo una sección para el cambio de contraseña.
+    -   **Seed de Producción Detallado:** Se reemplazó el `seed.js` básico por uno de calidad de producción.
+    -   **Corrección de Flujo de Autenticación:** Se ajustó la lógica de login para el rol `STUDENT`.
+    -   **Corrección de Flujo de Pago QR:** Se eliminó un bug de suscripciones pendientes múltiples.
+    -   **Mejora de UI en Admin (DataTables & SweetAlert2):** Se implementaron librerías para mejorar la experiencia en la gestión de suscripciones.
+    -   **Rediseño de Perfil de Usuario:** Se rediseñó la página "Editar Perfil".
 
 ### Fase N: Implementación de Pasarelas de Pago
 - **Estado:** 🟡 **EN PROGRESO**
 - **Resumen:** El flujo de pago manual por QR está funcional y robustecido. La integración con PayPal queda como la principal tarea pendiente.
 - **Tareas Pendientes:**
     1.  **Integración con PayPal:**
-        -   Implementar la lógica para comunicarse con la API de PayPal (crear orden, capturar pago).
-        -   Utilizar el SDK de PayPal en el frontend.
+        -   Implementar la lógica para comunicarse con la API de PayPal.
         -   Activar la suscripción automáticamente tras la confirmación del pago.
 
 ### Problemas Conocidos y Tareas Pendientes
--   **Error de Email "Relay Not Permitted":** El servidor de correo configurado actualmente solo permite enviar correos desde su propio dominio (ej: `percyalvarez.com`). Falla al intentar enviar notificaciones a usuarios con otros dominios (ej: `student@academiaai.com`).
-    -   **Solución Temporal:** El `seed.js` fue actualizado para usar un correo del dominio autorizado (`student@percyalvarez.com`) para permitir las pruebas.
-    -   **Solución Definitiva:** Se debe configurar el proveedor de correo para autorizar el envío desde otros dominios (mediante registros SPF/DKIM).
--   **Bug de Renderizado en Perfil de Usuario:** Persiste un problema visual donde el menú lateral (sidebar) no se muestra en la página `/profile/edit`, a pesar de que el código del controlador, la vista y el layout parecen ser correctos.
-    -   **Próximo Paso:** Requiere una depuración manual en el entorno de desarrollo, posiblemente inspeccionando el DOM y los estilos aplicados en tiempo de ejecución para identificar la causa raíz.
+-   **Error de Email "Relay Not Permitted" en Producción:** El problema de envío de correos a dominios externos persiste, pero **ha sido mitigado en el entorno de desarrollo** mediante el uso de Ethereal.email.
+    -   **Solución para Desarrollo:** ✅ **Implementada.** Los correos se previsualizan en la consola.
+    -   **Solución Definitiva para Producción:** Aún se requiere configurar el proveedor de correo para autorizar el envío desde otros dominios (mediante registros SPF/DKIM) para que los correos reales lleguen a servicios como Gmail, etc.
+-   **Bug de Renderizado en Perfil de Usuario:** ✅ **SOLUCIONADO.**

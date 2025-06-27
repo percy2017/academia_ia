@@ -4,7 +4,9 @@ import {
     listUsers, 
     renderEditUserForm, 
     updateUser,
-    assignUserSubscription // Importar la nueva función
+    assignUserSubscription, // Importar la nueva función
+    resendUserVerificationEmail,
+    deleteUser
 } from '../../controllers/admin/userAdminController.js';
 
 const router = express.Router();
@@ -24,5 +26,11 @@ router.put('/:id', updateUser);
 
 // POST /admin/users/:userId/assign-subscription - Asignar/actualizar suscripción a un usuario
 router.post('/:userId/assign-subscription', assignUserSubscription);
+
+// POST /admin/users/:id/resend-verification - Reenviar correo de verificación
+router.post('/:id/resend-verification', resendUserVerificationEmail);
+
+// DELETE /admin/users/:id - Eliminar un usuario
+router.delete('/:id', deleteUser);
 
 export default router;

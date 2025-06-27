@@ -48,14 +48,15 @@ export default function socketHandler(io) {
         const message = await prisma.chatMessage.create({
           data: {
             content,
-            userId, // Use validated userId from session
+            senderId: userId, // Use validated userId from session
+            source: 'USER',
             courseId,
             lessonId,
             fileUrl,
             fileType,
           },
           include: {
-            user: true,
+            sender: true,
           },
         });
 
@@ -91,13 +92,16 @@ export default function socketHandler(io) {
 
             // Fetch last 10 messages for context, filtered by user
             const chatHistory = await prisma.chatMessage.findMany({
-              where: { 
+              where: {
                 lessonId,
-                userId // CRITICAL: Filter AI context by user
+                OR: [
+                  { senderId: userId },
+                  { repliedToUserId: userId }
+                ]
               },
               orderBy: { createdAt: 'desc' },
               take: 10,
-              include: { user: true }
+              include: { sender: true }
             });
             chatHistory.reverse(); // Oldest first
 
@@ -110,13 +114,14 @@ export default function socketHandler(io) {
             const aiMessage = await prisma.chatMessage.create({
               data: {
                 content: aiResponseContent,
-                userId: 'ai-agent', // Special user ID for the AI agent
+                source: 'AI',
+                senderId: null, // AI has no user record
                 courseId,
                 lessonId,
                 repliedToUserId: userId, // CRITICAL: Link AI message to the user
               },
               include: {
-                user: true,
+                sender: true, // Will be null, but good practice to include
               },
             });
             const roomName = `${lessonId}-user-${userId}`;

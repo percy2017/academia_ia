@@ -60,13 +60,6 @@ async function main() {
   });
   console.log(`Usuario estudiante procesado: student@percyalvarez.com`);
 
-  await prisma.user.upsert({
-    where: { id: 'ai-agent' },
-    update: {},
-    create: { id: 'ai-agent', email: 'ai-agent@academiaai.com', name: 'MentorIA', password: '', role: Role.STUDENT },
-  });
-  console.log('Usuario Agente IA procesado.');
-
   // 2. Upsert Tags
   const tagsData = [
       { name: 'Desarrollo Web', slug: 'desarrollo-web' }, { name: 'DevOps', slug: 'devops' },

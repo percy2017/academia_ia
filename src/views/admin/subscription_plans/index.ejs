@@ -36,41 +36,35 @@
             </tr>
         </thead>
         <tbody>
-            <% if (plans && plans.length > 0) { %>
-                <% plans.forEach(plan => { %>
-                    <tr>
-                        <td><%= plan.name %></td>
-                        <td><%= plan.price %></td>
-                        <td><span class="badge bg-secondary"><%= plan.currency %></span></td>
-                        <td><%= plan.durationMonths %></td>
-                        <td><%= plan.bonusMonths || 'N/A' %></td>
-                        <td>
-                            <% if (plan.isActive) { %>
-                                <span class="badge bg-success">Activo</span>
-                            <% } else { %>
-                                <span class="badge bg-danger">Inactivo</span>
-                            <% } %>
-                        </td>
-                        <td><%= new Date(plan.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric'}) %></td>
-                        <td>
-                            <a href="/admin/subscription-plans/<%= plan.id %>/edit" class="btn btn-sm btn-outline-primary me-1" title="Editar">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                            <form action="/admin/subscription-plans/<%= plan.id %>/toggle-status?_method=POST" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres cambiar el estado de este plan?');">
-                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
-                                <button type="submit" class="btn btn-sm <%= plan.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>" title="<%= plan.isActive ? 'Desactivar' : 'Activar' %>">
-                                    <i class="bi <%= plan.isActive ? 'bi-toggle-off' : 'bi-toggle-on' %>"></i>
-                                </button>
-                            </form>
-                            <%# Considerar si se necesita un botón de eliminar real, o si desactivar es suficiente %>
-                        </td>
-                    </tr>
-                <% }); %>
-            <% } else { %>
+            <% plans.forEach(plan => { %>
                 <tr>
-                    <td colspan="8" class="text-center">No hay planes de suscripción creados todavía.</td>
+                    <td><%= plan.name %></td>
+                    <td><%= plan.price %></td>
+                    <td><span class="badge bg-secondary"><%= plan.currency %></span></td>
+                    <td><%= plan.durationMonths %></td>
+                    <td><%= plan.bonusMonths || 'N/A' %></td>
+                    <td>
+                        <% if (plan.isActive) { %>
+                            <span class="badge bg-success">Activo</span>
+                        <% } else { %>
+                            <span class="badge bg-danger">Inactivo</span>
+                        <% } %>
+                    </td>
+                    <td><%= new Date(plan.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric'}) %></td>
+                    <td>
+                        <a href="/admin/subscription-plans/<%= plan.id %>/edit" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <form action="/admin/subscription-plans/<%= plan.id %>/toggle-status?_method=POST" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que quieres cambiar el estado de este plan?');">
+                            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                            <button type="submit" class="btn btn-sm <%= plan.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>" title="<%= plan.isActive ? 'Desactivar' : 'Activar' %>">
+                                <i class="bi <%= plan.isActive ? 'bi-toggle-off' : 'bi-toggle-on' %>"></i>
+                            </button>
+                        </form>
+                        <%# Considerar si se necesita un botón de eliminar real, o si desactivar es suficiente %>
+                    </td>
                 </tr>
-            <% } %>
+            <% }); %>
         </tbody>
     </table>
 </div>

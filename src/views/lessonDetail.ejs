@@ -353,7 +353,7 @@
         }
         messages.forEach(message => {
           const messageDiv = document.createElement('div');
-          messageDiv.classList.add('chat-message', message.userId === userId ? 'user-message' : 'ai-message', 'mb-2');
+          messageDiv.classList.add('chat-message', message.source === 'USER' ? 'user-message' : 'ai-message', 'mb-2');
           
           // Parse markdown content
           const parsedContent = marked.parse(message.content || '');
@@ -463,7 +463,7 @@
 
           const messageData = {
             content: messageText,
-            userId,
+            senderId: userId,
             courseId,
             lessonId,
             fileUrl,
@@ -483,7 +483,7 @@
         chatEmptyMessage.style.display = 'none'; // Ocultar mensaje de historial vacío
       }
       const messageDiv = document.createElement('div');
-      const isCurrentUser = message.userId === userId;
+      const isCurrentUser = message.source === 'USER';
       messageDiv.classList.add('chat-message', isCurrentUser ? 'user-message' : 'ai-message', 'mb-2');
       
       // Parse markdown content
