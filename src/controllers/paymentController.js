@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma.js';
 import { sendEmail } from '../lib/emailService.js';
+import { io } from '../server.js'; // Importar io
 // @desc    Crear una orden de pago en PayPal
 // @route   POST /payment/paypal/create-order
 // @access  Private
@@ -56,23 +57,12 @@ export const uploadQrReceipt = async (req, res) => {
             data: { transactionId: receiptPath }
         });
 
-        // Enviar notificación por correo al administrador
-        try {
-            const adminEmail = process.env.EMAIL_USER; // Usar el correo del sistema como admin email
-            if (adminEmail) {
-                const subject = `Nuevo Comprobante de Pago Recibido - ${subscription.plan.name}`;
-                const html = `
-                    <h1>Nuevo Comprobante de Pago</h1>
-                    <p>El usuario <strong>${userName}</strong> (Email: ${userEmail}) ha subido un comprobante de pago para la suscripción al plan <strong>${subscription.plan.name}</strong>.</p>
-                    <p>Por favor, verifica la transacción y aprueba la suscripción en el panel de administración.</p>
-                    <p>Puedes ver el comprobante aquí: <a href="${req.protocol}://${req.get('host')}${receiptPath}">Ver Comprobante</a></p>
-                `;
-                await sendEmail(adminEmail, subject, html);
-            }
-        } catch (emailError) {
-            console.error("Fallo al enviar el correo de notificación al admin:", emailError);
-            // No detenemos el flujo si el email falla, pero es importante loguearlo.
-        }
+        // Enviar notificación en tiempo real al admin via Socket.IO
+        io.emit('new-pending-subscription', {
+            userName: userName,
+            planName: subscription.plan.name,
+            timestamp: new Date().toISOString()
+        });
 
         req.flash('success', 'Comprobante enviado correctamente. Tu pago será verificado por un administrador a la brevedad.');
         res.redirect('/profile');

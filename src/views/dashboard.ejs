@@ -44,6 +44,14 @@
               </div>
             <% } %>
             
+            <% if (user && course.progress > 0) { %>
+            <div class="progress mt-2 mb-3" role="progressbar" aria-label="Progreso del curso" aria-valuenow="<%= course.progress.toFixed(0) %>" aria-valuemin="0" aria-valuemax="100" style="height: 20px;">
+              <div class="progress-bar bg-info text-white fw-bold" style="width: <%= Math.round(course.progress) %>%;">
+                <%= Math.round(course.progress) %> %
+              </div>
+            </div>
+            <% } %>
+
             <div class="mt-auto pt-2">
               <a href="/courses/<%= course.slug || course.id %>" class="btn btn-primary w-100">Ver Detalles</a>
             </div>

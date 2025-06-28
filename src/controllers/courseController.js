@@ -33,22 +33,38 @@ const sanitizeMarkdownOutput = (htmlContent) => {
 // @access  Private
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await prisma.course.findMany({
-      where: { status: 'PUBLISHED' }, // Mostrar solo cursos publicados en el dashboard público
-      orderBy: {
-        createdAt: 'desc',
-      },
+    const userId = req.session.user.id;
+
+    let courses = await prisma.course.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { createdAt: 'desc' },
       include: {
-        tags: { // Incluir los tags asociados
-          select: { name: true } // Solo necesitamos el nombre del tag para el dashboard
-        } 
-      }
+        tags: { select: { name: true } },
+        _count: { select: { lessons: true } }, // Contar el total de lecciones
+      },
     });
+
+    // Si hay usuario, obtener su progreso para cada curso
+    if (userId) {
+      const userProgress = await prisma.userCourseProgress.findMany({
+        where: { userId },
+        select: { courseId: true, progressPercentage: true },
+      });
+
+      // Crear un mapa para búsqueda rápida de progreso
+      const progressMap = new Map(userProgress.map(p => [p.courseId, p.progressPercentage]));
+
+      // Añadir el progreso a cada curso
+      courses = courses.map(course => ({
+        ...course,
+        progress: progressMap.get(course.id) || 0, // Default a 0 si no hay progreso
+      }));
+    }
+
     res.render('dashboard', { 
       title: 'Catálogo de Cursos',
       courses,
-      user: req.session.user
-      // El layout se determina automáticamente en main.ejs
+      user: req.session.user,
     });
   } catch (error) {
     console.error('Error fetching courses:', error);
@@ -129,12 +145,39 @@ export const getCourseById = async (req, res) => {
     }
     // --- Fin Lógica de Suscripción ---
 
+    // --- Lógica de Progreso del Usuario ---
+    let userCourseProgress = null;
+    let completedLessons = new Set(); // Usaremos un Set para búsqueda rápida O(1)
+
+    if (req.session.user) {
+      const userId = req.session.user.id;
+
+      // 1. Obtener el progreso general del curso
+      userCourseProgress = await prisma.userCourseProgress.findUnique({
+        where: { userId_courseId: { userId, courseId: course.id } },
+      });
+
+      // 2. Obtener todas las lecciones completadas por el usuario en este curso
+      const completedLessonProgress = await prisma.userLessonProgress.findMany({
+        where: {
+          userId,
+          courseId: course.id,
+          status: 'COMPLETED',
+        },
+        select: { lessonId: true },
+      });
+      
+      completedLessonProgress.forEach(p => completedLessons.add(p.lessonId));
+    }
+    // --- Fin Lógica de Progreso ---
+
     res.render('courseDetail', {
       title: course.title,
       course,
       user: req.session.user,
-      hasActiveSubscription // Pasar la nueva variable a la vista
-      // El layout se determina automáticamente en main.ejs
+      hasActiveSubscription, // Pasar la variable de suscripción
+      userCourseProgress, // Pasar el progreso del curso
+      completedLessons, // Pasar el Set de lecciones completadas
     });
   } catch (error) {
     console.error(`Error fetching course ${req.params.courseId}:`, error);
@@ -148,6 +191,7 @@ export const getCourseById = async (req, res) => {
 export const getLessonById = async (req, res) => {
   try {
     const { lessonId, courseId: courseParam } = req.params; // courseParam puede ser slug o ID
+    const userId = req.session.user ? req.session.user.id : null;
     
     const lesson = await prisma.lesson.findUnique({
       where: { id: lessonId },
@@ -189,6 +233,31 @@ export const getLessonById = async (req, res) => {
       }
       if (currentIndex < lesson.course.lessons.length - 1) {
         nextLesson = lesson.course.lessons[currentIndex + 1];
+      }
+    }
+
+    // Marcar la lección como iniciada si es la primera vez que se accede
+    if (userId) {
+      await prisma.userLessonProgress.upsert({
+        where: { userId_lessonId: { userId, lessonId } },
+        update: { status: 'STARTED' }, // Podríamos añadir un campo lastAccessedAt si quisiéramos
+        create: {
+          userId,
+          lessonId,
+          courseId: lesson.courseId,
+          status: 'STARTED',
+        },
+      });
+    }
+
+    // Verificar si la lección actual está completada por el usuario
+    let isCompleted = false;
+    if (userId) {
+      const lessonProgress = await prisma.userLessonProgress.findUnique({
+        where: { userId_lessonId: { userId, lessonId } },
+      });
+      if (lessonProgress && lessonProgress.status === 'COMPLETED') {
+        isCompleted = true;
       }
     }
 
@@ -245,6 +314,7 @@ export const getLessonById = async (req, res) => {
     res.render('lessonDetail', {
       title: `${lesson.course.title} - ${lesson.title}`,
       lesson,
+      isCompleted, // Pasar el estado de completado a la vista
       courseProgressPercentage,
       quizAttemptsCount,
       lastQuizScoreValue,
@@ -258,5 +328,103 @@ export const getLessonById = async (req, res) => {
   } catch (error) {
     console.error(`Error fetching lesson ${req.params.lessonId}:`, error);
     res.status(500).send('Error al cargar la lección');
+  }
+};
+
+// @desc    Mark a lesson as complete for the user
+// @route   POST /courses/:courseId/lessons/:lessonId/complete
+// @access  Private
+export const markLessonAsComplete = async (req, res) => {
+  const { lessonId, courseId: courseParam } = req.params; // courseParam can be slug or ID
+  const userId = req.session.user.id;
+
+  try {
+    // CRITICAL FIX: Find the course by slug/ID to get the actual ID
+    const course = await prisma.course.findFirst({
+      where: {
+        OR: [
+          { id: courseParam },
+          { slug: courseParam }
+        ]
+      },
+      select: { id: true } // Solo necesitamos el ID
+    });
+
+    if (!course) {
+      req.flash('error_msg', 'No se pudo encontrar el curso para actualizar el progreso.');
+      return res.redirect('back');
+    }
+    const courseId = course.id; // Use the real course ID from now on
+
+    // 1. Marcar la lección como completada
+    await prisma.userLessonProgress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      update: { status: 'COMPLETED', completedAt: new Date() },
+      create: {
+        userId,
+        lessonId,
+        courseId,
+        status: 'COMPLETED',
+        completedAt: new Date(),
+      },
+    });
+
+    // 2. Recalcular el progreso del curso
+    const totalLessonsInCourse = await prisma.lesson.count({
+      where: { courseId },
+    });
+
+    const completedLessonsCount = await prisma.userLessonProgress.count({
+      where: { userId, courseId, status: 'COMPLETED' },
+    });
+
+    const progressPercentage = totalLessonsInCourse > 0
+      ? (completedLessonsCount / totalLessonsInCourse) * 100
+      : 0;
+
+    // 3. Actualizar el progreso general del curso
+    await prisma.userCourseProgress.upsert({
+      where: { userId_courseId: { userId, courseId } },
+      update: {
+        progressPercentage: progressPercentage,
+        completedLessons: completedLessonsCount,
+        status: progressPercentage === 100 ? 'COMPLETED' : 'IN_PROGRESS',
+        completedAt: progressPercentage === 100 ? new Date() : null,
+      },
+      create: {
+        userId,
+        courseId,
+        progressPercentage: progressPercentage,
+        completedLessons: completedLessonsCount,
+        totalLessons: totalLessonsInCourse,
+        status: progressPercentage === 100 ? 'COMPLETED' : 'IN_PROGRESS',
+      },
+    });
+
+    // 4. Encontrar la siguiente lección para redirigir
+    const currentLesson = await prisma.lesson.findUnique({ where: { id: lessonId } });
+    const nextLesson = await prisma.lesson.findFirst({
+      where: {
+        courseId,
+        order: { gt: currentLesson.order },
+      },
+      orderBy: { order: 'asc' },
+    });
+
+    req.flash('success_msg', '¡Lección completada! Sigue así.');
+
+    if (nextLesson) {
+      // Use the original courseParam (slug or ID) for the redirect to maintain URL structure
+      res.redirect(`/courses/${courseParam}/lessons/${nextLesson.id}`);
+    } else {
+      // Si no hay siguiente lección, es la última
+      req.flash('success_msg', '¡Felicidades! Has completado todas las lecciones de este curso.');
+      res.redirect(`/courses/${courseParam}`); // Redirigir a la página principal del curso
+    }
+
+  } catch (error) {
+    console.error('Error marking lesson as complete:', error);
+    req.flash('error_msg', 'Hubo un error al marcar la lección como completada.');
+    res.redirect('back');
   }
 };

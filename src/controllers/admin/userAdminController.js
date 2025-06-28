@@ -22,6 +22,67 @@ export const listUsers = async (req, res) => {
     }
 };
 
+// Ver detalles y progreso de un usuario
+export const viewUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id },
+            include: {
+                subscriptions: {
+                    where: { isActive: true },
+                    include: { plan: true }
+                }
+            }
+        });
+
+        if (!user) {
+            req.flash('error_msg', 'Usuario no encontrado.');
+            return res.redirect('/admin/users');
+        }
+
+        const courseProgress = await prisma.userCourseProgress.findMany({
+            where: { userId: id },
+            include: {
+                course: {
+                    select: {
+                        title: true,
+                        slug: true
+                    }
+                }
+            },
+            orderBy: {
+                course: {
+                    title: 'asc'
+                }
+            }
+        });
+
+        // Re-usamos la vista de formulario, así que necesitamos los datos que espera
+        const activePlans = await prisma.subscriptionPlan.findMany({
+            where: { isActive: true },
+            orderBy: { name: 'asc' }
+        });
+        const currentSubscription = user.subscriptions.length > 0 ? user.subscriptions[0] : null;
+
+        res.render('admin/users/form', {
+            user,
+            courseProgress, // Pasamos el progreso del curso a la vista
+            currentSubscription,
+            activePlans,
+            availableRoles,
+            formTitle: `Viendo a ${user.name || user.email}`,
+            actionUrl: `/admin/users/${user.id}?_method=PUT`,
+            isViewMode: true, // Flag para diferenciar modo vista/edición
+            messages: req.flash()
+        });
+    } catch (error) {
+        console.error(`Error fetching user ${id} for view:`, error);
+        req.flash('error_msg', 'Error al cargar la vista del usuario.');
+        res.redirect('/admin/users');
+    }
+};
+
 // Mostrar formulario para editar usuario
 export const renderEditUserForm = async (req, res) => {
     const { id } = req.params;

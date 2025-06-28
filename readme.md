@@ -70,6 +70,24 @@ Academia AI es una plataforma de e-learning personalizada construida con Node.js
 
 ## Roadmap de Desarrollo
 
+### Fase E: Experiencia de Usuario y Progreso (Sesión 27/06/2025)
+- **Estado:** ✅ **COMPLETADA**
+- **Resumen:** Sesión centrada en mejorar la experiencia del estudiante mediante la implementación de un sistema completo de seguimiento de progreso y la corrección de bugs críticos y de UI.
+- **Logros y Funcionalidades:**
+    -   **Sistema de Progreso de Cursos:** Se implementó un sistema integral para que los usuarios puedan seguir su avance.
+        -   **Marcar Lección como Completada:** Se añadió un botón en la vista de cada lección que permite al usuario marcarla como finalizada.
+        -   **Lógica de Backend Robusta:** Se creó la ruta (`POST /.../complete`) y el controlador (`markLessonAsComplete`) para registrar el progreso en la base de datos, utilizando los modelos `UserLessonProgress` y `UserCourseProgress`.
+        -   **Avance Automático:** Al completar una lección, el sistema redirige automáticamente al usuario a la siguiente, mejorando la fluidez del aprendizaje. Si es la última lección, se muestra un mensaje de felicitación.
+        -   **Visualización de Progreso:** Se añadió una barra de progreso en el catálogo de cursos, mostrando el porcentaje de avance en cada curso que el usuario ha iniciado.
+    -   **Notificaciones de Admin en Tiempo Real:** Se modernizó el sistema de notificaciones para el administrador.
+        -   **Reemplazo de Email por Sockets:** Se eliminó el envío de correos al administrador cuando un usuario sube un comprobante de pago.
+        -   **Implementación de WebSockets:** Ahora, se emite un evento de Socket.IO (`new-pending-subscription`) que es escuchado por el frontend del panel de administración.
+        -   **Notificaciones Toast:** Cualquier administrador conectado recibe una notificación "toast" instantánea en la UI, permitiendo una respuesta más rápida.
+    -   **Solución de Bugs Críticos y de UI:**
+        -   **Bug de Actualización de Cursos:** Se corrigió un error crítico que impedía guardar cambios en los cursos. El problema se debía al envío de campos (`ollamaBaseUrl`) que no existían en el schema de la base de datos. Se refactorizó la función `updateCourse` para que solo procese los campos válidos.
+        -   **Corrección de Imágenes Rotas:** Se solucionó un problema visual por el cual las imágenes de los cursos no se mostraban ni en el panel de administración ni en la vista pública de detalle del curso. Se corrigió la ruta en las etiquetas `<img>` para que fuera absoluta.
+        -   **Corrección del Narrador (TTS):** Se solucionó un bug en la función de Texto a Voz que causaba que la narración se detuviera al encontrar emojis. Se implementó una función para limpiar el texto de caracteres especiales antes de pasarlo a la API de `SpeechSynthesis`.
+
 ### Fase R: Refactorización y Mejoras de Admin (Sesión 26/06/2025)
 - **Estado:** ✅ **COMPLETADA**
 - **Resumen:** Sesión enfocada en la refactorización de la arquitectura del Agente de IA, la solución de bugs de UI y la adición de funcionalidades clave en el panel de administración para mejorar la gestión de usuarios.

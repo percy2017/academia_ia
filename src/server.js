@@ -30,6 +30,8 @@ const server = http.createServer(app); // Create HTTP server
 const io = new Server(server); // Initialize Socket.IO
 const PORT = process.env.PORT || 3000;
 
+export { io }; // Export io instance
+
 // __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

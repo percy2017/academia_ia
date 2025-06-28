@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllCourses, getCourseById, getLessonById } from '../controllers/courseController.js';
+import { getAllCourses, getCourseById, getLessonById, markLessonAsComplete } from '../controllers/courseController.js';
 import { isAuthenticated } from '../middleware/authMiddleware.js';
 import { checkActiveSubscription } from '../middleware/subscriptionMiddleware.js';
 
@@ -19,5 +19,10 @@ router.get('/:courseId', isAuthenticated, getCourseById);
 // @desc    Get a single lesson by ID
 // @access  Private (Subscription required)
 router.get('/:courseId/lessons/:lessonId', isAuthenticated, checkActiveSubscription, getLessonById);
+
+// @route   POST /courses/:courseId/lessons/:lessonId/complete
+// @desc    Mark a lesson as complete for the user
+// @access  Private
+router.post('/:courseId/lessons/:lessonId/complete', isAuthenticated, markLessonAsComplete);
 
 export default router;

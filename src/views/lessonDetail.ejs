@@ -41,6 +41,14 @@
                 <!-- Área de Mensajes -->
                 <div id="chat-messages-area" class="mb-3" style="height: 600px; overflow-y: auto;">
                     <p class="text-muted text-center" id="chat-empty-message">El historial de chat aparecerá aquí.</p>
+                    <!-- Typing Indicator -->
+                    <div id="ai-typing-indicator" class="chat-message ai-message mb-2" style="display: none; width: fit-content;">
+                        <div class="d-flex align-items-center p-2">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
                 </div>
             
                 <!-- Previsualización de Archivo (opcional) -->
@@ -80,27 +88,56 @@
       <div class="card shadow-sm mb-4">
         <%- include('partials/_content-header', { title: lesson.title, showTTS: true, showLessonToggle: true }) %>
         <div class="card-body">
+          <% if (isCompleted) { %>
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              <div>
+                ¡Felicidades! Ya has completado esta lección.
+              </div>
+            </div>
+          <% } %>
           <div class="lesson-content">
             <%- marked.parse(lesson.content || '') %>
           </div>
         </div>
 
-        <div class="card-footer d-flex justify-content-between">
-          <% if (previousLesson) { %>
-            <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= previousLesson.id %>" class="btn btn-outline-secondary">
-              <span data-feather="arrow-left" class="me-1"></span> Anterior Lección
-            </a>
-          <% } else { %>
-            <button class="btn btn-outline-secondary" disabled><span data-feather="arrow-left" class="me-1"></span> Anterior Lección</button>
-          <% } %>
-          
-          <% if (nextLesson) { %>
-            <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= nextLesson.id %>" class="btn btn-primary">
-              Siguiente Lección <span data-feather="arrow-right" class="ms-1"></span>
-            </a>
-          <% } else { %>
-            <button class="btn btn-primary" disabled>Siguiente Lección <span data-feather="arrow-right" class="ms-1"></span></button>
-          <% } %>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <!-- Botón Anterior -->
+          <div>
+            <% if (previousLesson) { %>
+              <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= previousLesson.id %>" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Anterior
+              </a>
+            <% } else { %>
+              <button class="btn btn-outline-secondary" disabled><i class="bi bi-arrow-left"></i> Anterior</button>
+            <% } %>
+          </div>
+
+          <!-- Botón Marcar como Completada -->
+          <div class="text-center">
+            <% if (isCompleted) { %>
+              <button class="btn btn-outline-success" disabled>
+                <i class="bi bi-check-circle-fill me-2"></i>Lección Completada
+              </button>
+            <% } else { %>
+              <form action="/courses/<%= lesson.course.id %>/lessons/<%= lesson.id %>/complete?_method=POST" method="POST" id="complete-lesson-form">
+                <button type="submit" class="btn btn-success">
+                  Marcar como Completada <i class="bi bi-check-lg"></i>
+                </button>
+              </form>
+            <% } %>
+          </div>
+
+          <!-- Botón Siguiente -->
+          <div>
+            <% if (nextLesson) { %>
+              <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= nextLesson.id %>" class="btn btn-primary">
+                Siguiente <i class="bi bi-arrow-right"></i>
+              </a>
+            <% } else { %>
+              <button class="btn btn-primary" disabled>Siguiente <i class="bi bi-arrow-right"></i></button>
+            <% } %>
+          </div>
         </div>
       </div>
 
@@ -331,6 +368,27 @@
     flex-grow: 1;
     height: auto !important;
   }
+
+  /* Typing indicator animation */
+  .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #6c757d;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing-blink 1.4s infinite both;
+  }
+  .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+  }
+  .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+  }
+  @keyframes typing-blink {
+      0% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 0.2; }
+  }
 </style>
 
 <!-- Placeholder para el JavaScript del Chat a Medida -->
@@ -387,6 +445,21 @@
     const chatFilePreviewName = document.getElementById('chat-file-preview-name');
     const chatRemoveFileButton = document.getElementById('chat-remove-file-button');
     const chatEmptyMessage = document.getElementById('chat-empty-message');
+    const aiTypingIndicator = document.getElementById('ai-typing-indicator');
+
+    // Listen for typing indicator events
+    socket.on('ai_is_typing', () => {
+        if (aiTypingIndicator) {
+            aiTypingIndicator.style.display = 'block';
+            chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+        }
+    });
+
+    socket.on('ai_stopped_typing', () => {
+        if (aiTypingIndicator) {
+            aiTypingIndicator.style.display = 'none';
+        }
+    });
 
     // Ejemplo: Manejar clic en adjuntar archivo
     if (chatAttachButton && chatInputFile) {

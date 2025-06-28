@@ -1,24 +1,24 @@
 import prisma from '../lib/prisma.js';
 
 export const getChatHistory = async (req, res) => {
-  const { lessonId } = req.params;
-  const userId = req.session.user.id; // Obtener el ID del usuario de la sesión
-
-  if (!userId) {
-    return res.status(401).json({ error: 'User not authenticated' });
-  }
-
   try {
+    const { lessonId } = req.params;
+    const userId = req.session.user?.id;
+
+    if (!userId) {
+      // Permitir ver el historial si no está logueado, pero estará vacío.
+      // Opcional: podrías querer enviar un 401 si el historial es estrictamente privado.
+      return res.json([]); 
+    }
+
     const messages = await prisma.chatMessage.findMany({
       where: {
         lessonId,
+        // Un mensaje es relevante si el usuario lo envió O si la IA le respondió a él.
         OR: [
-          { userId: userId }, // Mensajes enviados por el usuario.
-          { repliedToUserId: userId } // Mensajes de la IA en respuesta a este usuario.
-        ]
-      },
-      include: {
-        user: true,
+          { senderId: userId },
+          { repliedToUserId: userId }
+        ],
       },
       orderBy: {
         createdAt: 'asc',
@@ -28,7 +28,7 @@ export const getChatHistory = async (req, res) => {
     res.json(messages);
   } catch (error) {
     console.error('Error fetching chat history:', error);
-    res.status(500).json({ error: 'Error fetching chat history' });
+    res.status(500).json({ error: 'Error interno del servidor al obtener el historial.' });
   }
 };
 

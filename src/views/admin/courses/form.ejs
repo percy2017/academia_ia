@@ -3,8 +3,6 @@
 
 <%- contentFor('body') %>
 
-<!-- El contenedor de datos del curso se elimina, los datos se inyectarán directamente en el script. -->
-
 <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
@@ -19,7 +17,8 @@
 
 <form action="<%= actionUrl %>" method="POST" enctype="multipart/form-data">
     <div class="row">
-        <div class="col-12">
+        <%# Columna principal para el contenido con pestañas %>
+        <div class="col-lg-8">
             <ul class="nav nav-tabs mb-3" id="courseFormTabs" role="tablist">
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="true">Detalles</button>
@@ -45,9 +44,7 @@
             <div class="tab-content" id="courseFormTabsContent">
                
                 <div class="tab-pane fade show active mb-3" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
-                  <div class="row">
-                    <div class="col-lg-8">
-                      <div class="row">
+                    <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="title" class="form-label">Título del Curso</label>
                             <input type="text" class="form-control" id="title" name="title" value="<%= course.title || '' %>" required>
@@ -58,38 +55,38 @@
                             <input type="text" class="form-control" id="slug" name="slug" value="<%= course.slug %>" readonly disabled>
                         </div>
                         <% } %>
-                      </div>
-                      <div class="mb-3">
-                          <label for="shortDescription" class="form-label">Descripción Corta</label>
-                          <textarea class="form-control" id="shortDescription" name="shortDescription" rows="2"><%= course.shortDescription || '' %></textarea>
-                      </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shortDescription" class="form-label">Descripción Corta</label>
+                        <textarea class="form-control" id="shortDescription" name="shortDescription" rows="2"><%= course.shortDescription || '' %></textarea>
+                    </div>
 
-                      <div class="mb-3">
-                          <label for="description" class="form-label">Descripción Completa</label>
-                          <textarea class="form-control" id="description" name="description"><%= course.description || '' %></textarea>
-                      </div>
-                   
-                      <div class="mb-3">
-                          <label for="additionalMaterialInfo" class="form-label">Información sobre Material Adicional</label>
-                          <textarea class="form-control" id="additionalMaterialInfo" name="additionalMaterialInfo" rows="5" placeholder="Ej: Acceso a un VPS con Ubuntu Server (credenciales se enviarán por correo), links a repositorios, etc."><%= course.additionalMaterialInfo || '' %></textarea>
-                      </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descripción Completa</label>
+                        <textarea class="form-control" id="description" name="description"><%= course.description || '' %></textarea>
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="additionalMaterialInfo" class="form-label">Información sobre Material Adicional</label>
+                        <textarea class="form-control" id="additionalMaterialInfo" name="additionalMaterialInfo" rows="5" placeholder="Ej: Acceso a un VPS con Ubuntu Server (credenciales se enviarán por correo), links a repositorios, etc."><%= course.additionalMaterialInfo || '' %></textarea>
+                    </div>
 
-                      <div class="mb-3">
-                          <label for="requirements" class="form-label">Requisitos del Curso</label>
-                          <textarea class="form-control" id="requirements" name="requirements" rows="5" placeholder="Ej: - Conocimientos básicos de HTML y CSS.&#10;- Tener instalado Node.js v18 o superior.&#10;- Ganas de aprender."><%= course.requirements || '' %></textarea>
-                          <div class="form-text">Lista los conocimientos previos, software o cualquier otro requisito para tomar el curso. Puedes usar guiones (-) para listas.</div>
-                      </div>
+                    <div class="mb-3">
+                        <label for="requirements" class="form-label">Requisitos del Curso</label>
+                        <textarea class="form-control" id="requirements" name="requirements" rows="5" placeholder="Ej: - Conocimientos básicos de HTML y CSS.&#10;- Tener instalado Node.js v18 o superior.&#10;- Ganas de aprender."><%= course.requirements || '' %></textarea>
+                        <div class="form-text">Lista los conocimientos previos, software o cualquier otro requisito para tomar el curso. Puedes usar guiones (-) para listas.</div>
+                    </div>
 
-                      <div class="card">
+                    <div class="card">
                         <div class="card-header">
                             Tiempo o Carga Horaria
                         </div>
                         <div class="card-body">
-                          <div class="row">
+                            <div class="row">
                             <label for=""></label>
                             <div class="col-md-4">
-                              <label for="durationMonths" class="form-label">Meses</label>
-                              <input type="number" class="form-control" id="durationMonths" name="durationMonths" value="<%= course.durationMonths || '' %>" min="0" placeholder="Ej: 3">
+                                <label for="durationMonths" class="form-label">Meses</label>
+                                <input type="number" class="form-control" id="durationMonths" name="durationMonths" value="<%= course.durationMonths || '' %>" min="0" placeholder="Ej: 3">
                             </div>
                             <div class="col-md-4">
                                 <label for="studyDaysPerWeek" class="form-label">Dias por Semana</label>
@@ -99,94 +96,12 @@
                                 <label for="studyHoursPerDay" class="form-label">Horas por Día</label>
                                 <input type="number" class="form-control" id="studyHoursPerDay" name="studyHoursPerDay" value="<%= course.studyHoursPerDay || '' %>" step="0.1" min="0" placeholder="Ej: 2.5">
                             </div>
-                          </div>
+                            </div>
                         </div>
-                      </div>
-
                     </div>
-                    <div class="col-lg-4">
-                      <div class="card">
-                          <div class="card-header">
-                              Acciones y Configuración
-                          </div>
-                          <div class="card-body">
-                              <div class="mb-2">
-                                  <select class="form-select" id="status" name="status" required>
-                                      <% const statuses = { DRAFT: 'Borrador', PUBLISHED: 'Publicado', ARCHIVED: 'Archivado' }; %>
-                                      <% Object.entries(statuses).forEach(([key, value]) => { %>
-                                          <option value="<%= key %>" <%= course.status === key ? 'selected' : '' %> >
-                                              <%= value %>
-                                          </option>
-                                      <% }); %> 
-                                  </select>
-                              </div>
-                              <div class="d-grid gap-2">
-                                  <button type="submit" class="btn btn-primary">
-                                      <i class="bi bi-save me-2"></i>
-                                      <%= course.id ? 'Actualizar Curso' : 'Crear Curso' %>
-                                  </button>
-                                  <a href="/admin/courses" class="btn btn-outline-secondary">
-                                      <i class="bi bi-arrow-left-circle me-1"></i> Volver a Cursos
-                                  </a>
-                              </div>
-                          </div>
-                      </div>
-                      <div class="mb-3">
-                          <label for="courseImage" class="form-label">Imagen del Curso</label>
-                          <% if (course && course.imageUrl) { %>
-                              <div class="mb-2">
-                                  <img src="<%= course.imageUrl.startsWith('http') ? course.imageUrl : '/' + course.imageUrl %>" alt="Imagen actual del curso" class="img-thumbnail" style="max-width: 100%; height: auto; object-fit: cover;">
-                              </div>
-                          <% } %>
-                          <input type="file" class="form-control" id="courseImage" name="courseImage" accept="image/png, image/jpeg, image/gif, image/webp">
-                          <% if (course && course.imageUrl) { %>
-                              <div class="form-text mt-1">Subir una nueva imagen la reemplazará.</div>
-                          <% } else { %>
-                              <div class="form-text mt-1">Sube una imagen para el curso (PNG, JPG, GIF, WEBP).</div>
-                          <% } %>
-                      </div>
-                      <% if (course && course.imageUrl) { %>
-                          <input type="hidden" name="currentImageUrl" value="<%= course.imageUrl %>">
-                      <% } %>
-
-                      <div class="mb-3">
-                          <label for="level" class="form-label">Nivel de Dificultad</label>
-                          <select class="form-select" id="level" name="level" required>
-                              <% const levels = { BEGINNER: 'Principiante', INTERMEDIATE: 'Avanzado' }; %>
-                              <% Object.entries(levels).forEach(([key, value]) => { %>
-                                  <option value="<%= key %>" <%= course.level === key ? 'selected' : '' %> >
-                                      <%= value %>
-                                  </option>
-                              <% }); %>
-                          </select>
-                      </div>
-
-                      <div class="mb-3">
-                          <label for="tags" class="form-label">Etiquetas</label>
-                          <select class="form-select" id="tags" name="tags" multiple>
-                              <% if (typeof allTags !== 'undefined' && allTags.length > 0) { %>
-                                  <% allTags.forEach(tag => { %>
-                                      <% let isSelected = false; %>
-                                      <% if (course.tags && course.tags.some(courseTag => courseTag.id === tag.id)) { isSelected = true; } %>
-                                      <option value="<%= tag.id %>" <%= isSelected ? 'selected' : '' %>>
-                                          <%= tag.name %>
-                                      </option>
-                                  <% }); %>
-                              <% } else { %>
-                                  <option disabled>No hay tags disponibles. Créalos primero en "Admin Tags".</option>
-                              <% } %>
-                          </select>
-                          <div class="form-text">Selecciona una o más etiquetas.</div>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div class="tab-pane fade" id="lessons-tab-pane" role="tabpanel" aria-labelledby="lessons-tab" tabindex="0">
-                
-                    <!-- <button type="button" class="btn btn-success btn-sm" id="openCreateLessonModalBtn">
-                        <i class="bi bi-plus-circle me-1"></i> Crear Nueva Lección
-                    </button> -->
                     <% if (course && course.id) { %>
                         <% if (course.lessons && course.lessons.length > 0) { %>
                             <table id="lessonsTable" class="table table-striped table-bordered" style="width:100%">
@@ -227,14 +142,11 @@
                     <% } else { %>
                         <p class="alert alert-warning">Debes guardar el curso primero para poder añadir y gestionar lecciones.</p>
                     <% } %>
-                       
                 </div>
           
                 <div class="tab-pane fade" id="quizzes-tab-pane" role="tabpanel" aria-labelledby="quizzes-tab" tabindex="0">
-                
                     <% if (course && course.id && course.quizzes && course.quizzes.length > 0) { %>
                             <% const mainQuiz = course.quizzes[0]; %>
-                            <!-- <h5 class="mb-3">Cuestionario: <%= mainQuiz.title %></h5> -->
                         <table id="questionsTable" class="table table-striped table-bordered" style="width:100%">
                             <thead>
                                 <tr>
@@ -260,25 +172,21 @@
                                                         title="Editar Pregunta">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </button>
-                                                <%# No hay botón de eliminar pregunta aquí, se elimina con la lección %>
                                             </td>
                                         </tr>
                                     <% }); %>
                                 <% } %>
-                                <%# Si no hay preguntas, el tbody quedará vacío y DataTables mostrará su mensaje por defecto %>
                             </tbody>
                         </table>
                         <p class="form-text mt-2">
                             Número total de lecciones: <%= course.lessons ? course.lessons.length : 0 %>. 
                             Número de preguntas definidas: <%= mainQuiz.questions ? mainQuiz.questions.length : 0 %>.
                         </p>
-
                     <% } else if (course && course.id) { %>
                         <p class="alert alert-info">El cuestionario principal para este curso se creará/actualizará al guardar. Las preguntas se generarán automáticamente por cada lección.</p>
                     <% } else { %>
                         <p class="alert alert-warning">Debes guardar el curso primero para gestionar su cuestionario y preguntas.</p>
                     <% } %>
-                      
                 </div>
 
                 <div class="tab-pane fade" id="ai-agent-tab-pane" role="tabpanel" aria-labelledby="ai-agent-tab" tabindex="0">
@@ -310,7 +218,6 @@
                         <label for="aiTemperature" class="form-label">Temperatura</label>
                         <input type="number" class="form-control" id="aiTemperature" name="aiTemperature" value="<%= course.aiTemperature || '' %>" step="0.1" min="0" max="1" placeholder="Ej: 0.7">
                     </div>
-                       
                     <div>
                         <h6 class="mb-1">Uso de Tokens de IA para este Curso</h6>
                         <% if (typeof totalTokensUsed !== 'undefined') { %>
@@ -338,6 +245,12 @@
                             Estos placeholders serán reemplazados por el sistema cuando el alumno interactúe con el Agente IA.
                         </p>
                     </div>
+                    <hr>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-info" id="testAiAgentBtn">
+                            <i class="bi bi-robot me-2"></i> Probar Agente IA
+                        </button>
+                    </div>
                 </div>
 
                 <div class="tab-pane fade" id="students-tab-pane" role="tabpanel" aria-labelledby="students-tab" tabindex="0">
@@ -360,95 +273,86 @@
                 </div>
             </div>
         </div>
+
+        <%# Columna lateral para acciones y configuración %>
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header">
+                    Acciones y Configuración
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>
+                            <%= course.id ? 'Actualizar Curso' : 'Crear Curso' %>
+                        </button>
+                        <a href="/admin/courses" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left-circle me-1"></i> Volver a Cursos
+                        </a>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Estado</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <% const statuses = { DRAFT: 'Borrador', PUBLISHED: 'Publicado', ARCHIVED: 'Archivado' }; %>
+                            <% Object.entries(statuses).forEach(([key, value]) => { %>
+                                <option value="<%= key %>" <%- course.status === key ? 'selected' : '' %>>
+                                    <%= value %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="courseImage" class="form-label">Imagen del Curso</label>
+                        <% if (course && course.imageUrl) { %>
+                            <div class="mb-2">
+                                <img src="<%= course.imageUrl.startsWith('http') ? course.imageUrl : '/' + course.imageUrl %>" alt="Imagen actual del curso" class="img-thumbnail" style="max-width: 100%; height: auto; object-fit: cover;">
+                            </div>
+                        <% } %>
+                        <input type="file" class="form-control" id="courseImage" name="courseImage" accept="image/png, image/jpeg, image/gif, image/webp">
+                        <% if (course && course.imageUrl) { %>
+                            <div class="form-text mt-1">Subir una nueva imagen la reemplazará.</div>
+                        <% } else { %>
+                            <div class="form-text mt-1">Sube una imagen para el curso (PNG, JPG, GIF, WEBP).</div>
+                        <% } %>
+                    </div>
+                    <% if (course && course.imageUrl) { %>
+                        <input type="hidden" name="currentImageUrl" value="<%= course.imageUrl %>">
+                    <% } %>
+
+                    <div class="mb-3">
+                        <label for="level" class="form-label">Nivel de Dificultad</label>
+                        <select class="form-select" id="level" name="level" required>
+                            <% const levels = { BEGINNER: 'Principiante', INTERMEDIATE: 'Avanzado' }; %>
+                            <% Object.entries(levels).forEach(([key, value]) => { %>
+                                <option value="<%= key %>" <%- course.level === key ? 'selected' : '' %>>
+                                    <%= value %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Etiquetas</label>
+                        <select class="form-select" id="tags" name="tags" multiple>
+                            <% if (typeof allTags !== 'undefined' && allTags.length > 0) { %>
+                                <% allTags.forEach(tag => { %>
+                                    <% let isSelected = course.tags && course.tags.some(courseTag => courseTag.id === tag.id); %>
+                                    <option value="<%= tag.id %>" <%- isSelected ? 'selected' : '' %>>
+                                        <%= tag.name %>
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option disabled>No hay tags disponibles. Créalos primero en "Admin Tags".</option>
+                            <% } %>
+                        </select>
+                        <div class="form-text">Selecciona una o más etiquetas.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </form>
-
-<!-- Modal para Editar Lección -->
-<div class="modal fade" id="editLessonModal" tabindex="-1" aria-labelledby="editLessonModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editLessonModalLabel">Editar Lección</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="editLessonForm">
-                <div class="modal-body">
-                    <input type="hidden" id="editLessonId" name="lessonId">
-                    <input type="hidden" id="editLessonCourseId" name="courseId">
-                    <div class="mb-3">
-                        <label for="editLessonTitle" class="form-label">Título de la Lección</label>
-                        <input type="text" class="form-control" id="editLessonTitle" name="title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLessonContent" class="form-label">Contenido</label>
-                        <textarea class="form-control" id="editLessonContent" name="content" rows="5"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editLessonOrder" class="form-label">Orden</label>
-                        <input type="number" class="form-control" id="editLessonOrder" name="order" required>
-                    </div>
-
-                    <%# --- Campos de Pregunta Asociada Eliminados del Modal de Lección --- %>
-                    <%# La gestión del contenido de las preguntas se hace en la pestaña "Cuestionarios" %>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para Editar Pregunta -->
-<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl"> <!-- modal-xl para más espacio -->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="questionModalLabel">Editar Pregunta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="questionForm">
-                <div class="modal-body">
-                    <input type="hidden" id="editQuestionId" name="questionId">
-                    <input type="hidden" id="editQuestionQuizId" name="quizId">
-                    <input type="hidden" id="editQuestionCourseId" name="courseId">
-                    
-                    <div class="mb-3">
-                        <label>Pregunta para Lección Nº: <span id="questionOrderLabel" class="fw-bold"></span></label>
-                        <input type="hidden" id="editQuestionOrder" name="order">
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="questionText" class="form-label">Texto de la Pregunta <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="questionText" name="text" rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Opciones de Respuesta <span class="text-danger">*</span></label>
-                        <div id="questionOptionsContainer">
-                            <!-- Las opciones se añadirán aquí dinámicamente -->
-                        </div>
-                        <button type="button" class="btn btn-outline-success btn-sm mt-2" id="addQuestionOptionBtn">
-                            <i class="bi bi-plus-circle"></i> Añadir Opción
-                        </button>
-                        <div class="form-text">Debe haber al menos una opción correcta.</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="questionPoints" class="form-label">Puntos <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="questionPoints" name="points" min="0" value="1" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="saveQuestionBtn">Guardar Pregunta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <%- contentFor('scripts') %>
 
@@ -485,488 +389,6 @@
       });
     } else {
       console.warn('jQuery o Summernote no están disponibles para inicializar el editor de texto.');
-    }
-
-    // La lógica para añadir dinámicamente nuevas lecciones en línea ha sido eliminada.
-
-    // Inicializar DataTables para la tabla de lecciones
-    let lessonsDataTable = null;
-    if (typeof $ !== 'undefined' && $.fn.DataTable && document.getElementById('lessonsTable')) {
-        lessonsDataTable = $('#lessonsTable').DataTable({
-            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-            paging: true, lengthChange: false, searching: true, ordering: true, info: true, autoWidth: false, responsive: true,
-            order: [[0, 'asc']], 
-        });
-    } else {
-        console.warn('jQuery o DataTables no están disponibles, o la tabla #lessonsTable no existe.');
-    }
-
-    // Lógica para editar y eliminar lecciones existentes vía Modal y AJAX (adaptada para DataTables)
-    const editLessonModalElement = document.getElementById('editLessonModal');
-    const editLessonForm = document.getElementById('editLessonForm');
-    const editLessonContentEditor = $('#editLessonContent'); 
-    let currentEditingRow = null; 
-    let isEditMode = false; // Para distinguir entre crear y editar en el modal
-    let questionOptionCounter = 0; // Contador para IDs únicos de opciones de pregunta // Ya no se usa aquí
-
-    // Ya no se necesitan funciones para añadir/eliminar opciones de pregunta en este modal
-    // function addLessonQuestionOption...
-    // $('#addLessonQuestionOptionBtn').on('click', ...
-    // $('#lessonQuestionOptionsContainer').on('click', '.remove-lesson-question-option', ...
-
-    if (editLessonModalElement) {
-      const editModal = new bootstrap.Modal(editLessonModalElement);
-      
-      // Botón para abrir modal en modo CREACIÓN
-      const openCreateLessonModalBtn = document.getElementById('openCreateLessonModalBtn');
-      if (openCreateLessonModalBtn) {
-        openCreateLessonModalBtn.addEventListener('click', function() {
-          isEditMode = false;
-          document.getElementById('editLessonModalLabel').textContent = 'Crear Nueva Lección';
-          editLessonForm.reset(); // Limpiar formulario
-          $('#editLessonId').val(''); // Asegurar que no haya ID de lección
-          $('#editLessonCourseId').val('<%= course.id %>'); // Asignar courseId actual
-          
-          // Calcular el siguiente número de orden sugerido
-          let nextOrder = 1;
-          if (lessonsDataTable && lessonsDataTable.rows().count() > 0) {
-            const orders = lessonsDataTable.column(0).data().toArray().map(o => parseInt(o, 10) || 0);
-            if (orders.length > 0) {
-                const maxOrder = Math.max(...orders);
-                nextOrder = (isFinite(maxOrder) ? maxOrder : 0) + 1;
-            }
-          }
-          // Si DataTables no está inicializado o no tiene filas, nextOrder permanece 1.
-          $('#editLessonOrder').val(nextOrder);
-
-          // Limpiar campos de pregunta (ya no están en el modal)
-          // $('#lessonQuestionOptionsContainer').empty(); 
-          // questionOptionCounter = 0; 
-          // addLessonQuestionOption(); 
-          // addLessonQuestionOption(); 
-          // $('#editLessonQuestionText').val('');
-          // $('#editLessonQuestionPoints').val(1);
-
-          if (editLessonContentEditor.data('summernote')) { // Verificar si ya está inicializado
-            try { editLessonContentEditor.summernote('destroy'); } catch(e) { console.warn("Error destroying summernote for create:", e); }
-          }
-          editLessonContentEditor.val(''); // Limpiar contenido
-          editLessonContentEditor.summernote({
-            placeholder: 'Escribe el contenido de la lección aquí...', tabsize: 2, height: 250, lang: 'es-ES',
-            toolbar: [
-              ['style', ['style']], ['font', ['bold', 'italic', 'underline', 'clear']],
-              ['para', ['ul', 'ol', 'paragraph']], ['insert', ['link', 'picture', 'video']],
-              ['view', ['fullscreen', 'codeview']]
-            ]
-          });
-          editModal.show();
-        });
-      }
-
-      // Delegación de eventos para botones de editar en la tabla (modo EDICIÓN)
-      if (lessonsDataTable) { // Solo adjuntar si DataTables está disponible
-        $('#lessonsTable tbody').on('click', '.edit-lesson-btn', function () {
-          isEditMode = true;
-          document.getElementById('editLessonModalLabel').textContent = 'Editar Lección';
-          currentEditingRow = $(this).closest('tr');
-          const courseId = $(this).data('courseId');
-          const lessonId = $(this).data('lessonId');
-
-          $('#editLessonCourseId').val(courseId);
-          $('#editLessonId').val(lessonId);
-
-          fetch(`/admin/courses/${courseId}/lessons/${lessonId}/data`)
-          .then(response => {
-            if (!response.ok) throw new Error('No se pudieron cargar los datos de la lección.');
-            return response.json();
-          })
-          .then(lessonData => {
-            $('#editLessonTitle').val(lessonData.title);
-            $('#editLessonOrder').val(lessonData.order);
-
-            // Campos de pregunta ya no se pueblan aquí
-            // $('#lessonQuestionOptionsContainer').empty(); 
-            // questionOptionCounter = 0; 
-            // $('#editLessonQuestionText').val(lessonData.questionText || '');
-            // $('#editLessonQuestionPoints').val(lessonData.questionPoints !== undefined ? lessonData.questionPoints : 1);
-            // if (lessonData.questionOptions && lessonData.questionOptions.length > 0) {
-            //     lessonData.questionOptions.forEach(opt => addLessonQuestionOption(opt));
-            // } else {
-            //     addLessonQuestionOption(); 
-            //     addLessonQuestionOption(); 
-            // }
-            
-            if (editLessonContentEditor.data('summernote')) { // Verificar si ya está inicializado
-              try { editLessonContentEditor.summernote('destroy'); } catch(e) { console.warn("Error destroying summernote for edit:", e); }
-            }
-            editLessonContentEditor.val(lessonData.content);
-            editLessonContentEditor.summernote({
-              placeholder: 'Escribe el contenido de la lección aquí...', tabsize: 2, height: 250, lang: 'es-ES',
-              toolbar: [
-                ['style', ['style']], ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['para', ['ul', 'ol', 'paragraph']], ['insert', ['link', 'picture', 'video']],
-                ['view', ['fullscreen', 'codeview']]
-              ]
-            });
-            editModal.show();
-          })
-          .catch(error => {
-            console.error("Error al cargar datos de lección para editar:", error);
-            if (typeof Swal !== 'undefined') Swal.fire('Error', 'No se pudieron cargar los datos de la lección.', 'error');
-          });
-        });
-
-        editLessonForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const courseId = $('#editLessonCourseId').val();
-        const lessonId = $('#editLessonId').val(); // Estará vacío si es modo creación
-        const title = $('#editLessonTitle').val();
-        const order = $('#editLessonOrder').val();
-        const content = editLessonContentEditor.summernote('code');
-        
-        // Datos de pregunta ya no se recolectan aquí
-        // const questionText = ...
-        // const questionPoints = ...
-        // const questionOptions = ...
-
-        const lessonPayload = { 
-            title, 
-            content, 
-            order
-            // Ya no se envían questionText, questionPoints, questionOptions desde aquí
-        };
-
-        const url = isEditMode ? `/admin/courses/${courseId}/lessons/${lessonId}` : `/admin/courses/${courseId}/lessons`;
-        const method = isEditMode ? 'PUT' : 'POST';
-
-        fetch(url, {
-          method: method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(lessonPayload)
-        })
-        .then(response => {
-          if (!response.ok) return response.json().then(err => { throw new Error(err.message || `Error al ${isEditMode ? 'actualizar' : 'crear'} la lección`) });
-          return response.json();
-        })
-        .then(data => {
-          if (isEditMode) {
-            if (currentEditingRow && lessonsDataTable) {
-              const actionButtonsHtml = $(currentEditingRow).find('td:last-child').html(); // Conservar botones
-              lessonsDataTable.row(currentEditingRow).data([order, title, actionButtonsHtml]).draw(false);
-            }
-          } else { // Modo Creación
-            if (lessonsDataTable && data.lesson) {
-              // Crear HTML para los botones de acción para la nueva fila
-              const newActionButtonsHtml = `
-                <button type="button" class="btn btn-sm btn-outline-primary me-1 edit-lesson-btn" 
-                        data-bs-toggle="modal" data-bs-target="#editLessonModal"
-                        data-course-id="${data.lesson.courseId}" 
-                        data-lesson-id="${data.lesson.id}"
-                        title="Editar Lección">
-                    <i class="bi bi-pencil-square"></i>
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger delete-lesson-btn" 
-                        data-course-id="${data.lesson.courseId}" 
-                        data-lesson-id="${data.lesson.id}" 
-                        title="Eliminar Lección">
-                    <i class="bi bi-trash"></i>
-                </button>`;
-              lessonsDataTable.row.add([data.lesson.order, data.lesson.title, newActionButtonsHtml]).draw(false);
-            }
-          }
-          // No destruir Summernote aquí si se va a reutilizar. Se destruirá en 'hidden.bs.modal'.
-          // if (editLessonContentEditor.data('summernote')) {
-          //   try { editLessonContentEditor.summernote('destroy'); } catch(e) { console.warn("Error destroying summernote on submit:", e); }
-          // }
-          editModal.hide(); // Esto disparará 'hidden.bs.modal' donde se destruye Summernote
-          if (typeof Swal !== 'undefined') Swal.fire(isEditMode ? '¡Actualizada!' : '¡Creada!', data.message || `La lección ha sido ${isEditMode ? 'actualizada' : 'creada'}.`, 'success');
-        })
-        .catch(error => {
-          console.error(`Error al ${isEditMode ? 'actualizar' : 'crear'} lección:`, error);
-          if (typeof Swal !== 'undefined') Swal.fire('Error', error.message || `No se pudo ${isEditMode ? 'actualizar' : 'crear'} la lección.`, 'error');
-        });
-      });
-
-      // Asegurarse de destruir Summernote cuando el modal se oculta completamente
-      editLessonModalElement.addEventListener('hidden.bs.modal', function () {
-        if (editLessonContentEditor.data('summernote')) {
-          try {
-            editLessonContentEditor.summernote('destroy');
-          } catch (e) {
-            console.warn("Error destroying summernote on modal hidden:", e);
-          }
-        }
-        editLessonContentEditor.val(''); // Limpiar el textarea por si acaso
-        currentEditingRow = null;
-      });
-    }
-
-      // Lógica de eliminación adaptada para DataTables con delegación de eventos
-      $('#lessonsTable tbody').on('click', '.delete-lesson-btn', function () {
-          const rowToDelete = $(this).closest('tr');
-          const courseId = $(this).data('courseId');
-          const lessonId = $(this).data('lessonId');
-
-          if (typeof Swal !== 'undefined') {
-            Swal.fire({
-              title: '¿Estás seguro?', text: "¡No podrás revertir esto!", icon: 'warning',
-              showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33',
-              confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                fetch(`/admin/courses/${courseId}/lessons/${lessonId}`, {
-                  method: 'DELETE', headers: { 'Content-Type': 'application/json' }
-                })
-                .then(response => {
-                  if (!response.ok) return response.json().then(err => { throw new Error(err.message || 'Error al eliminar la lección') });
-                  return response.json();
-                })
-                .then(data => {
-                  if (lessonsDataTable) {
-                    lessonsDataTable.row(rowToDelete).remove().draw(false);
-                  } else {
-                    rowToDelete.remove(); // Fallback
-                  }
-                  Swal.fire('¡Eliminada!', data.message || 'La lección ha sido eliminada.', 'success');
-                })
-                .catch(error => {
-                  console.error('Error al eliminar lección:', error);
-                  Swal.fire('Error', error.message || 'No se pudo eliminar la lección.', 'error');
-                });
-              }
-            });
-          } else {
-            if (confirm('¿Estás seguro de que quieres eliminar esta lección?')) {
-              fetch(`/admin/courses/${courseId}/lessons/${lessonId}`, {
-                  method: 'DELETE', headers: { 'Content-Type': 'application/json' }
-              }).then(response => response.json()).then(data => {
-                  if (lessonsDataTable) {
-                    lessonsDataTable.row(rowToDelete).remove().draw(false);
-                  } else {
-                    rowToDelete.remove();
-                  }
-                  alert(data.message || 'Lección eliminada.');
-              }).catch(err => alert('Error al eliminar.'));
-            }
-          }
-      });
-    }
-
-    // === Lógica para Cuestionarios (Quizzes) ===
-    // La lógica anterior para DataTables y el modal de Quizzes ha sido eliminada
-    // ya que los cuestionarios ahora se gestionan implícitamente y las preguntas
-    // se definen a nivel de lección.
-    // La pestaña "Cuestionarios" ahora solo muestra información y permite editar preguntas individuales.
-
-    let questionsDataTable = null;
-    const questionModalElement = document.getElementById('questionModal');
-    const questionForm = document.getElementById('questionForm');
-    const currentCourseId = '<%= course.id %>'; // Usado para las URLs de fetch
-    let questionOptionEditorCounter = 0; // Para los names de los inputs de opciones
-
-    // Se inyectan los datos del quiz directamente desde el servidor usando EJS.
-    // Esto es seguro porque JSON.stringify produce una cadena que es un literal de objeto JavaScript válido.
-    const mainQuizData = <%- JSON.stringify(course && course.id && course.quizzes && course.quizzes.length > 0 ? course.quizzes[0] : null) %> || { questions: [] };
-    
-    // Asegurarse de que questions sea un array, incluso si el quiz existe pero no tiene preguntas
-    if (mainQuizData && !Array.isArray(mainQuizData.questions)) {
-        mainQuizData.questions = [];
-    }
-
-
-    if (typeof $ !== 'undefined' && $.fn.DataTable && document.getElementById('questionsTable')) {
-        questionsDataTable = $('#questionsTable').DataTable({
-            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' },
-            paging: true, lengthChange: false, searching: true, ordering: true, info: true, autoWidth: false, responsive: true,
-            order: [[0, 'asc']], // Ordenar por la columna "Orden (Lección)"
-        });
-    }
-
-    // Función para añadir un nuevo campo de opción de respuesta para la pregunta en questionModal
-    function addQuestionModalOption(option = { text: '', isCorrect: false }) {
-        questionOptionEditorCounter++;
-        const optionHtml = `
-            <div class="input-group mb-2 question-modal-option-item">
-                <input type="text" class="form-control form-control-sm question-modal-option-text" placeholder="Texto de la opción" value="${option.text || ''}">
-                <div class="input-group-text">
-                    <input class="form-check-input mt-0 question-modal-option-isCorrect" type="checkbox" ${option.isCorrect ? 'checked' : ''}>
-                    <label class="form-check-label ms-1 small">Correcta</label>
-                </div>
-                <button type="button" class="btn btn-outline-danger btn-sm remove-question-modal-option"><i class="bi bi-trash"></i></button>
-            </div>
-        `;
-        $('#questionOptionsContainer').append(optionHtml);
-    }
-    
-    if (questionModalElement && currentCourseId) {
-        const questionModal = new bootstrap.Modal(questionModalElement);
-
-        $('#addQuestionOptionBtn').on('click', function() {
-            addQuestionModalOption();
-        });
-
-        $('#questionOptionsContainer').on('click', '.remove-question-modal-option', function() {
-            $(this).closest('.question-modal-option-item').remove();
-        });
-
-        // Abrir modal para EDITAR Pregunta (delegación de eventos)
-        $('#questionsTable tbody').on('click', '.edit-question-btn', function () {
-            const questionId = $(this).data('questionId');
-            const quizId = $(this).data('quizId');
-            // const courseId = $(this).data('courseId'); // Ya tenemos currentCourseId
-
-            // Usaremos una ruta genérica para obtener datos de la pregunta, ya que no está anidada bajo curso en el controlador
-            // O podríamos crear una ruta específica /admin/courses/:courseId/quizzes/:quizId/questions/:questionId/data
-            // Por ahora, asumimos que getLessonDataAsJson (que modificaremos) o una nueva función puede servir.
-            // Para este caso, es mejor una ruta específica para la pregunta.
-            // Vamos a asumir que tenemos una ruta GET /admin/quizzes/:quizId/questions/:questionId/data
-            // Y una función en el controlador getQuestionDataForModal(req, res)
-
-            // Como aún no tenemos esa ruta/controlador específico para Question,
-            // vamos a simular la carga o usar los datos que ya podríamos tener en el cliente si el quiz se carga con preguntas.
-            // Para una implementación real, se necesitaría el fetch.
-            // Por ahora, vamos a buscar la pregunta en el objeto `course` si está disponible.
-            
-            let questionDataToEdit = null;
-            if (mainQuizData && mainQuizData.questions) { // Acceder directamente a questions
-                questionDataToEdit = mainQuizData.questions.find(q => q.id === questionId);
-            }
-
-            if (questionDataToEdit) {
-                questionForm.reset();
-                document.getElementById('questionModalLabel').textContent = `Editar Pregunta (Lección N.º ${questionDataToEdit.order})`;
-                $('#editQuestionId').val(questionDataToEdit.id);
-                $('#editQuestionQuizId').val(quizId); // El quizId del quiz principal
-                $('#editQuestionCourseId').val(currentCourseId);
-                $('#editQuestionOrder').val(questionDataToEdit.order);
-                $('#questionOrderLabel').text(questionDataToEdit.order);
-                $('#questionText').val(questionDataToEdit.text);
-                $('#questionPoints').val(questionDataToEdit.points);
-
-                $('#questionOptionsContainer').empty();
-                questionOptionEditorCounter = 0;
-                if (questionDataToEdit.options && Array.isArray(questionDataToEdit.options)) {
-                    questionDataToEdit.options.forEach(opt => addQuestionModalOption(opt));
-                } else {
-                    addQuestionModalOption(); // Añadir 2 opciones vacías por defecto si no hay
-                    addQuestionModalOption();
-                }
-                questionModal.show();
-            } else {
-                 if (typeof Swal !== 'undefined') Swal.fire('Error', 'No se pudieron cargar los datos de la pregunta para editar.', 'error');
-                 console.error(`No se encontraron datos para la pregunta ID: ${questionId} en el objeto course.quizzes`);
-            }
-        });
-
-        // Enviar formulario del modal (Editar Pregunta)
-        questionForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            const questionId = $('#editQuestionId').val();
-            const quizId = $('#editQuestionQuizId').val();
-            // const courseId = $('#editQuestionCourseId').val(); // Ya tenemos currentCourseId
-            const order = parseInt($('#editQuestionOrder').val(),10);
-
-            const options = [];
-            $('#questionOptionsContainer .question-modal-option-item').each(function() {
-                const text = $(this).find('.question-modal-option-text').val();
-                const isCorrect = $(this).find('.question-modal-option-isCorrect').is(':checked');
-                if (text.trim()) {
-                    options.push({ text: text.trim(), isCorrect: isCorrect });
-                }
-            });
-
-            if (options.length === 0 || !options.some(opt => opt.isCorrect)) {
-                if (typeof Swal !== 'undefined') Swal.fire('Error de Validación', 'Debe haber al menos una opción y al menos una opción marcada como correcta.', 'error');
-                return;
-            }
-            
-            const payload = {
-                text: $('#questionText').val(),
-                points: parseInt($('#questionPoints').val(), 10) || 1,
-                options: options,
-                order: order // Aunque el orden no se edita, lo enviamos para referencia o consistencia
-            };
-
-            // Necesitaremos una ruta PUT /admin/quizzes/:quizId/questions/:questionId
-            // Y una función en el controlador updateQuestionContent(req, res)
-            fetch(`/admin/quizzes/${quizId}/questions/${questionId}`, { // RUTA ASUMIDA
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(response => {
-                if (!response.ok) return response.json().then(err => { throw new Error(err.message || 'Error al actualizar la pregunta.') });
-                return response.json();
-            })
-            .then(data => {
-                questionModal.hide();
-                if (typeof Swal !== 'undefined') Swal.fire('¡Actualizada!', data.message || 'Pregunta actualizada.', 'success');
-                
-                // Actualizar DataTable de preguntas
-                const qRow = questionsDataTable.row($(`tr[data-question-row-id="${questionId}"]`));
-                if (qRow.length) {
-                    const currentData = qRow.data(); // Obtenemos los datos actuales para mantener el orden y los botones
-                    const newRowData = [
-                        currentData[0], // Orden (columna 0) - no cambia desde el modal
-                        payload.text.length > 100 ? payload.text.substring(0, 97) + '...' : payload.text, // Texto (columna 1)
-                        payload.points, // Puntos (columna 2)
-                        currentData[3]  // Botones de acción (columna 3) - no cambian
-                    ];
-                    qRow.data(newRowData).draw(false);
-                } else {
-                    // Si no se puede actualizar la fila directamente, se podría recargar la página o la tabla.
-                    // Esto es un fallback, idealmente la fila siempre debería encontrarse.
-                    console.warn(`No se encontró la fila para questionId ${questionId} en DataTable para actualizar.`);
-                    // location.reload(); 
-                }
-            })
-            .catch(error => {
-                console.error('Error al actualizar pregunta:', error);
-                if (typeof Swal !== 'undefined') Swal.fire('Error', error.message || 'No se pudo actualizar la pregunta.', 'error');
-            });
-        });
-    }
-
-    // Show/hide Ollama URL field based on provider selection
-    const aiProviderSelect = document.getElementById('aiProvider');
-    const aiApiKeyContainer = document.getElementById('aiApiKeyContainer');
-
-    function toggleAiProviderFields() {
-        if (!aiProviderSelect || !aiApiKeyContainer) return;
-        
-        if (aiProviderSelect.value === 'ollama') {
-            aiApiKeyContainer.style.display = 'none';
-        } else {
-            aiApiKeyContainer.style.display = 'block';
-        }
-    }
-
-    if (aiProviderSelect) {
-      aiProviderSelect.addEventListener('change', toggleAiProviderFields);
-      // Run on page load to set initial state
-      toggleAiProviderFields();
-    }
-
-    // Inicializar EasyMDE para los campos de requisitos e información adicional
-    if (typeof EasyMDE !== 'undefined') {
-      if (document.getElementById('requirements')) {
-        new EasyMDE({
-          element: document.getElementById('requirements'),
-          spellChecker: false,
-          status: false,
-          toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
-        });
-      }
-      if (document.getElementById('additionalMaterialInfo')) {
-        new EasyMDE({
-          element: document.getElementById('additionalMaterialInfo'),
-          spellChecker: false,
-          status: false,
-          toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "|", "preview", "side-by-side", "fullscreen", "|", "guide"]
-        });
-      }
-    } else {
-      console.warn('EasyMDE no está disponible.');
     }
   });
 </script>

@@ -17,6 +17,7 @@ import {
     getLessonDataAsJson,
     // Controlador para generación IA
     generateCourseFromAI,
+    testAiAgent, // Para probar la configuración del agente
     // Controladores de Cuestionarios (Quizzes)
     createQuiz,
     getQuizDataAsJson,
@@ -46,8 +47,13 @@ router.get('/courses/:id/edit', isAuthenticated, isAdmin, renderEditCourseForm);
 router.put('/courses/:id', isAuthenticated, isAdmin, uploadCourseImage.single('courseImage'), updateCourse); // Aplicar middleware
 router.delete('/courses/:id', isAuthenticated, isAdmin, deleteCourse);
 
+import prisma from '../lib/prisma.js';
+
 // Ruta para generación de contenido con IA
 router.post('/courses/generate-from-ai', isAuthenticated, isAdmin, generateCourseFromAI);
+
+// Ruta para probar la configuración del Agente IA
+router.post('/courses/test-agent', isAuthenticated, isAdmin, testAiAgent);
 
 // Rutas para CRUD de Lecciones (anidadas bajo cursos)
 router.get('/courses/:courseId/lessons', isAuthenticated, isAdmin, listAdminLessons);

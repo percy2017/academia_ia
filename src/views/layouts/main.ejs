@@ -108,6 +108,11 @@
 </head>
 <body>
   <%- include('../partials/header') %>
+
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- Toasts will be appended here -->
+  </div>
   
   <div class="container-fluid">
     <div class="row">
@@ -165,5 +170,49 @@
 
   <!-- Custom scripts for specific pages will be injected here by express-ejs-layouts -->
   <%- defineContent('scripts') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Solo ejecutar si el usuario es un admin
+      <% if (user && user.role === 'ADMIN') { %>
+        const socket = io();
+        const toastContainer = document.querySelector('.toast-container');
+
+        const createToast = (data) => {
+          const toastEl = document.createElement('div');
+          toastEl.classList.add('toast', 'fade');
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'assertive');
+          toastEl.setAttribute('aria-atomic', 'true');
+
+          toastEl.innerHTML = `
+            <div class="toast-header">
+              <i class="bi bi-bell-fill me-2"></i>
+              <strong class="me-auto">Nueva Notificación</strong>
+              <small>${new Date(data.timestamp).toLocaleTimeString()}</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+              El usuario <strong>${data.userName}</strong> ha solicitado el plan <strong>${data.planName}</strong>.
+              <div class="mt-2 pt-2 border-top">
+                <a href="/admin/subscriptions/pending" class="btn btn-primary btn-sm">Verificar</a>
+              </div>
+            </div>
+          `;
+          
+          toastContainer.appendChild(toastEl);
+          const toast = new bootstrap.Toast(toastEl);
+          toast.show();
+        };
+
+        socket.on('new-pending-subscription', (data) => {
+          console.log('Notificación de nueva suscripción recibida:', data);
+          createToast(data);
+        });
+
+        console.log('Socket listener para notificaciones de admin inicializado.');
+      <% } %>
+    });
+  </script>
 </body>
 </html>

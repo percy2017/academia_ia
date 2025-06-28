@@ -82,7 +82,7 @@ export default function socketHandler(io) {
             processedSystemPrompt = processedSystemPrompt.replace(/{{userEmail}}/g, user?.email || 'email no disponible');
             processedSystemPrompt = processedSystemPrompt.replace(/{{courseTitle}}/g, course.title);
             processedSystemPrompt = processedSystemPrompt.replace(/{{lessonTitle}}/g, lesson?.title || 'lección actual');
-            processedSystemPrompt = processedSystemPrompt.replace(/{{courseProgress}}/g, courseProgress?.progress || 0);
+            processedSystemPrompt = processedSystemPrompt.replace(/{{courseProgress}}/g, courseProgress?.progressPercentage || 0);
             processedSystemPrompt = processedSystemPrompt.replace(/{{lastQuizScore}}/g, lastQuizAttempt?.score ?? 'N/A');
 
             const courseConfig = {
@@ -104,6 +104,9 @@ export default function socketHandler(io) {
               include: { sender: true }
             });
             chatHistory.reverse(); // Oldest first
+
+            // Notify client that AI is "typing"
+            io.to(roomName).emit('ai_is_typing');
 
             const aiResponseContent = await getAiResponse(
               content,
@@ -131,6 +134,10 @@ export default function socketHandler(io) {
             console.error('Error getting AI response:', aiError);
             // Optionally, emit an error message to the user
             io.to(socket.id).emit('aiError', { message: 'El Agente IA no pudo responder. Inténtalo de nuevo más tarde.' });
+          } finally {
+            // Always notify client that AI has "stopped typing"
+            const roomName = `${lessonId}-user-${userId}`;
+            io.to(roomName).emit('ai_stopped_typing');
           }
         }
       } catch (error) {

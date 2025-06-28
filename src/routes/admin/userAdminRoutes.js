@@ -1,7 +1,8 @@
 import express from 'express';
 import { isAuthenticated, isAdmin } from '../../middleware/authMiddleware.js';
 import { 
-    listUsers, 
+    listUsers,
+    viewUser, // Nueva función para ver detalles y progreso
     renderEditUserForm, 
     updateUser,
     assignUserSubscription, // Importar la nueva función
@@ -17,6 +18,9 @@ router.use(isAdmin);
 
 // GET /admin/users - Listar todos los usuarios
 router.get('/', listUsers);
+
+// GET /admin/users/:id - Mostrar detalles y progreso del usuario
+router.get('/:id', viewUser);
 
 // GET /admin/users/:id/edit - Mostrar formulario para editar usuario
 router.get('/:id/edit', renderEditUserForm);
