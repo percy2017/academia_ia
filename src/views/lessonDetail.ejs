@@ -121,7 +121,7 @@
               </button>
             <% } else { %>
               <form action="/courses/<%= lesson.course.id %>/lessons/<%= lesson.id %>/complete?_method=POST" method="POST" id="complete-lesson-form">
-                <button type="submit" class="btn btn-success">
+                <button type="submit" class="btn btn-outline-warning">
                   Marcar como Completada <i class="bi bi-check-lg"></i>
                 </button>
               </form>
@@ -131,7 +131,7 @@
           <!-- Botón Siguiente -->
           <div>
             <% if (nextLesson) { %>
-              <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= nextLesson.id %>" class="btn btn-primary">
+              <a href="/courses/<%= lesson.course.slug || lesson.course.id %>/lessons/<%= nextLesson.id %>" class="btn btn-outline-primary">
                 Siguiente <i class="bi bi-arrow-right"></i>
               </a>
             <% } else { %>

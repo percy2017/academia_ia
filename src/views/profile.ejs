@@ -2,12 +2,14 @@
 Mi Cuenta - Academia AI
 <%- contentFor('body') %>
 
-<div class="container-fluid profile-page">
-    <!-- <div class="row">
-        <div class="col-12">
-            <h1 class="h2 mb-4">Mi Cuenta</h1>
-        </div>
-    </div> -->
+<div class="container-fluid">
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Mi Cuenta</li>
+        </ol>
+    </nav>
 
     <% if (messages && messages.success_msg && messages.success_msg.length > 0) { %>
         <div class="alert alert-success alert-dismissible fade show" role="alert">

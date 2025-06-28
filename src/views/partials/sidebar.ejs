@@ -46,6 +46,29 @@
     </div>
     <hr>
     <!-- Theme Switcher -->
+     <div class="dropdown px-3 pb-3"> <!-- Added pb-3 for some spacing at the bottom -->
+      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#circle-half"/></svg>
+        <strong>Tema</strong>
+      </a>
+      <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#sun-fill"></use></svg>
+          Claro
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
+          Oscuro
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#circle-half"></use></svg>
+          Automático
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+      </ul>
+    </div>
   </div>
 </div>
 
@@ -58,32 +81,27 @@
         <!-- Menú de Admin (Desktop) -->
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === '/') ? 'active' : '' %>" href="/">
-            <span data-feather="home"></span> Dashboard
+            <span data-feather="home"></span> Catálogo
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses')) ? 'active' : '' %>" href="/admin/courses">
-            <span data-feather="archive"></span> Admin Cursos
+            <span data-feather="archive"></span> Cursos
           </a>
         </li>
-        <!-- <li class="nav-item">
-          <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/courses/edit')) ? 'active' : '' %>" href="/admin/courses/edit">
-            <span data-feather="edit"></span> Admin Cursos IA
-          </a>
-        </li> -->
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/tags')) ? 'active' : '' %>" href="/admin/tags">
-            <span data-feather="tag"></span> Admin Tags
+            <span data-feather="tag"></span> Tags
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/users')) ? 'active' : '' %>" href="/admin/users">
-            <span data-feather="users"></span> Admin Usuarios
+            <span data-feather="users"></span> Usuarios
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/admin/subscription-plans')) ? 'active' : '' %>" href="/admin/subscription-plans">
-            <span data-feather="list"></span> Admin Planes
+            <span data-feather="list"></span> Planes
           </a>
         </li>
         <li class="nav-item">
@@ -103,11 +121,11 @@
             <i class="bi bi-book-open"></i> Catálogo de Cursos
           </a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/profile')) ? 'active' : '' %>" href="/profile">
             <i class="bi bi-person-circle"></i> Mi Perfil
           </a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath.startsWith('/subscription-plans')) ? 'active' : '' %>" href="/subscription-plans">
             <i class="bi bi-gem"></i> Suscripción
@@ -117,6 +135,29 @@
     </ul>
     <hr>
     <!-- Theme Switcher -->
+    <div class="dropdown px-3 pb-3"> <!-- Added pb-3 for some spacing at the bottom -->
+      <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+        <svg class="bi me-2" width="16" height="16"><use xlink:href="#circle-half"/></svg>
+        <strong>Tema</strong>
+      </a>
+      <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#sun-fill"></use></svg>
+          Claro
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#moon-stars-fill"></use></svg>
+          Oscuro
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+        <li><button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto">
+          <svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="#circle-half"></use></svg>
+          Automático
+          <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="#check2"></use></svg>
+        </button></li>
+      </ul>
+    </div>
   </div>
 </nav>
 <% } %>

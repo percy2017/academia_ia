@@ -3,26 +3,26 @@
 
 <%- contentFor('body') %>
 
-<nav aria-label="breadcrumb" class="mb-4">
+<nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
         <li class="breadcrumb-item active" aria-current="page">Planes de Suscripción</li>
     </ol>
 </nav>
 
 <%- include('../../partials/messages') %>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2"><%= title %></h1>
+<div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+    <h2><%= title %></h2>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="/admin/subscription-plans/new" class="btn btn-success">
+        <a href="/admin/subscription-plans/new" class="btn btn-outline-primary">
             <i class="bi bi-plus-circle me-1"></i> Crear Nuevo Plan
         </a>
     </div>
 </div>
 
 <div class="table-responsive">
-    <table class="table table-striped table-sm">
+    <table class="table table-striped table-bordered" id="mitable">
         <thead>
             <tr>
                 <th>Nombre</th>
@@ -71,3 +71,13 @@
 
 <%- contentFor('scripts') %>
 <%# Scripts adicionales si son necesarios para esta página, como DataTables %>
+
+<script>
+        // Inicialización de DataTables
+    $('#mitable').DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+        },
+        order: [] // Deshabilitar ordenamiento inicial
+    });
+</script>

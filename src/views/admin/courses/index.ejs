@@ -4,7 +4,7 @@ Gestión de Cursos - Admin
 
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/admin">Admin</a></li>
+        <li class="breadcrumb-item"><a href="/">Inicio</a></li>
         <li class="breadcrumb-item active" aria-current="page">Cursos</li>
     </ol>
 </nav>
@@ -23,13 +23,12 @@ Gestión de Cursos - Admin
     </div>
 <% } %>
 
-<div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom"> <%# Añadido pt-3 pb-2 mb-3 border-bottom para consistencia %>
-    <h1 class="h2">Gestión de Cursos</h1> <%# Cambiado h2 a h1.h2 para consistencia %>
+<div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+    <h2>Gestión de Cursos</h2>
     <a href="/admin/courses/new" class="btn btn-outline-primary">
         <i class="bi bi-plus-circle-fill me-2"></i>Nuevo Curso
     </a>
 </div>
-<%# El <hr> y los mensajes flash se movieron arriba, debajo de las migas de pan %>
 
 <div class="table-responsive">
     <table class="table table-striped table-bordered" id="coursesTable">
